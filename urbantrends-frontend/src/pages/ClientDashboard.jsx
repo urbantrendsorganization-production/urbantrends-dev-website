@@ -130,146 +130,139 @@ export function ClientDashboard() {
   }, [email])
 
   const fetchProjects = async () => {
-  if (!email) return; // avoid empty fetch
-  try {
-    const response = await axios.get(
-      `https://urbantrends-backend-production-fde8.up.railway.app/dev/projects-access/${email}`
-    );
-    setFetchedAccess(response.data.data);
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-useEffect(() => {
-  fetchProjects();
-}, []);
-
-const downloadCSV = () => {
-  if (fetchedAccess.length === 0) {
-    toast.error("No projects to download!");
-    return;
-  }
-
-  // CSV header
-  const headers = ["Title", "Category", "Tags", "GitHub Repo", "Live URL", "Created At"];
-  
-  // Convert data
-  const rows = fetchedAccess.map(project => [
-    `"${project.title}"`,
-    `"${project.category}"`,
-    `"${project.tags.join(', ')}"`,
-    `"${project.githubRepo}"`,
-    `"${project.liveUrl}"`,
-    `"${new Date(project.createdAt).toLocaleDateString()}"`
-  ]);
-
-  const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
-
-  // Create blob and trigger download
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.setAttribute("href", url);
-  link.setAttribute("download", `projects_${Date.now()}.csv`);
-  link.style.visibility = "hidden";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
-
-
-
-
-
-const [orders, setOrders] = React.useState([]);
-const [supportTickets, setSupportTickets] = React.useState([]);
-
-
-useEffect(() => {
-  // Fetch projects
-  const fetchProjects = async () => {
+    if (!email) return; // avoid empty fetch
     try {
-      const res = await axios.get(`https://urbantrends-backend-production-fde8.up.railway.app/dev/projects-access/${email}`);
-      setProjects(res.data.data || []);
-    } catch (err) {
-      console.error(err);
+      const response = await axios.get(
+        `https://urbantrends-backend-production-fde8.up.railway.app/dev/projects-access/${email}`
+      );
+      setFetchedAccess(response.data.data);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  // Fetch orders
-  const fetchOrders = async () => {
-    try {
-      const res = await axios.get(`https://urbantrends-backend-production-fde8.up.railway.app/products/prods-order/${email}`);
-      setOrders(res.data.orders || []);
-    } catch (err) {
-      console.error(err);
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const downloadCSV = () => {
+    if (fetchedAccess.length === 0) {
+      toast.error("No projects to download!");
+      return;
     }
+
+    // CSV header
+    const headers = ["Title", "Category", "Tags", "GitHub Repo", "Live URL", "Created At"];
+
+    // Convert data
+    const rows = fetchedAccess.map(project => [
+      `"${project.title}"`,
+      `"${project.category}"`,
+      `"${project.tags.join(', ')}"`,
+      `"${project.githubRepo}"`,
+      `"${project.liveUrl}"`,
+      `"${new Date(project.createdAt).toLocaleDateString()}"`
+    ]);
+
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+
+    // Create blob and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `projects_${Date.now()}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  // Fetch support tickets
-  const fetchTickets = async () => {
-    try {
-      const res = await axios.get(`https://urbantrends-backend-production-fde8.up.railway.app/api/tickets/${email}`);
-      setSupportTickets(res.data.tickets || []);
-    } catch (err) {
-      console.error(err);
+
+
+
+
+  const [orders, setOrders] = useState([]);
+
+
+  useEffect(() => {
+    // Fetch projects
+    const fetchProjects = async () => {
+      try {
+        const res = await axios.get(`https://urbantrends-backend-production-fde8.up.railway.app/dev/projects-access/${email}`);
+        setProjects(res.data.data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    // Fetch orders
+    const fetchOrders = async () => {
+      try {
+        const res = await axios.get(`https://urbantrends-backend-production-fde8.up.railway.app/products/prods-order/${email}`);
+        setOrders(res.data.orders || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    // Fetch support tickets
+    // const fetchTickets = async () => {
+    //   try {
+    //     const res = await axios.get(`https://urbantrends-backend-production-fde8.up.railway.app/api/tickets/${email}`);
+    //     setSupportTickets(res.data.tickets || []);
+    //   } catch (err) {
+    //     console.error(err);
+    //   }
+    // };
+
+    fetchOrders();
+    fetchProjects();
+  }, [email]);
+
+
+  const stats = [
+    {
+      label: 'Active Projects',
+      value: projects.length,
+      change: projects.length > 0 ? `+${projects.length} this month` : '0',
+      icon: FolderKanban,
+      trend: projects.length > 0 ? 'up' : 'neutral',
+    },
+    {
+      label: 'Total Spent',
+      value: `$${orders.reduce((sum, o) => sum + o.amount, 0).toLocaleString()}`,
+      change: '+12% from last month',
+      icon: DollarSign,
+      trend: 'up',
+    },
+    {
+      label: 'Active Orders',
+      value: orders.length,
+      change: `${orders.filter(o => o.status === 'pending').length} pending delivery`,
+      icon: Package,
+      trend: 'neutral',
+    },
+  ];
+
+
+
+
+  const spendingData = orders.reduce((acc, order) => {
+    const month = new Date(order.createdAt).toLocaleString('default', { month: 'short' });
+    const existing = acc.find(d => d.month === month);
+    if (existing) {
+      existing.amount += order.amount;
+    } else {
+      acc.push({ month, amount: order.amount });
     }
-  };
+    return acc;
+  }, []);
 
-  fetchProjects();
-  fetchOrders();
-  fetchTickets();
-}, [email]);
-
-
-const stats = [
-  {
-    label: 'Active Projects',
-    value: projects.length,
-    change: projects.length > 0 ? `+${projects.length} this month` : '0',
-    icon: FolderKanban,
-    trend: projects.length > 0 ? 'up' : 'neutral',
-  },
-  {
-    label: 'Total Spent',
-    value: `$${orders.reduce((sum, o) => sum + o.amount, 0).toLocaleString()}`,
-    change: '+12% from last month', // optional: calculate dynamically
-    icon: DollarSign,
-    trend: 'up',
-  },
-  {
-    label: 'Active Orders',
-    value: orders.length,
-    change: `${orders.filter(o => o.status === 'pending').length} pending delivery`,
-    icon: Package,
-    trend: 'neutral',
-  },
-  {
-    label: 'Support Tickets',
-    value: supportTickets.length,
-    change: `${supportTickets.filter(t => t.status === 'open').length} open`,
-    icon: AlertCircle,
-    trend: 'neutral',
-  },
-];
-
-
-const spendingData = orders.reduce((acc, order) => {
-  const month = new Date(order.createdAt).toLocaleString('default', { month: 'short' });
-  const existing = acc.find(d => d.month === month);
-  if (existing) {
-    existing.amount += order.amount;
-  } else {
-    acc.push({ month, amount: order.amount });
-  }
-  return acc;
-}, []);
-
-const projectActivityData = projects.map((p, index) => ({
-  week: `Week ${index + 1}`,
-  hours: p.estimatedHours || 0, // replace with real field if available
-}));
+  const projectActivityData = projects.map((p, index) => ({
+    week: `Week ${index + 1}`,
+    hours: 0, // replace with real field if available
+  }));
 
 
 
@@ -348,8 +341,8 @@ const projectActivityData = projects.map((p, index) => ({
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${activeTab === tab.id
-                    ? 'border-silver text-silver'
-                    : 'border-transparent text-dim-grey hover:text-silver'
+                  ? 'border-silver text-silver'
+                  : 'border-transparent text-dim-grey hover:text-silver'
                   }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -366,34 +359,34 @@ const projectActivityData = projects.map((p, index) => ({
           <div className="space-y-6">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-  {stats.map((stat, index) => (
-    <motion.div
-      key={index}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
-    >
-      <Card className="bg-gunmetal/20 border-dim-grey/30 p-6 hover:border-silver/30 transition-colors">
-        <div className="flex items-start justify-between mb-4">
-          {/* Icon */}
-          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-silver to-dim-grey flex items-center justify-center">
-            <stat.icon className="w-6 h-6 text-black" />
-          </div>
+              {stats.map((stat, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                >
+                  <Card className="bg-gunmetal/20 border-dim-grey/30 p-6 hover:border-silver/30 transition-colors">
+                    <div className="flex items-start justify-between mb-4">
+                      {/* Icon */}
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-silver to-dim-grey flex items-center justify-center">
+                        <stat.icon className="w-6 h-6 text-black" />
+                      </div>
 
-          {/* Trend arrow */}
-          {stat.trend === 'up' && <TrendingUp className="w-4 h-4 text-silver" />}
-          {stat.trend === 'down' && <TrendingDown className="w-4 h-4 text-red-500" />}
-          {stat.trend === 'neutral' && <TrendingUpDown className="w-4 h-4 text-dim-grey" />}
-        </div>
+                      {/* Trend arrow */}
+                      {stat.trend === 'up' && <TrendingUp className="w-4 h-4 text-silver" />}
+                      {stat.trend === 'down' && <TrendingDown className="w-4 h-4 text-red-500" />}
+                      {stat.trend === 'neutral' && <TrendingUpDown className="w-4 h-4 text-dim-grey" />}
+                    </div>
 
-        {/* Stat values */}
-        <div className="text-2xl text-silver mb-1">{stat.value}</div>
-        <div className="text-sm text-dim-grey mb-2">{stat.label}</div>
-        <div className="text-xs text-dim-grey">{stat.change}</div>
-      </Card>
-    </motion.div>
-  ))}
-</div>
+                    {/* Stat values */}
+                    <div className="text-2xl text-silver mb-1">{stat.value}</div>
+                    <div className="text-sm text-dim-grey mb-2">{stat.label}</div>
+                    <div className="text-xs text-dim-grey">{stat.change}</div>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
 
             <br />
 
@@ -540,47 +533,7 @@ const projectActivityData = projects.map((p, index) => ({
                     </Button>
                   </div>
                   <div className="space-y-4">
-                    {fetchedAccess.map((project) => (
-  <div
-    key={project._id}
-    className="flex items-center justify-between p-4 rounded-lg bg-black/30 border border-gunmetal hover:border-dim-grey transition-colors"
-  >
-    {/* Project Info */}
-    <div className="flex-1">
-      <div className="text-silver text-sm mb-1">{project.title}</div>
-      <div className="text-xs text-dim-grey">
-        Category: {project.category} | Tags: {project.tags.join(', ')}
-      </div>
-    </div>
-
-    {/* Actions */}
-    <div className="flex items-center gap-3">
-      <div className="text-right">
-        <div className="text-silver text-sm mb-1">
-          Created: {new Date(project.createdAt).toLocaleDateString()}
-        </div>
-      </div>
-      {/* Download project as CSV or link */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="text-dim-grey hover:text-silver"
-        onClick={() => {
-          const csvContent = `"Title","Category","Tags","GitHub","Live URL","Created At"\n` +
-            `"${project.title}","${project.category}","${project.tags.join(', ')}","${project.githubRepo}","${project.liveUrl}","${new Date(project.createdAt).toLocaleDateString()}"`;
-          const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = `${project.title.replace(/\s+/g, "_")}.csv`;
-          link.click();
-        }}
-      >
-        <Download className="w-4 h-4" />
-      </Button>
-    </div>
-  </div>
-))}
+                    
 
                   </div>
                 </Card>
@@ -724,7 +677,7 @@ const projectActivityData = projects.map((p, index) => ({
 
 
 
-        {activeTab === 'projects-access' && (
+        {/* {activeTab === 'projects-access' && (
   <div className="space-y-6">
     <div className="flex items-center justify-between">
       <h2 className="text-silver">My Projects</h2>
@@ -781,7 +734,7 @@ const projectActivityData = projects.map((p, index) => ({
       </div>
     </Card>
   </div>
-)}
+)} */}
 
       </main>
     </div>
