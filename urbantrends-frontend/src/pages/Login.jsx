@@ -268,14 +268,14 @@ export function Login() {
               </div>
 
               {/* Demo Credentials */}
-              <div className="mt-6 p-4 rounded-lg bg-black/30 border border-gunmetal">
+              {/* <div className="mt-6 p-4 rounded-lg bg-black/30 border border-gunmetal">
                 <p className="text-xs text-dim-grey mb-2">Demo Credentials:</p>
                 <div className="space-y-1">
                   <p className="text-xs text-silver">Email: any@email.com</p>
                   <p className="text-xs text-silver">Password: any password</p>
                   <p className="text-xs text-dim-grey mt-2">Select a role and use any credentials to login</p>
                 </div>
-              </div>
+              </div> */}
             </Card>
           </motion.div>
         </div>
