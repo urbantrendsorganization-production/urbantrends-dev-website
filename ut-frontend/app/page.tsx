@@ -23,7 +23,7 @@ export default function HomePage() {
           <div className="hero-copy">
             <span className="eyebrow">
               <span className="dot-led" />
-              Nairobi, Kenya · Multi-product studio
+              Multi-product software studio · Est. 2024
             </span>
             <h1>
               Infrastructure for the{" "}
