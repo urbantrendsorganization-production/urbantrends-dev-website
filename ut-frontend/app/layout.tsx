@@ -18,6 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://urbantrends.dev"
+  ),
   title: {
     default: "UrbanTrends — Infrastructure for the East African internet",
     template: "%s — UrbanTrends",
@@ -26,6 +29,7 @@ export const metadata: Metadata = {
     "A Nairobi software studio building M-Pesa-native SaaS and developer tooling for East African operators.",
   openGraph: {
     type: "website",
+    siteName: "UrbanTrends",
     images: [{ url: "/images/og-image.png", width: 1200, height: 630 }],
   },
   twitter: { card: "summary_large_image" },

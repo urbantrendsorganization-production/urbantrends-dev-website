@@ -61,7 +61,7 @@ export default function HomePage() {
             <div className="art-diagram">
               <div className="diagram-frame">
                 <div className="df-head">
-                  <span className="mono-label">reconciliation_core.svc</span>
+                  <span className="mono-label">genmars_studio.svc</span>
                   <div className="dots">
                     <i /><i /><i />
                   </div>
@@ -72,54 +72,116 @@ export default function HomePage() {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                   role="img"
-                  aria-label="Architecture diagram: M-Pesa, Daraja and KRA feed the UrbanTrends reconciliation core, which powers the product suite."
+                  aria-label="Orbital diagram: Genmars Tech at the centre delivering software to Startups, Businesses, Companies, Agencies, Developers and NGOs."
                 >
                   <defs>
                     <pattern id="dg" width="22" height="22" patternUnits="userSpaceOnUse">
                       <circle cx="1.2" cy="1.2" r="1.2" className="dot-grid-bg" />
                     </pattern>
+                    <radialGradient id="hub-glow" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#22D3EE" stopOpacity=".22" />
+                      <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
+                    </radialGradient>
+                    <radialGradient id="hub-core" cx="40%" cy="38%" r="65%">
+                      <stop offset="0%" stopColor="var(--surface-3)" />
+                      <stop offset="100%" stopColor="var(--surface-1)" />
+                    </radialGradient>
+                    <radialGradient id="ng1" cx="35%" cy="32%" r="65%">
+                      <stop offset="0%" stopColor="#a5f3fc" stopOpacity=".95" />
+                      <stop offset="100%" stopColor="#0e7490" stopOpacity=".9" />
+                    </radialGradient>
+                    <radialGradient id="ng2" cx="35%" cy="32%" r="65%">
+                      <stop offset="0%" stopColor="#a7f3d0" stopOpacity=".95" />
+                      <stop offset="100%" stopColor="#047857" stopOpacity=".9" />
+                    </radialGradient>
+                    <radialGradient id="ng3" cx="35%" cy="32%" r="65%">
+                      <stop offset="0%" stopColor="#ddd6fe" stopOpacity=".95" />
+                      <stop offset="100%" stopColor="#6d28d9" stopOpacity=".9" />
+                    </radialGradient>
+                    <radialGradient id="ng4" cx="35%" cy="32%" r="65%">
+                      <stop offset="0%" stopColor="#bfdbfe" stopOpacity=".95" />
+                      <stop offset="100%" stopColor="#1d4ed8" stopOpacity=".9" />
+                    </radialGradient>
+                    <radialGradient id="ng5" cx="35%" cy="32%" r="65%">
+                      <stop offset="0%" stopColor="#fed7aa" stopOpacity=".95" />
+                      <stop offset="100%" stopColor="#c2410c" stopOpacity=".9" />
+                    </radialGradient>
+                    <radialGradient id="ng6" cx="35%" cy="32%" r="65%">
+                      <stop offset="0%" stopColor="#f5d0fe" stopOpacity=".95" />
+                      <stop offset="100%" stopColor="#a21caf" stopOpacity=".9" />
+                    </radialGradient>
                   </defs>
-                  <rect x="0" y="0" width="760" height="410" fill="url(#dg)" opacity=".5" />
-                  {/* connectors */}
-                  <path className="flow" d="M156,107 C 245,107 245,196 314,196" />
-                  <path className="flow" d="M156,199 C 245,199 285,220 314,220" />
-                  <path className="flow" d="M156,291 C 245,291 245,244 314,244" />
-                  <path className="flow" d="M446,196 C 520,196 520,92 586,92" />
-                  <path className="flow" d="M446,210 C 520,210 520,172 586,172" />
-                  <path className="flow" d="M446,230 C 520,230 520,252 586,252" />
-                  <path className="flow" d="M446,244 C 520,244 520,332 586,332" />
-                  {/* animated pulses */}
-                  <path className="flow-pulse" style={{ animationDelay: "0s" }}   d="M156,107 C 245,107 245,196 314,196" />
-                  <path className="flow-pulse" style={{ animationDelay: ".5s" }}  d="M156,199 C 245,199 285,220 314,220" />
-                  <path className="flow-pulse" style={{ animationDelay: "1s" }}   d="M156,291 C 245,291 245,244 314,244" />
-                  <path className="flow-pulse" style={{ animationDelay: ".3s" }}  d="M446,196 C 520,196 520,92 586,92" />
-                  <path className="flow-pulse" style={{ animationDelay: ".9s" }}  d="M446,210 C 520,210 520,172 586,172" />
-                  <path className="flow-pulse" style={{ animationDelay: "1.4s" }} d="M446,230 C 520,230 520,252 586,252" />
-                  <path className="flow-pulse" style={{ animationDelay: ".7s" }}  d="M446,244 C 520,244 520,332 586,332" />
-                  {/* input nodes */}
-                  <rect className="node-rect" x="24"  y="84"  width="132" height="46" rx="8" />
-                  <text className="node-t" x="90" y="112" textAnchor="middle">M-PESA</text>
-                  <rect className="node-rect" x="24"  y="176" width="132" height="46" rx="8" />
-                  <text className="node-t" x="90" y="204" textAnchor="middle">DARAJA API</text>
-                  <rect className="node-rect" x="24"  y="268" width="132" height="46" rx="8" />
-                  <text className="node-t" x="90" y="296" textAnchor="middle">KRA eTIMS</text>
-                  {/* reconciliation core */}
-                  <rect className="node-core" x="314" y="154" width="132" height="132" rx="14" />
-                  <rect x="360" y="194" width="7" height="12" rx="1.5" fill="var(--accent)" fillOpacity=".5" />
-                  <rect x="371" y="188" width="7" height="18" rx="1.5" fill="var(--accent)" fillOpacity=".75" />
-                  <rect x="382" y="182" width="7" height="24" rx="1.5" fill="var(--accent)" />
-                  <rect x="393" y="191" width="7" height="15" rx="1.5" fill="var(--accent)" fillOpacity=".4" />
-                  <text className="node-t" x="380" y="232" textAnchor="middle" style={{ fontSize: "12.5px", letterSpacing: ".06em" }}>URBANTRENDS</text>
-                  <text className="node-s" x="380" y="250" textAnchor="middle">RECONCILIATION CORE</text>
-                  {/* output nodes */}
-                  <rect className="node-rect" x="586" y="70"  width="150" height="44" rx="8" />
-                  <text className="node-t" x="661" y="97"  textAnchor="middle">RentFlow</text>
-                  <rect className="node-rect" x="586" y="150" width="150" height="44" rx="8" />
-                  <text className="node-t" x="661" y="177" textAnchor="middle">PortfolioU</text>
-                  <rect className="node-rect" x="586" y="230" width="150" height="44" rx="8" />
-                  <text className="node-t" x="661" y="257" textAnchor="middle">TrendyyLeads</text>
-                  <rect className="node-rect" x="586" y="310" width="150" height="44" rx="8" />
-                  <text className="node-t" x="661" y="337" textAnchor="middle">AcademyOS</text>
+
+                  {/* Dot grid background */}
+                  <rect x="0" y="0" width="760" height="410" fill="url(#dg)" opacity=".45" />
+
+                  {/* Hub ambient glow */}
+                  <circle cx="360" cy="200" r="82" fill="url(#hub-glow)" />
+                  <circle cx="360" cy="200" r="62" stroke="#22D3EE" strokeWidth=".7" strokeOpacity=".18" fill="none" />
+
+                  {/* Elliptical orbit track */}
+                  <ellipse cx="360" cy="200" rx="160" ry="112" stroke="rgba(255,255,255,.1)" strokeWidth=".8" strokeDasharray="4 8" fill="none" />
+
+                  {/* Spokes: hub → satellite */}
+                  <path className="flow" d="M360,156 L360,113" />
+                  <path className="flow" d="M403,183 L477,153" />
+                  <path className="flow" d="M403,217 L477,247" />
+                  <path className="flow" d="M360,246 L360,288" />
+                  <path className="flow" d="M317,217 L243,247" />
+                  <path className="flow" d="M317,183 L243,153" />
+
+                  {/* Animated pulses outward along each spoke */}
+                  <path className="flow-pulse" style={{ animationDelay: "0s" }}   d="M360,156 L360,113" />
+                  <path className="flow-pulse" style={{ animationDelay: ".4s" }}  d="M403,183 L477,153" />
+                  <path className="flow-pulse" style={{ animationDelay: ".8s" }}  d="M403,217 L477,247" />
+                  <path className="flow-pulse" style={{ animationDelay: "1.2s" }} d="M360,246 L360,288" />
+                  <path className="flow-pulse" style={{ animationDelay: "1.6s" }} d="M317,217 L243,247" />
+                  <path className="flow-pulse" style={{ animationDelay: "2.0s" }} d="M317,183 L243,153" />
+
+                  {/* ── Hub sphere ── */}
+                  <circle cx="360" cy="200" r="44" fill="url(#hub-core)" stroke="#22D3EE" strokeWidth="1.4" strokeOpacity=".45" />
+                  <rect x="340" y="196" width="5" height="12" rx="1" fill="#22D3EE" fillOpacity=".4" />
+                  <rect x="348" y="190" width="5" height="18" rx="1" fill="#22D3EE" fillOpacity=".7" />
+                  <rect x="356" y="183" width="5" height="25" rx="1" fill="#22D3EE" />
+                  <rect x="364" y="193" width="5" height="15" rx="1" fill="#22D3EE" fillOpacity=".45" />
+                  <text x="360" y="220" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".1em" fill="#22D3EE" fillOpacity=".7">GENMARS TECH</text>
+                  <circle cx="347" cy="187" r="6" fill="white" fillOpacity=".08" />
+
+                  {/* ── Satellite 1: Startups — top (360, 88), cyan ── */}
+                  <circle cx="360" cy="88" r="22" fill="url(#ng1)" />
+                  <circle cx="352" cy="80" r="6" fill="white" fillOpacity=".22" />
+                  <text x="360" y="57" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" fill="#a5f3fc">Startups</text>
+                  <text x="360" y="44" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" fill="rgba(255,255,255,.38)">Product Dev</text>
+
+                  {/* ── Satellite 2: Businesses — top-right (499, 144), green ── */}
+                  <circle cx="499" cy="144" r="22" fill="url(#ng2)" />
+                  <circle cx="491" cy="136" r="6" fill="white" fillOpacity=".22" />
+                  <text x="536" y="141" textAnchor="start" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" fill="#a7f3d0">Businesses</text>
+                  <text x="536" y="154" textAnchor="start" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" fill="rgba(255,255,255,.38)">Custom Software</text>
+
+                  {/* ── Satellite 3: Companies — bottom-right (499, 256), purple ── */}
+                  <circle cx="499" cy="256" r="22" fill="url(#ng3)" />
+                  <circle cx="491" cy="248" r="6" fill="white" fillOpacity=".22" />
+                  <text x="536" y="253" textAnchor="start" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" fill="#ddd6fe">Companies</text>
+                  <text x="536" y="266" textAnchor="start" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" fill="rgba(255,255,255,.38)">{"API & Integrations"}</text>
+
+                  {/* ── Satellite 4: Agencies — bottom (360, 312), blue ── */}
+                  <circle cx="360" cy="312" r="22" fill="url(#ng4)" />
+                  <circle cx="352" cy="304" r="6" fill="white" fillOpacity=".22" />
+                  <text x="360" y="351" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" fill="#bfdbfe">Agencies</text>
+                  <text x="360" y="364" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" fill="rgba(255,255,255,.38)">Consulting</text>
+
+                  {/* ── Satellite 5: Developers — bottom-left (221, 256), amber ── */}
+                  <circle cx="221" cy="256" r="22" fill="url(#ng5)" />
+                  <circle cx="213" cy="248" r="6" fill="white" fillOpacity=".22" />
+                  <text x="184" y="253" textAnchor="end" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" fill="#fed7aa">Developers</text>
+                  <text x="184" y="266" textAnchor="end" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" fill="rgba(255,255,255,.38)">Dev Tools</text>
+
+                  {/* ── Satellite 6: NGOs — top-left (221, 144), fuchsia ── */}
+                  <circle cx="221" cy="144" r="22" fill="url(#ng6)" />
+                  <circle cx="213" cy="136" r="6" fill="white" fillOpacity=".22" />
+                  <text x="184" y="141" textAnchor="end" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" fill="#f5d0fe">NGOs</text>
+                  <text x="184" y="154" textAnchor="end" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" fill="rgba(255,255,255,.38)">{"Design & UX"}</text>
                 </svg>
               </div>
             </div>
