@@ -34,23 +34,23 @@ body { margin: 0; overflow-x: clip; }
 
 /* ---------- Tokens : LIGHT ---------- */
 [data-theme="light"] {
-  --bg:          #FBFBFA;
+  --bg:          #F7F7F6;
   --surface-1:   #FFFFFF;
-  --surface-2:   #FFFFFF;
-  --surface-3:   #F4F4F2;
-  --border:      rgba(10,10,11,.11);
-  --border-strong: rgba(10,10,11,.18);
-  --hairline:    rgba(10,10,11,.07);
+  --surface-2:   #F0F0EE;
+  --surface-3:   #E8E8E5;
+  --border:      rgba(10,10,11,.14);
+  --border-strong: rgba(10,10,11,.26);
+  --hairline:    rgba(10,10,11,.09);
   --fg:          #0A0A0B;
-  --fg-muted:    #56565E;
-  --fg-subtle:   #8A8A92;
-  --grid-line:   rgba(10,10,11,.05);
-  --dot:         rgba(10,10,11,.10);
+  --fg-muted:    #52525A;
+  --fg-subtle:   #84848C;
+  --grid-line:   rgba(10,10,11,.055);
+  --dot:         rgba(10,10,11,.12);
   --accent-text: color-mix(in srgb, var(--accent) 72%, #0a0a0b 28%);
   --accent-soft: color-mix(in srgb, var(--accent) 14%, transparent);
   --accent-line: color-mix(in srgb, var(--accent) 55%, transparent);
   --on-accent:   #04181d;
-  --shadow-float: 0 1px 2px rgba(10,10,11,.04), 0 24px 50px -22px rgba(10,10,11,.22);
+  --shadow-float: 0 1px 3px rgba(10,10,11,.08), 0 4px 14px rgba(10,10,11,.06);
   --code-bg:     #0C0C0E;
   color-scheme: light;
 }
@@ -533,7 +533,7 @@ pre.code .v { color: #e6e6ee; }
 .recon-row .badge i { width: 5px; height: 5px; border-radius: 50%; background: var(--pa); }
 
 /* ---------- Built on Kenya ---------- */
-.kenya-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(28px, 5vw, 64px); align-items: center; }
+.kenya-grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(28px, 5vw, 64px); align-items: start; }
 .kenya-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
 .kenya-note { margin-top: 24px; font-family: var(--font-mono); font-size: 12.5px; color: var(--fg-subtle); line-height: 1.7; }
 .kenya-note b { color: var(--accent-text); font-weight: 500; }
@@ -1616,7 +1616,7 @@ pre.code .v { color: #e6e6ee; }
   flex-wrap: wrap;
 }
 .tavatar {
-  width: 36px; height: 36px;
+  width: 40px; height: 40px;
   border-radius: 50%;
   background: var(--surface-3);
   border: 1px solid var(--border);
@@ -1625,6 +1625,8 @@ pre.code .v { color: #e6e6ee; }
   color: var(--fg-muted);
   flex-shrink: 0;
   font-family: var(--font-mono);
+  overflow: hidden;
+  position: relative;
 }
 .tname  { font-size: 13.5px; font-weight: 600; color: var(--fg); }
 .trole  { font-size: 12px; color: var(--fg-subtle); margin-top: 1px; }
@@ -1638,6 +1640,141 @@ pre.code .v { color: #e6e6ee; }
 }
 @media (max-width: 900px) { .testimonials-grid { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .testimonials-grid { gap: 14px; } }
+
+/* ============================================================
+   Landing page images
+   ============================================================ */
+
+/* Hero — subtle background photo */
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  -webkit-mask-image: linear-gradient(105deg, transparent 0%, rgba(0,0,0,.12) 38%, rgba(0,0,0,.45) 65%, rgba(0,0,0,.6) 100%);
+          mask-image: linear-gradient(105deg, transparent 0%, rgba(0,0,0,.12) 38%, rgba(0,0,0,.45) 65%, rgba(0,0,0,.6) 100%);
+}
+[data-theme="light"] .hero-bg {
+  -webkit-mask-image: linear-gradient(105deg, transparent 0%, rgba(0,0,0,.06) 40%, rgba(0,0,0,.2) 70%, rgba(0,0,0,.3) 100%);
+          mask-image: linear-gradient(105deg, transparent 0%, rgba(0,0,0,.06) 40%, rgba(0,0,0,.2) 70%, rgba(0,0,0,.3) 100%);
+}
+/* ensure hero content stays above the bg photo layer */
+.hero-grid { z-index: 1; }
+
+/* Hero photo mosaic strip */
+.hero-photo-card {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr;
+  grid-template-rows: 1fr;
+  gap: 8px;
+  height: 146px;
+  margin-top: 28px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.hpc-a, .hpc-b, .hpc-c {
+  position: relative;
+  overflow: hidden;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  min-height: 0;
+}
+.hpc-a::after, .hpc-b::after, .hpc-c::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(160deg, transparent 40%, rgba(0,0,0,.35) 100%);
+  pointer-events: none;
+}
+
+/* Kenya section — photo above code window */
+.kenya-img-wrap {
+  position: relative;
+  height: 196px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+.kenya-img-wrap::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,.4) 100%);
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .hero-photo-card { height: 110px; gap: 6px; }
+  .kenya-img-wrap { height: 160px; }
+}
+
+/* ============================================================
+   Light-mode visibility — card lift + component contrast
+   ============================================================ */
+
+/* All card-like surfaces get a shadow lift so they read above --bg */
+[data-theme="light"] .pcard,
+[data-theme="light"] .tcard,
+[data-theme="light"] .tool,
+[data-theme="light"] .feature,
+[data-theme="light"] .blog-card,
+[data-theme="light"] .process-step,
+[data-theme="light"] .collab-card,
+[data-theme="light"] .value,
+[data-theme="light"] .member,
+[data-theme="light"] .metrics .m,
+[data-theme="light"] .price-card,
+[data-theme="light"] .service-card,
+[data-theme="light"] .featured-post,
+[data-theme="light"] .reg-card,
+[data-theme="light"] .faq,
+[data-theme="light"] .cl-entry,
+[data-theme="light"] .auth-panel {
+  box-shadow: 0 1px 3px rgba(10,10,11,.08), 0 2px 8px rgba(10,10,11,.05);
+}
+
+/* Nav mega-menu */
+[data-theme="light"] .nav-dd-panel {
+  box-shadow: 0 4px 24px rgba(10,10,11,.12), 0 1px 4px rgba(10,10,11,.08);
+}
+
+/* Diagram frame */
+[data-theme="light"] .diagram-frame {
+  box-shadow: 0 4px 24px rgba(10,10,11,.1), 0 1px 4px rgba(10,10,11,.07);
+}
+
+/* Code-window border is stronger in light */
+[data-theme="light"] .code-window {
+  border-color: rgba(10,10,11,.18);
+}
+
+/* ── SVG diagram: theme-adaptive classes ───────────────────── */
+
+/* Orbit ring — invisible white becomes a proper border stroke */
+.orbit-ring { stroke: var(--border-strong); }
+
+/* Hub "GENMARS TECH" label */
+.hub-label { fill: var(--accent-text); }
+
+/* Satellite sub-labels (service type) — "Design & UX" etc. */
+.sat-sub { fill: var(--fg-subtle); }
+
+/* Satellite primary labels
+   Dark mode: pastel (readable on near-black background)
+   Light mode: dark variant (readable on white/near-white) */
+.sat-n1 { fill: #a5f3fc; }
+[data-theme="light"] .sat-n1 { fill: #0e7490; }
+
+.sat-n2 { fill: #a7f3d0; }
+[data-theme="light"] .sat-n2 { fill: #047857; }
+
+.sat-n3 { fill: #ddd6fe; }
+[data-theme="light"] .sat-n3 { fill: #5b21b6; }
+
+.sat-n4 { fill: #bfdbfe; }
+[data-theme="light"] .sat-n4 { fill: #1d4ed8; }
+
+.sat-n5 { fill: #fed7aa; }
+[data-theme="light"] .sat-n5 { fill: #9a3412; }
+
+.sat-n6 { fill: #f5d0fe; }
+[data-theme="light"] .sat-n6 { fill: #86198f; }
 
 /* ============================================================
    Contact page

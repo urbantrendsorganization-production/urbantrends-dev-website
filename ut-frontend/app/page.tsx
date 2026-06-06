@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import LogoStrip from "@/components/LogoStrip";
 
 export default function HomePage() {
@@ -6,6 +7,18 @@ export default function HomePage() {
     <>
       {/* ===== HERO ===== */}
       <section className="hero">
+        {/* Background cityscape — masked so the copy column stays clean */}
+        <div className="hero-bg">
+          <Image
+            src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1800&q=55"
+            alt=""
+            fill
+            style={{ objectFit: "cover", opacity: .22 }}
+            priority
+            aria-hidden="true"
+          />
+        </div>
+
         <div className="wrap hero-grid">
           <div className="hero-copy">
             <span className="eyebrow">
@@ -51,6 +64,34 @@ export default function HomePage() {
               <div className="stat">
                 <div className="n">99.96%</div>
                 <div className="l">Uptime, trailing 90d</div>
+              </div>
+            </div>
+
+            {/* Photo mosaic — humanises the studio, always visible */}
+            <div className="hero-photo-card">
+              <div className="hpc-a">
+                <Image
+                  fill
+                  src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=560&q=80"
+                  alt="Genmars Tech team collaborating"
+                  style={{ objectFit: "cover" }}
+                />
+              </div>
+              <div className="hpc-b">
+                <Image
+                  fill
+                  src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=300&q=80"
+                  alt="Developer writing code"
+                  style={{ objectFit: "cover" }}
+                />
+              </div>
+              <div className="hpc-c">
+                <Image
+                  fill
+                  src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=300&q=80"
+                  alt="Startup team at work"
+                  style={{ objectFit: "cover" }}
+                />
               </div>
             </div>
           </div>
@@ -120,7 +161,7 @@ export default function HomePage() {
                   <circle cx="360" cy="200" r="62" stroke="#22D3EE" strokeWidth=".7" strokeOpacity=".18" fill="none" />
 
                   {/* Elliptical orbit track */}
-                  <ellipse cx="360" cy="200" rx="160" ry="112" stroke="rgba(255,255,255,.1)" strokeWidth=".8" strokeDasharray="4 8" fill="none" />
+                  <ellipse cx="360" cy="200" rx="160" ry="112" className="orbit-ring" strokeWidth=".8" strokeDasharray="4 8" fill="none" />
 
                   {/* Spokes: hub → satellite */}
                   <path className="flow" d="M360,156 L360,113" />
@@ -144,44 +185,44 @@ export default function HomePage() {
                   <rect x="348" y="190" width="5" height="18" rx="1" fill="#22D3EE" fillOpacity=".7" />
                   <rect x="356" y="183" width="5" height="25" rx="1" fill="#22D3EE" />
                   <rect x="364" y="193" width="5" height="15" rx="1" fill="#22D3EE" fillOpacity=".45" />
-                  <text x="360" y="220" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".1em" fill="#22D3EE" fillOpacity=".7">GENMARS TECH</text>
+                  <text x="360" y="220" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".1em" className="hub-label">GENMARS TECH</text>
                   <circle cx="347" cy="187" r="6" fill="white" fillOpacity=".08" />
 
                   {/* ── Satellite 1: Startups — top (360, 88), cyan ── */}
                   <circle cx="360" cy="88" r="22" fill="url(#ng1)" />
                   <circle cx="352" cy="80" r="6" fill="white" fillOpacity=".22" />
-                  <text x="360" y="57" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" fill="#a5f3fc">Startups</text>
-                  <text x="360" y="44" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" fill="rgba(255,255,255,.38)">Product Dev</text>
+                  <text x="360" y="57" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" className="sat-n1">Startups</text>
+                  <text x="360" y="44" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" className="sat-sub">Product Dev</text>
 
                   {/* ── Satellite 2: Businesses — top-right (499, 144), green ── */}
                   <circle cx="499" cy="144" r="22" fill="url(#ng2)" />
                   <circle cx="491" cy="136" r="6" fill="white" fillOpacity=".22" />
-                  <text x="536" y="141" textAnchor="start" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" fill="#a7f3d0">Businesses</text>
-                  <text x="536" y="154" textAnchor="start" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" fill="rgba(255,255,255,.38)">Custom Software</text>
+                  <text x="536" y="141" textAnchor="start" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" className="sat-n2">Businesses</text>
+                  <text x="536" y="154" textAnchor="start" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" className="sat-sub">Custom Software</text>
 
                   {/* ── Satellite 3: Companies — bottom-right (499, 256), purple ── */}
                   <circle cx="499" cy="256" r="22" fill="url(#ng3)" />
                   <circle cx="491" cy="248" r="6" fill="white" fillOpacity=".22" />
-                  <text x="536" y="253" textAnchor="start" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" fill="#ddd6fe">Companies</text>
-                  <text x="536" y="266" textAnchor="start" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" fill="rgba(255,255,255,.38)">{"API & Integrations"}</text>
+                  <text x="536" y="253" textAnchor="start" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" className="sat-n3">Companies</text>
+                  <text x="536" y="266" textAnchor="start" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" className="sat-sub">{"API & Integrations"}</text>
 
                   {/* ── Satellite 4: Agencies — bottom (360, 312), blue ── */}
                   <circle cx="360" cy="312" r="22" fill="url(#ng4)" />
                   <circle cx="352" cy="304" r="6" fill="white" fillOpacity=".22" />
-                  <text x="360" y="351" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" fill="#bfdbfe">Agencies</text>
-                  <text x="360" y="364" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" fill="rgba(255,255,255,.38)">Consulting</text>
+                  <text x="360" y="351" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" className="sat-n4">Agencies</text>
+                  <text x="360" y="364" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" className="sat-sub">Consulting</text>
 
                   {/* ── Satellite 5: Developers — bottom-left (221, 256), amber ── */}
                   <circle cx="221" cy="256" r="22" fill="url(#ng5)" />
                   <circle cx="213" cy="248" r="6" fill="white" fillOpacity=".22" />
-                  <text x="184" y="253" textAnchor="end" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" fill="#fed7aa">Developers</text>
-                  <text x="184" y="266" textAnchor="end" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" fill="rgba(255,255,255,.38)">Dev Tools</text>
+                  <text x="184" y="253" textAnchor="end" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" className="sat-n5">Developers</text>
+                  <text x="184" y="266" textAnchor="end" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" className="sat-sub">Dev Tools</text>
 
                   {/* ── Satellite 6: NGOs — top-left (221, 144), fuchsia ── */}
                   <circle cx="221" cy="144" r="22" fill="url(#ng6)" />
                   <circle cx="213" cy="136" r="6" fill="white" fillOpacity=".22" />
-                  <text x="184" y="141" textAnchor="end" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" fill="#f5d0fe">NGOs</text>
-                  <text x="184" y="154" textAnchor="end" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" fill="rgba(255,255,255,.38)">{"Design & UX"}</text>
+                  <text x="184" y="141" textAnchor="end" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" className="sat-n6">NGOs</text>
+                  <text x="184" y="154" textAnchor="end" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" className="sat-sub">{"Design & UX"}</text>
                 </svg>
               </div>
             </div>
@@ -424,7 +465,16 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="code-window">
+          <div>
+            <div className="kenya-img-wrap">
+              <Image
+                fill
+                src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=700&q=80"
+                alt="Software team reviewing M-Pesa integration in Nairobi"
+                style={{ objectFit: "cover" }}
+              />
+            </div>
+            <div className="code-window">
             <div className="code-bar">
               <div className="tl"><i /><i /><i /></div>
               <span className="fname">stk_push.ts</span>
@@ -441,6 +491,7 @@ export default function HomePage() {
 `}<span className="c">// → CheckoutRequestID issued in 41ms</span>{`
 `}<span className="c">// → settled + reconciled on callback</span>{`
 `}<span className="p">{`{ ResponseCode: `}<span className="s">&quot;0&quot;</span>{`, status: `}<span className="s">&quot;ok&quot;</span>{` }`}</span></pre>
+            </div>
           </div>
         </div>
       </section>
@@ -457,7 +508,9 @@ export default function HomePage() {
             <div className="tcard">
               <p className="tquote">&ldquo;The Monday reconciliation ritual is gone. We used to spend half a day matching M-Pesa statements to tenant records. RentFlow closes it in seconds — even on Sunday nights.&rdquo;</p>
               <div className="tfoot">
-                <div className="tavatar">JN</div>
+                <div className="tavatar">
+                  <Image fill src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=80&q=80" alt="Joy Njeri" style={{ objectFit: "cover" }} />
+                </div>
                 <div><div className="tname">Joy Njeri</div><div className="trole">Director, Jasmine Properties Ltd</div></div>
                 <span className="tprod" style={{ "--pa": "#34D399" } as React.CSSProperties}>RentFlow</span>
               </div>
@@ -465,7 +518,9 @@ export default function HomePage() {
             <div className="tcard">
               <p className="tquote">&ldquo;We integrated STK Push in an afternoon using the Playground and Scaffold CLI. Our previous attempt with the raw Daraja API took a senior engineer almost two weeks.&rdquo;</p>
               <div className="tfoot">
-                <div className="tavatar">DK</div>
+                <div className="tavatar">
+                  <Image fill src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?auto=format&fit=crop&w=80&q=80" alt="David Kamau" style={{ objectFit: "cover" }} />
+                </div>
                 <div><div className="tname">David Kamau</div><div className="trole">CTO, Pesabase</div></div>
                 <span className="tprod" style={{ "--pa": "#22D3EE" } as React.CSSProperties}>Dev Tools</span>
               </div>
@@ -473,7 +528,9 @@ export default function HomePage() {
             <div className="tcard">
               <p className="tquote">&ldquo;PortfolioU sent us three candidates with real, verifiable work. We hired two of them. It&apos;s the only place we&apos;ve found developers who can actually show what they&apos;ve built.&rdquo;</p>
               <div className="tfoot">
-                <div className="tavatar">AM</div>
+                <div className="tavatar">
+                  <Image fill src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80" alt="Amina Mohamed" style={{ objectFit: "cover" }} />
+                </div>
                 <div><div className="tname">Amina Mohamed</div><div className="trole">Head of Engineering, Acacia Labs</div></div>
                 <span className="tprod" style={{ "--pa": "#A78BFA" } as React.CSSProperties}>PortfolioU</span>
               </div>
