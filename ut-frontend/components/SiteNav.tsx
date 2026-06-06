@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
+import CountryFlag from "@/components/CountryFlag";
 
 const LOGO = (
   <svg
@@ -284,6 +285,7 @@ export default function SiteNav() {
         <div className="nav-spacer" />
 
         <div className="nav-actions">
+          <CountryFlag />
           <ThemeToggle />
           <button className="cmdk" type="button">
             <svg

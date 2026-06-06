@@ -287,6 +287,20 @@ a { color: inherit; text-decoration: none; }
 .signin { font-size: 14px; color: var(--fg-muted); padding: 0 6px; white-space: nowrap; }
 .signin:hover { color: var(--fg); }
 
+/* Country flag chip */
+.nav-country {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 28px; padding: 0 9px;
+  border: 1px solid var(--border); border-radius: 20px;
+  background: var(--surface-2);
+  font-size: 12px; font-weight: 600; letter-spacing: .04em;
+  color: var(--fg-muted); cursor: default; white-space: nowrap;
+  font-family: var(--font-mono);
+  transition: border-color .15s;
+}
+.nav-country:hover { border-color: var(--border-strong); color: var(--fg); }
+.nav-country-code { font-size: 11px; }
+
 /* ---------- Hero ---------- */
 .hero { position: relative; overflow: hidden; }
 .hero::before {
@@ -1130,6 +1144,10 @@ pre.code .v { color: #e6e6ee; }
   .nav-hamburger { display: flex; }
   .cmdk { display: none; }
   .signin { display: none; }
+  .nav-country-code { display: none; }
+}
+@media (max-width: 480px) {
+  .nav-country { display: none; }
 }
 
 /* ============================================================

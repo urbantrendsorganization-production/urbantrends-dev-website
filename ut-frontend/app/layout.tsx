@@ -53,6 +53,7 @@ export default function RootLayout({
       data-theme="dark"
       data-hero="diagram"
       className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
     >
       <head>
         <script
