@@ -159,6 +159,7 @@ export default function BlogPage() {
                 src="https://images.unsplash.com/photo-1509017174183-0b7e0278f1ec?auto=format&fit=crop&w=900&q=80"
                 alt="Mobile payment reconciliation — M-Pesa on a smartphone"
                 fill
+                sizes="(max-width: 960px) 100vw, 55vw"
                 style={{ objectFit: "cover" }}
               />
             </div>

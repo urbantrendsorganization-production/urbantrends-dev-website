@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const NAMES: Record<string, string> = {
   KE: "Kenya", TZ: "Tanzania", UG: "Uganda", RW: "Rwanda", ET: "Ethiopia",
@@ -66,13 +67,14 @@ export default function CountryFlag() {
   const name = NAMES[cc] ?? cc;
 
   return (
-    <span
+    <Link
+      href={`/${cc.toLowerCase()}/`}
       className="nav-country"
       title={`Viewing from ${name}`}
       aria-label={`Your location: ${name}`}
     >
       <span aria-hidden="true">{flag}</span>
-      <span className="nav-country-code">{cc}</span>
-    </span>
+      <span className="nav-country-code">/{cc.toLowerCase()}</span>
+    </Link>
   );
 }
