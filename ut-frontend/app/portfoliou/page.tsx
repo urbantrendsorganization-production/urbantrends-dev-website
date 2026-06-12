@@ -26,8 +26,8 @@ export default function PortfolioUPage() {
               <h1 className="page-title">Hire from <span className="em">proof, not promises.</span></h1>
               <p className="page-lead">PortfolioU is where East African students publish real work and employers hire from it. Verified projects, not padded CVs — so the first interview is about fit, not credibility.</p>
               <div className="head-cta">
-                <a className="btn btn-primary" href="#">Post your work <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
-                <a className="btn btn-ghost" href="#">Hire talent</a>
+                <a className="btn btn-primary" href="/contact">Post your work <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                <a className="btn btn-ghost" href="/contact">Hire talent</a>
               </div>
               <div className="stat-band" style={{ marginTop: 38 }}>
                 <div className="sb"><div className="n">18,000+</div><div className="l">Student portfolios</div></div>
@@ -80,46 +80,6 @@ export default function PortfolioUPage() {
           <div className="code-window">
             <div className="code-bar"><div className="tl"><i></i><i></i><i></i></div><span className="fname">verify.ts</span><span className="lang">PortfolioU</span></div>
             <pre className="code"><span className="k">const</span> <span className="v">proof</span> = <span className="k">await</span> <span className="f">portfoliou</span>.<span className="f">verify</span>{"({"}{"\n"}{"  "}repo: <span className="s">{`"github.com/amina/rentflow-ui"`}</span>,{"\n"}{"  "}live: <span className="s">{`"https://amina.dev/rentflow"`}</span>,{"\n"}{"});"}{"\n"}<span className="c">{"// → commits authored · deploy reachable · ✓"}</span>{"\n"}<span className="p">{"{ verified: "}<span className="n">true</span>{", confidence: "}<span className="n">0.94</span>{" }"}</span></pre>
-          </div>
-        </div>
-      </section>
-
-      <section className="section divider-top" id="pricing">
-        <div className="wrap">
-          <div className="section-head center-head"><span className="eyebrow muted">Pricing</span><h2>Free for students. Always.</h2><p>Students never pay. Employers pay for reach and hiring tools.</p></div>
-          <div className="pricing-grid">
-            <div className="price-card">
-              <div className="ptier">Student</div><div className="pprice">Free</div>
-              <p className="psub">For every student, no asterisk.</p>
-              <ul className="plist">
-                <li><CheckIcon />Unlimited verified projects</li>
-                <li><CheckIcon />Project hosting &amp; share links</li>
-                <li><CheckIcon />Be discoverable by employers</li>
-              </ul>
-              <div className="pcta"><a className="btn btn-ghost" href="#">Create profile</a></div>
-            </div>
-            <div className="price-card featured">
-              <span className="price-badge">Most popular</span>
-              <div className="ptier">Employer</div><div className="pprice">KES 9,000<small> /mo</small></div>
-              <p className="psub">For teams hiring junior talent.</p>
-              <ul className="plist">
-                <li><CheckIcon />Unlimited candidate search</li>
-                <li><CheckIcon />Shortlists &amp; team notes</li>
-                <li><CheckIcon />3 active job posts</li>
-                <li><CheckIcon />ATS sync</li>
-              </ul>
-              <div className="pcta"><a className="btn btn-primary" href="/signup">Start hiring</a></div>
-            </div>
-            <div className="price-card">
-              <div className="ptier">Enterprise</div><div className="pprice">Custom</div>
-              <p className="psub">For high-volume university recruiting.</p>
-              <ul className="plist">
-                <li><CheckIcon />Everything in Employer</li>
-                <li><CheckIcon />Unlimited job posts &amp; seats</li>
-                <li><CheckIcon />Campus partnerships &amp; SSO</li>
-              </ul>
-              <div className="pcta"><a className="btn btn-ghost" href="/contact">Contact sales</a></div>
-            </div>
           </div>
         </div>
       </section>

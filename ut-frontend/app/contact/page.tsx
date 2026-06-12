@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ContactForm from "./ContactForm";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -18,12 +19,22 @@ const CHANNELS = [
     value: "hello@urbantrends.dev",
   },
   {
+    icon: "M18.364 5.636a9 9 0 010 12.728M15.536 8.464a5 5 0 010 7.072M6.343 17.657a9 9 0 010-12.728M9.172 14.828a5 5 0 010-7.072M12 12h.01",
+    label: "Support",
+    value: "support@urbantrends.dev",
+  },
+  {
     icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
     label: "Security",
     value: "security@urbantrends.dev",
   },
   {
     icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z",
+    label: "Join the team",
+    value: "team@urbantrends.dev",
+  },
+  {
+    icon: "M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
     label: "Careers",
     value: "jobs@urbantrends.dev",
   },
@@ -71,82 +82,7 @@ export default function ContactPage() {
 
         {/* Right — form */}
         <div className="contact-form-side">
-          <div className="auth-form-wrap">
-            <Link className="auth-back" href="/">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-              UrbanTrends
-            </Link>
-
-            <h1 className="auth-title">Get in touch</h1>
-            <p className="auth-sub">Tell us what you&apos;re working on. The more context, the better.</p>
-
-            <form className="auth-form" action="#" method="post">
-              <div className="field-row">
-                <div className="field">
-                  <label htmlFor="c-fname">First name</label>
-                  <input id="c-fname" name="first_name" type="text" placeholder="Wanjiru" autoComplete="given-name" required />
-                </div>
-                <div className="field">
-                  <label htmlFor="c-lname">Last name</label>
-                  <input id="c-lname" name="last_name" type="text" placeholder="Kamau" autoComplete="family-name" required />
-                </div>
-              </div>
-              <div className="field">
-                <label htmlFor="c-email">Work email</label>
-                <input id="c-email" name="email" type="email" placeholder="you@company.ke" autoComplete="email" required />
-              </div>
-              <div className="field">
-                <label htmlFor="c-org">Company / Organisation</label>
-                <input id="c-org" name="organisation" type="text" placeholder="Your company or project" autoComplete="organization" />
-              </div>
-              <div className="field">
-                <label htmlFor="c-subject">What&apos;s this about?</label>
-                <select id="c-subject" name="subject" required>
-                  <option value="">Select a topic…</option>
-                  <optgroup label="Products">
-                    <option value="rentflow">RentFlow — property management</option>
-                    <option value="portfoliou">PortfolioU — talent marketplace</option>
-                    <option value="trendyyleads">TrendyyLeads — lead generation</option>
-                    <option value="academyos">AcademyOS — school management</option>
-                    <option value="devtools">Developer Tools &amp; APIs</option>
-                  </optgroup>
-                  <optgroup label="Services">
-                    <option value="custom-software">Custom software development</option>
-                    <option value="integration">API &amp; M-Pesa integration</option>
-                    <option value="consulting">Technical consulting</option>
-                    <option value="design">Product design</option>
-                  </optgroup>
-                  <optgroup label="Other">
-                    <option value="partnership">Partnership / collaboration</option>
-                    <option value="press">Press &amp; media</option>
-                    <option value="other">Something else</option>
-                  </optgroup>
-                </select>
-              </div>
-              <div className="field">
-                <label htmlFor="c-message">Message</label>
-                <textarea
-                  id="c-message"
-                  name="message"
-                  rows={5}
-                  placeholder="Tell us what you're building, what's blocking you, or what you'd like to explore with us."
-                  required
-                  style={{ resize: "vertical", minHeight: 120 }}
-                />
-              </div>
-              <button className="btn btn-primary auth-submit" type="submit">
-                Send message
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-              </button>
-              <p className="auth-legal">
-                We&apos;ll only use your details to respond to your enquiry. See our <Link href="/privacy">Privacy Policy</Link>.
-              </p>
-            </form>
-          </div>
+          <ContactForm />
         </div>
       </div>
     </div>

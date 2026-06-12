@@ -109,56 +109,6 @@ export default function RentFlowPage() {
         </div>
       </section>
 
-      <section className="section divider-top" id="pricing">
-        <div className="wrap">
-          <div className="section-head center-head">
-            <span className="eyebrow muted">Pricing</span>
-            <h2>Priced per unit. No surprises.</h2>
-            <p>Start free for your first 15 units. Scale when your portfolio does.</p>
-          </div>
-          <div className="pricing-grid">
-            <div className="price-card">
-              <div className="ptier">Starter</div>
-              <div className="pprice">Free</div>
-              <p className="psub">For small landlords getting off spreadsheets.</p>
-              <ul className="plist">
-                <li><CheckIcon />Up to 15 units</li>
-                <li><CheckIcon />Auto-reconciliation</li>
-                <li><CheckIcon />Tenant ledgers &amp; receipts</li>
-                <li><CheckIcon />Email support</li>
-              </ul>
-              <div className="pcta"><a className="btn btn-ghost" href="/signup">Get started</a></div>
-            </div>
-            <div className="price-card featured">
-              <span className="price-badge">Most popular</span>
-              <div className="ptier">Growth</div>
-              <div className="pprice">KES 60<small> / unit / mo</small></div>
-              <p className="psub">For agencies running real portfolios.</p>
-              <ul className="plist">
-                <li><CheckIcon />Unlimited units</li>
-                <li><CheckIcon />STK Push collection</li>
-                <li><CheckIcon />Owner payouts &amp; statements</li>
-                <li><CheckIcon />Arrears automation &amp; SMS</li>
-                <li><CheckIcon />eTIMS-ready exports</li>
-              </ul>
-              <div className="pcta"><a className="btn btn-primary" href="/signup">Start free trial</a></div>
-            </div>
-            <div className="price-card">
-              <div className="ptier">Scale</div>
-              <div className="pprice">Custom</div>
-              <p className="psub">For large managers &amp; institutional portfolios.</p>
-              <ul className="plist">
-                <li><CheckIcon />Everything in Growth</li>
-                <li><CheckIcon />Dedicated Paybill setup</li>
-                <li><CheckIcon />SSO &amp; audit logs</li>
-                <li><CheckIcon />Priority support &amp; SLA</li>
-              </ul>
-              <div className="pcta"><a className="btn btn-ghost" href="/contact">Contact sales</a></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="section divider-top">
         <div className="wrap">
           <div className="section-head"><span className="eyebrow muted">FAQ</span><h2>The questions managers actually ask.</h2></div>
@@ -191,7 +141,7 @@ export default function RentFlowPage() {
           </div>
           <div className="hero-cta" style={{ margin: 0 }}>
             <a className="btn btn-primary" href="/signup">Start free trial <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
-            <Link className="btn btn-ghost" href="/pricing">Compare plans</Link>
+            <Link className="btn btn-ghost" href="/contact">Talk to us</Link>
           </div>
         </div>
       </section>

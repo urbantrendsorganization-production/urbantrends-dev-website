@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: urbantrends-api
+    runtime: python
+    rootDir: ut-backend
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate
+    startCommand: gunicorn main_backend.wsgi --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --log-file -
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.14.5
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: api.urbantrends.dev
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://urbantrends.dev,https://www.urbantrends.dev
+      - key: FRONTEND_BASE_URL
+        value: https://urbantrends.dev
+      - key: WEBAUTHN_RP_ID
+        value: urbantrends.dev
+      - key: DEFAULT_FROM_EMAIL
+        value: noreply@urbantrends.dev
+      - key: DATABASE_URL
+        fromDatabase:
+          name: urbantrends-db
+          property: connectionString
+      # Set these manually in the Render dashboard after first deploy:
+      - key: RESEND_API_KEY
+        sync: false
+      - key: STAFF_NOTIFICATION_EMAIL
+        sync: false
+
+databases:
+  - name: urbantrends-db
+    databaseName: urbantrends
+    user: urbantrends

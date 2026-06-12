@@ -26,23 +26,23 @@ export default function SiteFooter() {
                 urbantrends<span className="tld">.dev</span>
               </span>
             </Link>
-            <p>Software products, tools &amp; applications by <strong>Genmars Tech</strong>. Made in Nairobi.</p>
+            <p>Software products, tools &amp; applications. Built in Nairobi.</p>
           </div>
 
           <div className="fcol">
-            <h5>Products</h5>
-            <Link href="/rentflow">RentFlow</Link>
-            <Link href="/portfoliou">PortfolioU</Link>
-            <Link href="/trendyyleads">TrendyyLeads</Link>
-            <Link href="/academyos">AcademyOS</Link>
+            <h5>Tools</h5>
+            <Link href="/tools">Browse all tools</Link>
+            <Link href="/tools">Inspector</Link>
+            <Link href="/tools">Scaffold</Link>
+            <Link href="/tools">OG Studio</Link>
           </div>
 
           <div className="fcol">
             <h5>Developers</h5>
-            <Link href="/docs">Daraja Playground</Link>
-            <Link href="/docs">Scaffold CLI</Link>
+            <Link href="/tools">All tools</Link>
+            <Link href="/tools">CLI generator</Link>
             <Link href="/docs">Docs</Link>
-            <a href="#">Status</a>
+            <Link href="/status">Status</Link>
           </div>
 
           <div className="fcol">
@@ -55,7 +55,7 @@ export default function SiteFooter() {
 
           <div className="fcol">
             <h5>Company</h5>
-            <Link href="/about">About Genmars Tech</Link>
+            <Link href="/about">About UrbanTrends</Link>
             <Link href="/careers">Careers</Link>
             <Link href="/blog">Blog</Link>
             <Link href="/changelog">Changelog</Link>
@@ -71,7 +71,7 @@ export default function SiteFooter() {
         </div>
 
         <div className="footer-bot">
-          <span>© 2026 Genmars Tech · UrbanTrends.dev · Nairobi, KE</span>
+          <span>© 2026 UrbanTrends.dev · Nairobi, KE · <a href="mailto:info@urbantrends.dev" style={{ color: "inherit" }}>info@urbantrends.dev</a></span>
           <span className="status">
             <i />
             All systems operational

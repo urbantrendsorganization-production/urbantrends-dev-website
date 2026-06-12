@@ -26,7 +26,7 @@ export default function AcademyOSPage() {
               <h1 className="page-title">Run the whole school, <span className="em">one system.</span></h1>
               <p className="page-lead">AcademyOS replaces the spreadsheet sprawl: admissions, fee collection over M-Pesa, timetables, attendance and reports — in a single place that parents, teachers and administrators all trust.</p>
               <div className="head-cta">
-                <a className="btn btn-primary" href="#">Join the beta <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+                <a className="btn btn-primary" href="/contact">Join the beta <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
                 <a className="btn btn-ghost" href="/contact">Book a demo</a>
               </div>
               <div className="stat-band" style={{ marginTop: 38 }}>
@@ -90,46 +90,6 @@ export default function AcademyOSPage() {
         </div>
       </section>
 
-      <section className="section divider-top" id="pricing">
-        <div className="wrap">
-          <div className="section-head center-head"><span className="eyebrow muted">Pricing</span><h2>Per student, per year.</h2><p>One simple rate. Setup and onboarding included for beta schools.</p></div>
-          <div className="pricing-grid">
-            <div className="price-card">
-              <div className="ptier">Core</div><div className="pprice">KES 120<small> /student/yr</small></div>
-              <p className="psub">For primary &amp; secondary schools.</p>
-              <ul className="plist">
-                <li><CheckIcon />Fees &amp; M-Pesa collection</li>
-                <li><CheckIcon />Admissions &amp; attendance</li>
-                <li><CheckIcon />Parent portal</li>
-              </ul>
-              <div className="pcta"><a className="btn btn-ghost" href="#">Join the beta</a></div>
-            </div>
-            <div className="price-card featured">
-              <span className="price-badge">Most popular</span>
-              <div className="ptier">Plus</div><div className="pprice">KES 200<small> /student/yr</small></div>
-              <p className="psub">For schools that want it all in one.</p>
-              <ul className="plist">
-                <li><CheckIcon />Everything in Core</li>
-                <li><CheckIcon />Timetables &amp; report cards</li>
-                <li><CheckIcon />SMS reminders included</li>
-                <li><CheckIcon />Priority onboarding</li>
-              </ul>
-              <div className="pcta"><a className="btn btn-primary" href="#">Join the beta</a></div>
-            </div>
-            <div className="price-card">
-              <div className="ptier">Group</div><div className="pprice">Custom</div>
-              <p className="psub">For school groups &amp; academies.</p>
-              <ul className="plist">
-                <li><CheckIcon />Everything in Plus</li>
-                <li><CheckIcon />Multi-school dashboard</li>
-                <li><CheckIcon />SSO &amp; consolidated billing</li>
-              </ul>
-              <div className="pcta"><a className="btn btn-ghost" href="/contact">Contact sales</a></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="section divider-top">
         <div className="wrap">
           <div className="section-head"><span className="eyebrow muted">FAQ</span><h2>What administrators ask.</h2></div>
@@ -145,7 +105,7 @@ export default function AcademyOSPage() {
         <div className="wrap cta-inner">
           <div><h2>Retire the spreadsheets.</h2><p>Join the beta — onboarding and setup are on us while we&apos;re early.</p></div>
           <div className="hero-cta" style={{ margin: 0 }}>
-            <a className="btn btn-primary" href="#">Join the beta <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+            <a className="btn btn-primary" href="/contact">Join the beta <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
             <Link className="btn btn-ghost" href="/products">All products</Link>
           </div>
         </div>

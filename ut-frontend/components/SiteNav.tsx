@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import CountryFlag from "@/components/CountryFlag";
+import { getSession, logout, type AuthUser } from "@/lib/auth";
 
 const LOGO = (
   <svg
@@ -20,95 +21,68 @@ const LOGO = (
   </svg>
 );
 
-const ARROW = (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.2"
-    width="14"
-    height="14"
-  >
-    <path d="M5 12h14M13 6l6 6-6 6" />
-  </svg>
-);
+const VALID_CC = new Set([
+  "ke","tz","ug","rw","et","ng","gh","za","eg",
+  "us","gb","ca","au","in","sg","ae","de","fr",
+  "nl","se","no","fi","jp","cn","kr","br","mx",
+  "zm","mz","zw","bw","na","sn","ci",
+]);
 
-const PRODUCTS = [
-  {
-    name: "RentFlow",
-    href: "/rentflow",
-    pa: "#34D399",
-    desc: "Property management with M-Pesa reconciliation",
-    glyph: "M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5",
-  },
-  {
-    name: "PortfolioU",
-    href: "/portfoliou",
-    pa: "#A78BFA",
-    desc: "Two-sided student talent marketplace",
-    glyph: "M9.5 9.8 14.5 14.2",
-    glyphExtra: (
-      <>
-        <circle cx="7" cy="8" r="3" />
-        <circle cx="17" cy="16" r="3" />
-        <path d="M9.5 9.8 14.5 14.2" />
-      </>
-    ),
-  },
-  {
-    name: "TrendyyLeads",
-    href: "/trendyyleads",
-    pa: "#FB923C",
-    desc: "B2B lead generation, sourced and scored",
-    glyph: "M3 4h18l-7 8v6l-4 2v-8z",
-  },
-  {
-    name: "AcademyOS",
-    href: "/academyos",
-    pa: "#60A5FA",
-    desc: "School management in one system",
-    glyph: "M3 8l9-4 9 4-9 4zM7 10.5V15c0 1.5 2.2 2.5 5 2.5s5-1 5-2.5v-4.5",
-  },
-];
+function getCC(pathname: string): string {
+  const m = /^\/([a-z]{2})(\/|$)/.exec(pathname);
+  if (m && VALID_CC.has(m[1])) return m[1];
+  if (typeof document !== "undefined") {
+    const c = document.cookie.match(/(?:^|;\s*)ut-country=([A-Z]{2})/);
+    if (c) return c[1].toLowerCase();
+  }
+  return "ke";
+}
+
 
 export default function SiteNav() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const ddRef = useRef<HTMLDivElement>(null);
-  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const isProduct = [
-    "/rentflow",
-    "/portfoliou",
-    "/trendyyleads",
-    "/academyos",
-    "/products",
-  ].includes(pathname);
+  useEffect(() => {
+    function checkAuth() {
+      getSession().then((r) => {
+        setUser(r.meta?.is_authenticated && r.data?.user ? r.data.user as AuthUser : null);
+      }).catch(() => setUser(null));
+    }
+    checkAuth();
+    window.addEventListener("auth:changed", checkAuth);
+    return () => window.removeEventListener("auth:changed", checkAuth);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleSignOut() {
+    try {
+      await logout();
+    } catch { /* ok */ }
+    setUser(null);
+    setUserMenuOpen(false);
+    router.push("/");
+    router.refresh();
+  }
+
+  const cc = getCC(pathname);
+  const p = (slug: string) => `/${cc}/${slug}`;
 
   function active(match: boolean) {
     return match ? ("page" as const) : undefined;
   }
 
-  function openDD() {
-    if (hoverTimer.current) clearTimeout(hoverTimer.current);
-    setOpen(true);
-  }
-  function closeDD() {
-    setOpen(false);
-  }
-  function scheduleClose() {
-    hoverTimer.current = setTimeout(closeDD, 80);
-  }
-
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (ddRef.current && !ddRef.current.contains(e.target as Node)) {
-        closeDD();
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
       }
     }
     function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") { closeDD(); setMobileOpen(false); }
+      if (e.key === "Escape") { setMobileOpen(false); setUserMenuOpen(false); }
     }
     document.addEventListener("click", handleClick);
     document.addEventListener("keydown", handleKey);
@@ -120,7 +94,6 @@ export default function SiteNav() {
 
   useEffect(() => {
     setMobileOpen(false);
-    setOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -140,143 +113,46 @@ export default function SiteNav() {
         </Link>
 
         <nav className="nav-links" aria-label="Primary">
-          {/* Products mega-menu */}
-          <div
-            className="nav-dd"
-            ref={ddRef}
-            data-open={open ? "" : undefined}
-            onMouseEnter={openDD}
-            onMouseLeave={scheduleClose}
+          <Link
+            className="nav-link"
+            href={p("tools")}
+            aria-current={active(pathname.includes("/tools"))}
           >
-            <button
-              className="nav-link nav-dd-trigger"
-              type="button"
-              aria-haspopup="true"
-              aria-expanded={open}
-              aria-current={active(isProduct)}
-              onClick={() => setOpen((o) => !o)}
-            >
-              Products
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.4"
-              >
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </button>
-
-            <div className="nav-dd-panel" role="menu">
-              <div className="dd-head">
-                <span className="mono-label">The portfolio</span>
-                <span className="dd-head-count">5 products</span>
-              </div>
-              <div className="dd-grid">
-                {PRODUCTS.map((p) => (
-                  <Link
-                    key={p.name}
-                    className="dd-item"
-                    role="menuitem"
-                    href={p.href}
-                    style={{ "--pa": p.pa } as React.CSSProperties}
-                    onClick={closeDD}
-                  >
-                    <span className="dd-glyph">
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                      >
-                        {p.glyphExtra ? (
-                          p.glyphExtra
-                        ) : (
-                          <path d={p.glyph} />
-                        )}
-                      </svg>
-                    </span>
-                    <span className="dd-tt">
-                      <b>{p.name}</b>
-                      <i>{p.desc}</i>
-                    </span>
-                  </Link>
-                ))}
-
-                {/* Developer Tools — full width */}
-                <Link
-                  className="dd-item dd-item-wide"
-                  role="menuitem"
-                  href="/docs"
-                  style={{ "--pa": "#22D3EE" } as React.CSSProperties}
-                  onClick={closeDD}
-                >
-                  <span className="dd-glyph">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                    >
-                      <path d="M7 8l4 4-4 4M13 16h4" />
-                      <rect x="3" y="4" width="18" height="16" rx="2" />
-                    </svg>
-                  </span>
-                  <span className="dd-tt">
-                    <b>
-                      Developer Tools{" "}
-                      <span className="dd-badge">Free</span>
-                    </b>
-                    <i>Daraja Playground, Scaffold CLI &amp; small utilities</i>
-                  </span>
-                </Link>
-              </div>
-
-              <Link className="dd-foot" href="/products" onClick={closeDD}>
-                Browse all products {ARROW}
-              </Link>
-            </div>
-          </div>
+            Tools
+          </Link>
 
           <Link
             className="nav-link"
-            href="/services"
-            aria-current={active(pathname === "/services")}
+            href={p("services")}
+            aria-current={active(pathname.endsWith("/services"))}
           >
             Services
           </Link>
           <Link
             className="nav-link"
-            href="/docs"
-            aria-current={active(pathname === "/docs")}
+            href={p("docs")}
+            aria-current={active(pathname.endsWith("/docs"))}
           >
             Developers
           </Link>
           <Link
             className="nav-link"
-            href="/pricing"
-            aria-current={active(pathname === "/pricing")}
-          >
-            Pricing
-          </Link>
-          <Link
-            className="nav-link"
-            href="/blog"
-            aria-current={active(pathname === "/blog")}
+            href={p("blog")}
+            aria-current={active(pathname.endsWith("/blog"))}
           >
             Blog
           </Link>
           <Link
             className="nav-link"
-            href="/changelog"
-            aria-current={active(pathname === "/changelog")}
+            href={p("changelog")}
+            aria-current={active(pathname.endsWith("/changelog"))}
           >
             Changelog
           </Link>
           <Link
             className="nav-link"
-            href="/about"
-            aria-current={active(pathname === "/about")}
+            href={p("about")}
+            aria-current={active(pathname.endsWith("/about"))}
           >
             About
           </Link>
@@ -302,12 +178,97 @@ export default function SiteNav() {
             <span>Search</span>
             <span className="keys">⌘K</span>
           </button>
-          <Link className="signin" href="/login">
-            Sign in
-          </Link>
-          <Link className="btn btn-primary btn-sm" href="/signup">
-            Start building
-          </Link>
+          {user ? (
+            <div className="nav-user-wrap" ref={userMenuRef} style={{ position: "relative" }}>
+              <button
+                className="nav-user-btn"
+                type="button"
+                aria-label="Account menu"
+                onClick={() => setUserMenuOpen((o) => !o)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  background: "none",
+                  border: "1px solid var(--border)",
+                  borderRadius: 20,
+                  padding: "4px 10px 4px 6px",
+                  cursor: "pointer",
+                  color: "var(--fg)",
+                  fontSize: 13,
+                }}
+              >
+                <span style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: "50%",
+                  background: "var(--accent)",
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 11,
+                  fontWeight: 600,
+                }}>
+                  {user.email[0].toUpperCase()}
+                </span>
+                <span style={{ maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {user.email}
+                </span>
+              </button>
+              {userMenuOpen && (
+                <div style={{
+                  position: "absolute",
+                  top: "calc(100% + 6px)",
+                  right: 0,
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 8,
+                  padding: "6px 0",
+                  minWidth: 160,
+                  boxShadow: "0 4px 16px rgba(0,0,0,.12)",
+                  zIndex: 100,
+                }}>
+                  <Link
+                    href="/portal/orders"
+                    onClick={() => setUserMenuOpen(false)}
+                    style={{
+                      display: "block",
+                      padding: "8px 16px",
+                      fontSize: 13,
+                      color: "var(--fg)",
+                      textDecoration: "none",
+                    }}
+                  >
+                    My Orders
+                  </Link>
+                  <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "8px 16px",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: 13,
+                      color: "var(--fg)",
+                    }}
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <Link className="signin" href="/login">Sign in</Link>
+              <Link className="btn btn-primary btn-sm" href="/signup">Start building</Link>
+            </>
+          )}
           <button
             className="nav-hamburger"
             type="button"
@@ -326,29 +287,27 @@ export default function SiteNav() {
     {/* Mobile menu — position: fixed, rendered outside header flow */}
     <div className={`mobile-menu${mobileOpen ? " open" : ""}`} aria-hidden={!mobileOpen}>
       <nav className="mnav-section" aria-label="Site navigation">
-        <span className="mnav-label">Products</span>
-        {PRODUCTS.map((p) => (
-          <Link
-            key={p.name}
-            className="mnav-sub"
-            href={p.href}
-            onClick={() => setMobileOpen(false)}
-          >
-            {p.name}
-          </Link>
-        ))}
-        <span className="mnav-label">Pages</span>
-        <Link className="mnav-link" href="/services" aria-current={active(pathname === "/services")} onClick={() => setMobileOpen(false)}>Services</Link>
-        <Link className="mnav-link" href="/docs" aria-current={active(pathname === "/docs")} onClick={() => setMobileOpen(false)}>Developers</Link>
-        <Link className="mnav-link" href="/pricing" aria-current={active(pathname === "/pricing")} onClick={() => setMobileOpen(false)}>Pricing</Link>
-        <Link className="mnav-link" href="/blog" aria-current={active(pathname === "/blog")} onClick={() => setMobileOpen(false)}>Blog</Link>
-        <Link className="mnav-link" href="/changelog" aria-current={active(pathname === "/changelog")} onClick={() => setMobileOpen(false)}>Changelog</Link>
-        <Link className="mnav-link" href="/about" aria-current={active(pathname === "/about")} onClick={() => setMobileOpen(false)}>About</Link>
+        <Link className="mnav-link" href={p("tools")} aria-current={active(pathname.includes("/tools"))} onClick={() => setMobileOpen(false)}>Tools</Link>
+        <Link className="mnav-link" href={p("services")} aria-current={active(pathname.endsWith("/services"))} onClick={() => setMobileOpen(false)}>Services</Link>
+        <Link className="mnav-link" href={p("docs")} aria-current={active(pathname.endsWith("/docs"))} onClick={() => setMobileOpen(false)}>Developers</Link>
+        <Link className="mnav-link" href={p("blog")} aria-current={active(pathname.endsWith("/blog"))} onClick={() => setMobileOpen(false)}>Blog</Link>
+        <Link className="mnav-link" href={p("changelog")} aria-current={active(pathname.endsWith("/changelog"))} onClick={() => setMobileOpen(false)}>Changelog</Link>
+        <Link className="mnav-link" href={p("about")} aria-current={active(pathname.endsWith("/about"))} onClick={() => setMobileOpen(false)}>About</Link>
       </nav>
       <div className="mnav-divider" />
       <div className="mnav-actions">
-        <Link className="btn btn-ghost" href="/login" onClick={() => setMobileOpen(false)}>Sign in</Link>
-        <Link className="btn btn-primary" href="/signup" onClick={() => setMobileOpen(false)}>Start building</Link>
+        {user ? (
+          <>
+            <span style={{ fontSize: 12, color: "var(--fg-muted)", padding: "0 4px" }}>{user.email}</span>
+            <Link className="btn btn-ghost" href="/portal/orders" onClick={() => setMobileOpen(false)}>My Orders</Link>
+            <button className="btn btn-ghost" type="button" onClick={handleSignOut}>Sign out</button>
+          </>
+        ) : (
+          <>
+            <Link className="btn btn-ghost" href="/login" onClick={() => setMobileOpen(false)}>Sign in</Link>
+            <Link className="btn btn-primary" href="/signup" onClick={() => setMobileOpen(false)}>Start building</Link>
+          </>
+        )}
       </div>
     </div>
     </>

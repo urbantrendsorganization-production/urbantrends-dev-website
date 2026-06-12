@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="28" height="28">
+  <!-- 4-bar chart mark — exact proportions from SiteNav.tsx, scaled to 28×28 -->
+  <rect x="2"  y="16.3" width="4.7" height="9.3"  rx="1.5" fill="#94a3b8" fill-opacity=".45"/>
+  <rect x="9.3" y="10.5" width="4.7" height="15.1" rx="1.5" fill="#22D3EE" fill-opacity=".72"/>
+  <rect x="16.3" y="4.7"  width="4.7" height="20.9" rx="1.5" fill="#22D3EE"/>
+  <rect x="23.3" y="14.0" width="4.7" height="11.6" rx="1.5" fill="#94a3b8" fill-opacity=".45"/>
+</svg>

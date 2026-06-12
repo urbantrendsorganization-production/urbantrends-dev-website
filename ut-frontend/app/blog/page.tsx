@@ -1,131 +1,85 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
-import {
-  IllustrationMpesaWeekends,
-  IllustrationStkCallbacks,
-  IllustrationPerUnitPricing,
-  IllustrationEtims,
-  IllustrationTwoSidedMarket,
-  IllustrationWebhookRetry,
-  IllustrationHiringNairobi,
-} from "@/components/BlogIllustrations";
+import { listPosts, CATEGORY_LABELS, type Post } from "@/lib/blog";
 
 export const metadata: Metadata = {
   title: "Blog",
   description:
-    "Engineering write-ups and product decisions from the UrbanTrends reconciliation core.",
+    "Engineering write-ups, product decisions, and company thinking from the UrbanTrends team.",
 };
 
-interface BlogPost {
-  slug: string;
-  tag: string;
-  readTime: string;
-  title: string;
-  excerpt: string;
-  authorInitials: string;
-  author: string;
-  date: string;
-  accent: string;
-  Illustration: React.ComponentType;
+function PostThumb({ post }: { post: Post }) {
+  if (post.cover_image_url) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={post.cover_image_url}
+        alt={post.title}
+        className="blog-thumb"
+        style={{ objectFit: "cover", width: "100%", display: "block" }}
+      />
+    );
+  }
+  return (
+    <div
+      className="blog-thumb"
+      style={{
+        background: `linear-gradient(135deg, ${post.accent_color}22 0%, ${post.accent_color}08 100%)`,
+        borderBottom: "1px solid var(--border)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: "50%",
+          background: `${post.accent_color}30`,
+          border: `1.5px solid ${post.accent_color}50`,
+        }}
+      />
+    </div>
+  );
 }
 
-const FEATURED: BlogPost = {
-  slug: "reconciling-mpesa-weekends-postmortem",
-  tag: "Engineering",
-  readTime: "9 min read",
-  title: "Reconciling M-Pesa on weekends: a postmortem of the batch job we deleted",
-  excerpt:
-    "We used to run reconciliation as a nightly batch. Then a landlord called on a Saturday asking why his tenant's payment 'disappeared'. Here's how we moved to real-time callback reconciliation — and what broke along the way.",
-  authorInitials: "WK",
-  author: "Wanjiru Kamau",
-  date: "May 28, 2026",
-  accent: "#34D399",
-  Illustration: IllustrationMpesaWeekends,
-};
+function PostMeta({ post }: { post: Post }) {
+  const initials = post.author_name
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
-const POSTS: BlogPost[] = [
-  {
-    slug: "daraja-stk-push-six-callbacks",
-    tag: "Engineering",
-    readTime: "7 min",
-    title: "Daraja STK Push: the six callbacks nobody documents",
-    excerpt:
-      "A field map of every callback state we've seen in production, including the ones the official docs skip.",
-    authorInitials: "DM",
-    author: "David Mwangi",
-    date: "May 21",
-    accent: "#22D3EE",
-    Illustration: IllustrationStkCallbacks,
-  },
-  {
-    slug: "why-we-price-rentflow-per-unit",
-    tag: "Company",
-    readTime: "5 min",
-    title: "Why we price RentFlow per unit",
-    excerpt:
-      "Seat-based pricing punishes the wrong thing. Here's the reasoning behind per-unit, and the spreadsheet we modelled it on.",
-    authorInitials: "FA",
-    author: "Faith Achieng",
-    date: "May 14",
-    accent: "#34D399",
-    Illustration: IllustrationPerUnitPricing,
-  },
-  {
-    slug: "etims-without-tears-field-guide",
-    tag: "Guides",
-    readTime: "11 min",
-    title: "eTIMS without tears: a field guide",
-    excerpt:
-      "Everything we learned wiring KRA eTIMS into a product — the gotchas, the formats, the retries.",
-    authorInitials: "SK",
-    author: "Samuel Kiptoo",
-    date: "May 7",
-    accent: "#FB923C",
-    Illustration: IllustrationEtims,
-  },
-  {
-    slug: "two-sided-marketplace-one-sided-market",
-    tag: "Product",
-    readTime: "8 min",
-    title: "Building a two-sided marketplace in a one-sided market",
-    excerpt:
-      "Cold-starting PortfolioU when neither students nor employers were waiting for us.",
-    authorInitials: "JN",
-    author: "Joy Njeri",
-    date: "Apr 30",
-    accent: "#A78BFA",
-    Illustration: IllustrationTwoSidedMarket,
-  },
-  {
-    slug: "webhook-retry-strategy-idempotency-keys",
-    tag: "Engineering",
-    readTime: "6 min",
-    title: "Our webhook retry strategy (and why idempotency keys saved us)",
-    excerpt:
-      "Duplicate callbacks are not an edge case — they're Tuesday. How we made reconciliation safe to repeat.",
-    authorInitials: "WK",
-    author: "Wanjiru Kamau",
-    date: "Apr 22",
-    accent: "#22D3EE",
-    Illustration: IllustrationWebhookRetry,
-  },
-  {
-    slug: "hiring-senior-engineers-nairobi",
-    tag: "Company",
-    readTime: "4 min",
-    title: "Hiring senior engineers in Nairobi",
-    excerpt:
-      "What we look for, how we interview, and why we don't do whiteboard puzzles.",
-    authorInitials: "BO",
-    author: "Brian Otieno",
-    date: "Apr 15",
-    accent: "#60A5FA",
-    Illustration: IllustrationHiringNairobi,
-  },
-];
+  return (
+    <div className="blog-foot">
+      <span className="avatar">{initials || "U"}</span>
+      <span>{post.author_name}</span>
+      <span className="sep">·</span>
+      <span>
+        {new Date(post.published_at).toLocaleDateString("en-KE", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })}
+      </span>
+      {post.like_count > 0 && (
+        <>
+          <span className="sep">·</span>
+          <span>{post.like_count} ♥</span>
+        </>
+      )}
+    </div>
+  );
+}
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const data = await listPosts();
+  const posts = data.results;
+
+  const [featured, ...rest] = posts;
+
   return (
     <>
       <section className="page-head" data-screen-label="Blog">
@@ -136,78 +90,89 @@ export default function BlogPage() {
             <span>Blog</span>
           </div>
           <h1 className="page-title">
-            Notes from the <span className="em">reconciliation core.</span>
+            Writing from the <span className="em">studio.</span>
           </h1>
           <p className="page-lead">
-            Engineering write-ups, product decisions, and the occasional
-            hard-won lesson about building payments software in East Africa.
-            Mostly for developers.
+            Engineering decisions, product thinking, and what it takes to build
+            software for East Africa.
           </p>
         </div>
       </section>
 
-      <section className="section" style={{ paddingTop: "clamp(20px,3vw,32px)" }}>
+      <section className="section" style={{ paddingTop: "clamp(20px,3vw,36px)" }}>
         <div className="wrap">
-          {/* FEATURED POST */}
-          <a
-            className="featured-post"
-            href="#"
-            style={{ "--accent": FEATURED.accent } as React.CSSProperties}
-          >
-            <div className="fp-art">
-              <Image
-                src="https://images.unsplash.com/photo-1509017174183-0b7e0278f1ec?auto=format&fit=crop&w=900&q=80"
-                alt="Mobile payment reconciliation — M-Pesa on a smartphone"
-                fill
-                sizes="(max-width: 960px) 100vw, 55vw"
-                style={{ objectFit: "cover" }}
-              />
+          {posts.length === 0 ? (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "80px 24px",
+                color: "var(--fg-muted)",
+                border: "1px dashed var(--border)",
+                borderRadius: 12,
+              }}
+            >
+              <p style={{ fontSize: 15 }}>No posts yet — check back soon.</p>
             </div>
-            <div className="fp-body">
-              <div className="blog-meta">
-                <span className="tag">{FEATURED.tag}</span>
-                <span>·</span>
-                <span>{FEATURED.readTime}</span>
-              </div>
-              <h2>{FEATURED.title}</h2>
-              <p>{FEATURED.excerpt}</p>
-              <div className="blog-foot">
-                <span className="avatar">{FEATURED.authorInitials}</span>
-                <span>{FEATURED.author}</span>
-                <span>·</span>
-                <span>{FEATURED.date}</span>
-              </div>
-            </div>
-          </a>
+          ) : (
+            <>
+              {/* Featured post */}
+              {featured && (
+                <Link
+                  href={`/blog/${featured.slug}`}
+                  className="featured-post"
+                  style={{ textDecoration: "none", display: "grid" }}
+                >
+                  <div className="fp-body">
+                    <div className="blog-meta">
+                      <span
+                        className="tag"
+                        style={{ color: featured.accent_color }}
+                      >
+                        {CATEGORY_LABELS[featured.category] ?? featured.category}
+                      </span>
+                      <span>·</span>
+                      <span>{featured.read_time} min read</span>
+                    </div>
+                    <h2>{featured.title}</h2>
+                    <p>{featured.excerpt}</p>
+                    <PostMeta post={featured} />
+                  </div>
+                  <PostThumb post={featured} />
+                </Link>
+              )}
 
-          {/* BLOG GRID */}
-          <div className="blog-grid">
-            {POSTS.map((post) => (
-              <a
-                key={post.slug}
-                className="blog-card"
-                href="#"
-                style={{ "--accent": post.accent } as React.CSSProperties}
-              >
-                <div className="blog-thumb blog-svg-art">
-                  <post.Illustration />
+              {/* Grid */}
+              {rest.length > 0 && (
+                <div className="blog-grid" style={{ marginTop: 24 }}>
+                  {rest.map((post) => (
+                    <Link
+                      key={post.slug}
+                      href={`/blog/${post.slug}`}
+                      className="blog-card"
+                      style={{ textDecoration: "none" }}
+                    >
+                      <PostThumb post={post} />
+                      <div className="blog-body">
+                        <div className="blog-meta">
+                          <span
+                            className="tag"
+                            style={{ color: post.accent_color }}
+                          >
+                            {CATEGORY_LABELS[post.category] ?? post.category}
+                          </span>
+                          <span>·</span>
+                          <span>{post.read_time} min read</span>
+                        </div>
+                        <h3>{post.title}</h3>
+                        <p>{post.excerpt}</p>
+                        <PostMeta post={post} />
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-                <div className="blog-body">
-                  <div className="blog-meta">
-                    <span className="tag">{post.tag}</span>
-                    <span>·</span>
-                    <span>{post.readTime}</span>
-                  </div>
-                  <h3>{post.title}</h3>
-                  <p>{post.excerpt}</p>
-                  <div className="blog-foot">
-                    <span className="avatar">{post.authorInitials}</span>
-                    <span>{post.author} · {post.date}</span>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
+              )}
+            </>
+          )}
         </div>
       </section>
     </>

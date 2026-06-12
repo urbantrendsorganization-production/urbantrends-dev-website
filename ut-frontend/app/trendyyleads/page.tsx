@@ -90,46 +90,6 @@ export default function TrendyyLeadsPage() {
         </div>
       </section>
 
-      <section className="section divider-top" id="pricing">
-        <div className="wrap">
-          <div className="section-head center-head"><span className="eyebrow muted">Pricing</span><h2>Per seat, plus usage.</h2><p>Pay for the reps who use it and the leads you enrich. Nothing for shelfware.</p></div>
-          <div className="pricing-grid">
-            <div className="price-card">
-              <div className="ptier">Solo</div><div className="pprice">KES 4,500<small> /seat/mo</small></div>
-              <p className="psub">For founders and single reps.</p>
-              <ul className="plist">
-                <li><CheckIcon />Sourcing &amp; scoring</li>
-                <li><CheckIcon />500 enrichments / mo</li>
-                <li><CheckIcon />Sheets sync</li>
-              </ul>
-              <div className="pcta"><a className="btn btn-ghost" href="/signup">Start free trial</a></div>
-            </div>
-            <div className="price-card featured">
-              <span className="price-badge">Most popular</span>
-              <div className="ptier">Team</div><div className="pprice">KES 12,000<small> /seat/mo</small></div>
-              <p className="psub">For sales teams with a number to hit.</p>
-              <ul className="plist">
-                <li><CheckIcon />Everything in Solo</li>
-                <li><CheckIcon />Intent signals</li>
-                <li><CheckIcon />HubSpot &amp; Pipedrive sync</li>
-                <li><CheckIcon />Sequences &amp; reply detection</li>
-              </ul>
-              <div className="pcta"><a className="btn btn-primary" href="/signup">Start free trial</a></div>
-            </div>
-            <div className="price-card">
-              <div className="ptier">Scale</div><div className="pprice">Custom</div>
-              <p className="psub">For high-volume outbound orgs.</p>
-              <ul className="plist">
-                <li><CheckIcon />Everything in Team</li>
-                <li><CheckIcon />Unlimited enrichment</li>
-                <li><CheckIcon />Custom data &amp; SLA</li>
-              </ul>
-              <div className="pcta"><a className="btn btn-ghost" href="/contact">Contact sales</a></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="section divider-top">
         <div className="wrap">
           <div className="section-head"><span className="eyebrow muted">FAQ</span><h2>Straight answers.</h2></div>

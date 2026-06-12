@@ -1,8 +1,116 @@
 import Link from "next/link";
 import Image from "next/image";
 import LogoStrip from "@/components/LogoStrip";
+import OrbitalTemplate from "@/components/hero/OrbitalTemplate";
+import CodeTemplate from "@/components/hero/CodeTemplate";
+import GridTemplate from "@/components/hero/GridTemplate";
+import MinimalTemplate from "@/components/hero/MinimalTemplate";
+import { getHomeData, type SiteSettings, type HeroStat, type Partner, type Testimonial } from "@/lib/cms";
+import { listServices, type Service } from "@/lib/services";
 
-export default function HomeContent() {
+const FALLBACK_RAILS = ["TypeScript", "PostgreSQL", "Next.js", "Django", "Redis", "Docker"];
+
+const FALLBACK_TESTIMONIALS: Testimonial[] = [
+  {
+    quote: "They delivered a production system in five weeks. Not a prototype — a production system, tested, deployed, documented. Still running eighteen months later without a single outage.",
+    author_name: "Michael Oduya", author_role: "CTO", company: "Kairo Systems",
+    photo_url: "https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?auto=format&fit=crop&w=80&q=80",
+    product_label: "Custom Software", product_accent_color: "#34D399",
+  },
+  {
+    quote: "The codebase they handed us was cleaner than anything our internal team had shipped. Every edge case handled, every type covered. We've maintained it ourselves for a year.",
+    author_name: "Priya Shah", author_role: "VP Engineering", company: "Loopline",
+    photo_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80",
+    product_label: "Product Dev", product_accent_color: "#22D3EE",
+  },
+  {
+    quote: "We told them what we needed. They pushed back once — correctly — then built exactly what they said, when they said. We don't entertain other vendors anymore.",
+    author_name: "James Kariuki", author_role: "Engineering Lead", company: "Baobab Cloud",
+    photo_url: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=80&q=80",
+    product_label: "API Work", product_accent_color: "#A78BFA",
+  },
+];
+
+function HeroArt({ template }: { template: SiteSettings["active_hero_template"] }) {
+  switch (template) {
+    case "code":    return <CodeTemplate />;
+    case "grid":    return <GridTemplate />;
+    case "minimal": return <MinimalTemplate />;
+    default:        return <OrbitalTemplate />;
+  }
+}
+
+const FALLBACK_SERVICES: Service[] = [
+  {
+    id: 0, slug: "product-development", is_featured: true, order: 0,
+    accent_color: "#22D3EE", category_name: "End-to-end", category_slug: "end-to-end",
+    icon_path: "M13 2 3 14h7l-1 8 10-12h-7z",
+    name: "Product Development",
+    tagline: "From idea to shipped product — design, backend, frontend, and deployment.",
+    plans: [],
+  },
+  {
+    id: 0, slug: "custom-software", is_featured: false, order: 1,
+    accent_color: "#34D399", category_name: "Bespoke", category_slug: "bespoke",
+    icon_path: "M7 8l4 4-4 4M13 16h4M3 4h18v16H3",
+    name: "Custom Software",
+    tagline: "Tailored systems for specific business processes — inventory, finance, compliance.",
+    plans: [],
+  },
+  {
+    id: 0, slug: "api-integrations", is_featured: false, order: 2,
+    accent_color: "#A78BFA", category_name: "Connect everything", category_slug: "integrations",
+    icon_path: "M12 2v6m0 8v6M2 12h6m8 0h6",
+    name: "API & Integrations",
+    tagline: "Payment gateways, banking APIs, ERP connectors, webhooks — we build the plumbing.",
+    plans: [],
+  },
+  {
+    id: 0, slug: "developer-tools", is_featured: false, order: 3,
+    accent_color: "#FB923C", category_name: "Open & documented", category_slug: "tools",
+    icon_path: "M4 19V5l8 4 8-4v14l-8 4z",
+    name: "Developer Tools & SDKs",
+    tagline: "SDKs, CLIs, and libraries built to the standard we'd want to use ourselves.",
+    plans: [],
+  },
+  {
+    id: 0, slug: "design-systems", is_featured: false, order: 4,
+    accent_color: "#60A5FA", category_name: "Product design", category_slug: "design",
+    icon_path: "M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z",
+    name: "Design & UX",
+    tagline: "Product design, UX flows, and design systems. Functional first, beautiful second.",
+    plans: [],
+  },
+  {
+    id: 0, slug: "consulting", is_featured: false, order: 5,
+    accent_color: "#34D399", category_name: "Architecture & audit", category_slug: "consulting",
+    icon_path: "M9 12l2 2 4-4M12 3l8 4v5c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V7z",
+    name: "Technical Consulting",
+    tagline: "Architecture reviews, code audits, scaling strategy, and technical due diligence.",
+    plans: [],
+  },
+];
+
+const ARROW_SVG = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
+);
+
+export default async function HomeContent() {
+  const [{ settings, stats, partners_rails, partners_trusted, testimonials }, apiServices] = await Promise.all([
+    getHomeData(),
+    listServices().catch(() => []),
+  ]);
+
+  const services = apiServices.length > 0 ? apiServices : FALLBACK_SERVICES;
+
+  const railsItems = partners_rails.length > 0
+    ? partners_rails.map((p: Partner) => p.name)
+    : FALLBACK_RAILS;
+
+  const displayTestimonials = testimonials.length > 0 ? testimonials : FALLBACK_TESTIMONIALS;
+
   return (
     <>
       {/* ===== HERO ===== */}
@@ -23,178 +131,45 @@ export default function HomeContent() {
           <div className="hero-copy">
             <span className="eyebrow">
               <span className="dot-led" />
-              Multi-product software studio · Est. 2024
+              {settings.hero_eyebrow}
             </span>
-            <h1>
-              Infrastructure for the{" "}
-              <span className="em">East African internet.</span>
-            </h1>
-            <p className="sub">
-              We build the SaaS and developer tooling East African operators
-              actually ship on. M-Pesa-native, Daraja-fluent, production-grade
-              — and serious about it.
-            </p>
+            <h1>{settings.hero_headline}</h1>
+            <p className="sub">{settings.hero_subheading}</p>
             <div className="hero-cta">
-              <a className="btn btn-primary" href="#products">
-                Explore products
+              <a className="btn btn-primary" href={settings.hero_primary_cta_url}>
+                {settings.hero_primary_cta_text}
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2">
                   <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
               </a>
-              <a className="btn btn-ghost" href="#tools">
-                Read the docs <span className="kbd">⌘</span>
+              <a className="btn btn-ghost" href={settings.hero_secondary_cta_url}>
+                {settings.hero_secondary_cta_text} <span className="kbd">⌘</span>
               </a>
             </div>
             <div className="hero-meta">
-              <div className="stat"><div className="n">5</div><div className="l">Products in market</div></div>
-              <div className="stat"><div className="n">2.4M+</div><div className="l">Transactions reconciled</div></div>
-              <div className="stat"><div className="n">99.96%</div><div className="l">Uptime, trailing 90d</div></div>
+              {stats.map((s: HeroStat) => (
+                <div key={s.label} className="stat">
+                  <div className="n">{s.value}</div>
+                  <div className="l">{s.label}</div>
+                </div>
+              ))}
             </div>
 
             <div className="hero-photo-card">
               <div className="hpc-a">
-                <Image fill sizes="(max-width: 920px) 50vw, 260px" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=560&q=80" alt="Genmars Tech team collaborating" style={{ objectFit: "cover" }} />
+                <Image fill sizes="(max-width: 920px) 50vw, 260px" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=560&q=80" alt="Team collaborating on software" style={{ objectFit: "cover" }} />
               </div>
               <div className="hpc-b">
                 <Image fill sizes="(max-width: 920px) 33vw, 180px" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=300&q=80" alt="Developer writing code" style={{ objectFit: "cover" }} />
               </div>
               <div className="hpc-c">
-                <Image fill sizes="(max-width: 920px) 33vw, 180px" src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=300&q=80" alt="Startup team at work" style={{ objectFit: "cover" }} />
+                <Image fill sizes="(max-width: 920px) 33vw, 180px" src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=300&q=80" alt="Software team at work" style={{ objectFit: "cover" }} />
               </div>
             </div>
           </div>
 
           <div className="hero-art">
-            <div className="art-diagram">
-              <div className="diagram-frame">
-                <div className="df-head">
-                  <span className="mono-label">genmars_studio.svc</span>
-                  <div className="dots"><i /><i /><i /></div>
-                </div>
-                <svg className="diagram-svg" viewBox="0 0 760 410" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Orbital diagram: Genmars Tech at the centre delivering software to Startups, Businesses, Companies, Agencies, Developers and NGOs.">
-                  <defs>
-                    <pattern id="dg" width="22" height="22" patternUnits="userSpaceOnUse">
-                      <circle cx="1.2" cy="1.2" r="1.2" className="dot-grid-bg" />
-                    </pattern>
-                    <radialGradient id="hub-glow" cx="50%" cy="50%" r="50%">
-                      <stop offset="0%" stopColor="#22D3EE" stopOpacity=".22" />
-                      <stop offset="100%" stopColor="#22D3EE" stopOpacity="0" />
-                    </radialGradient>
-                    <radialGradient id="hub-core" cx="40%" cy="38%" r="65%">
-                      <stop offset="0%" stopColor="var(--surface-3)" />
-                      <stop offset="100%" stopColor="var(--surface-1)" />
-                    </radialGradient>
-                    <radialGradient id="ng1" cx="35%" cy="32%" r="65%">
-                      <stop offset="0%" stopColor="#a5f3fc" stopOpacity=".95" />
-                      <stop offset="100%" stopColor="#0e7490" stopOpacity=".9" />
-                    </radialGradient>
-                    <radialGradient id="ng2" cx="35%" cy="32%" r="65%">
-                      <stop offset="0%" stopColor="#a7f3d0" stopOpacity=".95" />
-                      <stop offset="100%" stopColor="#047857" stopOpacity=".9" />
-                    </radialGradient>
-                    <radialGradient id="ng3" cx="35%" cy="32%" r="65%">
-                      <stop offset="0%" stopColor="#ddd6fe" stopOpacity=".95" />
-                      <stop offset="100%" stopColor="#6d28d9" stopOpacity=".9" />
-                    </radialGradient>
-                    <radialGradient id="ng4" cx="35%" cy="32%" r="65%">
-                      <stop offset="0%" stopColor="#bfdbfe" stopOpacity=".95" />
-                      <stop offset="100%" stopColor="#1d4ed8" stopOpacity=".9" />
-                    </radialGradient>
-                    <radialGradient id="ng5" cx="35%" cy="32%" r="65%">
-                      <stop offset="0%" stopColor="#fed7aa" stopOpacity=".95" />
-                      <stop offset="100%" stopColor="#c2410c" stopOpacity=".9" />
-                    </radialGradient>
-                    <radialGradient id="ng6" cx="35%" cy="32%" r="65%">
-                      <stop offset="0%" stopColor="#f5d0fe" stopOpacity=".95" />
-                      <stop offset="100%" stopColor="#a21caf" stopOpacity=".9" />
-                    </radialGradient>
-                  </defs>
-                  <rect x="0" y="0" width="760" height="410" fill="url(#dg)" opacity=".45" />
-                  <circle cx="360" cy="200" r="82" fill="url(#hub-glow)" />
-                  <circle cx="360" cy="200" r="62" stroke="#22D3EE" strokeWidth=".7" strokeOpacity=".18" fill="none" />
-                  <ellipse cx="360" cy="200" rx="160" ry="112" className="orbit-ring" strokeWidth=".8" strokeDasharray="4 8" fill="none" />
-                  <path className="flow" d="M360,156 L360,113" />
-                  <path className="flow" d="M403,183 L477,153" />
-                  <path className="flow" d="M403,217 L477,247" />
-                  <path className="flow" d="M360,246 L360,288" />
-                  <path className="flow" d="M317,217 L243,247" />
-                  <path className="flow" d="M317,183 L243,153" />
-                  <path className="flow-pulse" style={{ animationDelay: "0s" }}   d="M360,156 L360,113" />
-                  <path className="flow-pulse" style={{ animationDelay: ".4s" }}  d="M403,183 L477,153" />
-                  <path className="flow-pulse" style={{ animationDelay: ".8s" }}  d="M403,217 L477,247" />
-                  <path className="flow-pulse" style={{ animationDelay: "1.2s" }} d="M360,246 L360,288" />
-                  <path className="flow-pulse" style={{ animationDelay: "1.6s" }} d="M317,217 L243,247" />
-                  <path className="flow-pulse" style={{ animationDelay: "2.0s" }} d="M317,183 L243,153" />
-                  <circle cx="360" cy="200" r="44" fill="url(#hub-core)" stroke="#22D3EE" strokeWidth="1.4" strokeOpacity=".45" />
-                  <rect x="340" y="196" width="5" height="12" rx="1" fill="#22D3EE" fillOpacity=".4" />
-                  <rect x="348" y="190" width="5" height="18" rx="1" fill="#22D3EE" fillOpacity=".7" />
-                  <rect x="356" y="183" width="5" height="25" rx="1" fill="#22D3EE" />
-                  <rect x="364" y="193" width="5" height="15" rx="1" fill="#22D3EE" fillOpacity=".45" />
-                  <text x="360" y="220" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".1em" className="hub-label">GENMARS TECH</text>
-                  <circle cx="347" cy="187" r="6" fill="white" fillOpacity=".08" />
-                  <circle cx="360" cy="88" r="22" fill="url(#ng1)" />
-                  <circle cx="352" cy="80" r="6" fill="white" fillOpacity=".22" />
-                  <text x="360" y="57" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" className="sat-n1">Startups</text>
-                  <text x="360" y="44" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" className="sat-sub">Product Dev</text>
-                  <circle cx="499" cy="144" r="22" fill="url(#ng2)" />
-                  <circle cx="491" cy="136" r="6" fill="white" fillOpacity=".22" />
-                  <text x="536" y="141" textAnchor="start" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" className="sat-n2">Businesses</text>
-                  <text x="536" y="154" textAnchor="start" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" className="sat-sub">Custom Software</text>
-                  <circle cx="499" cy="256" r="22" fill="url(#ng3)" />
-                  <circle cx="491" cy="248" r="6" fill="white" fillOpacity=".22" />
-                  <text x="536" y="253" textAnchor="start" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" className="sat-n3">Companies</text>
-                  <text x="536" y="266" textAnchor="start" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" className="sat-sub">{"API & Integrations"}</text>
-                  <circle cx="360" cy="312" r="22" fill="url(#ng4)" />
-                  <circle cx="352" cy="304" r="6" fill="white" fillOpacity=".22" />
-                  <text x="360" y="351" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" className="sat-n4">Agencies</text>
-                  <text x="360" y="364" textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" className="sat-sub">Consulting</text>
-                  <circle cx="221" cy="256" r="22" fill="url(#ng5)" />
-                  <circle cx="213" cy="248" r="6" fill="white" fillOpacity=".22" />
-                  <text x="184" y="253" textAnchor="end" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" className="sat-n5">Developers</text>
-                  <text x="184" y="266" textAnchor="end" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" className="sat-sub">Dev Tools</text>
-                  <circle cx="221" cy="144" r="22" fill="url(#ng6)" />
-                  <circle cx="213" cy="136" r="6" fill="white" fillOpacity=".22" />
-                  <text x="184" y="141" textAnchor="end" fontFamily="var(--font-mono)" fontSize="11" letterSpacing=".04em" className="sat-n6">NGOs</text>
-                  <text x="184" y="154" textAnchor="end" fontFamily="var(--font-mono)" fontSize="8" letterSpacing=".06em" className="sat-sub">{"Design & UX"}</text>
-                </svg>
-              </div>
-            </div>
-
-            <div className="art-code">
-              <div className="code-window">
-                <div className="code-bar">
-                  <div className="tl"><i /><i /><i /></div>
-                  <span className="fname">reconcile.ts</span>
-                  <span className="lang">TypeScript</span>
-                </div>
-                <pre className="code">{`\
-`}<span className="c">// Match Paybill settlements to invoices — weekends included.</span>{`
-`}<span className="k">import</span>{` { daraja } `}<span className="k">from</span>{` `}<span className="s">&quot;@urbantrends/mpesa&quot;</span>{`;
-
-`}<span className="k">const</span>{` `}<span className="v">ledger</span>{` = `}<span className="k">await</span>{` `}<span className="f">daraja</span>{`.`}<span className="f">paybill</span>{`({
-  shortcode: `}<span className="n">247247</span>{`,
-  since: `}<span className="s">&quot;2026-06-01&quot;</span>{`,
-});
-
-`}<span className="k">for</span>{` (`}<span className="k">const</span>{` `}<span className="v">tx</span>{` `}<span className="k">of</span>{` ledger.settled) {
-  `}<span className="k">await</span>{` `}<span className="f">reconcile</span>{`(tx, {
-    against: `}<span className="s">&quot;invoices&quot;</span>{`,
-    tolerance: `}<span className="n">0</span>{`,        `}<span className="c">// cents</span>{`
-  });
-}
-
-`}<span className="p">→ 1,284 matched · 0 orphaned · 38ms</span></pre>
-              </div>
-            </div>
-
-            <div className="art-type">
-              <div className="big">Built on<br />the rails<br /><em>Kenya runs on.</em></div>
-              <div className="rule" />
-              <div className="row"><span>POSITIONING</span><b>Infra for the EA internet</b></div>
-              <div className="row"><span>STACK</span><b>M-Pesa · Daraja · KRA</b></div>
-              <div className="row"><span>SURFACE</span><b>5 products · 1 system</b></div>
-              <div className="row"><span>BASE</span><b>Nairobi, KE</b></div>
-            </div>
+            <HeroArt template={settings.active_hero_template} />
           </div>
         </div>
       </section>
@@ -202,129 +177,117 @@ export default function HomeContent() {
       {/* ===== TRUST STRIP ===== */}
       <div className="trust">
         <div className="wrap trust-inner">
-          <span className="lab">Runs on the rails you already use</span>
+          <span className="lab">{settings.trust_strip_label}</span>
           <div className="marks">
-            <span>M-Pesa</span><span>Daraja</span><span>Pesalink</span>
-            <span>KRA eTIMS</span><span>Equity</span><span>Co-op Bank</span>
+            {railsItems.map((name) => (
+              <span key={name}>{name}</span>
+            ))}
           </div>
         </div>
       </div>
 
       {/* ===== CUSTOMER LOGO STRIP ===== */}
-      <LogoStrip />
+      <LogoStrip
+        partners={partners_trusted.length > 0 ? partners_trusted : undefined}
+        label={settings.logo_strip_label}
+      />
 
-      {/* ===== PRODUCTS ===== */}
-      <section className="section products" id="products">
+      {/* ===== SERVICES ===== */}
+      <section className="section" id="services" style={{ borderTop: "1px solid var(--border)" }}>
         <div className="wrap">
           <div className="section-head">
-            <span className="eyebrow muted">The portfolio</span>
-            <h2>One studio. Five products. No loose ends.</h2>
-            <p>Each one could stand on its own. Together they share a spine — the same reconciliation core, the same design language, the same refusal to ship anything half-built.</p>
+            <span className="eyebrow muted">What we build</span>
+            <h2>Software that earns its keep.</h2>
+            <p>From end-to-end product development to targeted integrations and consulting — we build whatever the operation needs, then stand behind it.</p>
           </div>
-          <div className="product-grid">
-            <Link className="pcard feature" href="/rentflow" style={{ "--pa": "#34D399" } as React.CSSProperties}>
-              <div className="ptop">
-                <span className="pglyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M9 11h.01M15 11h.01" /></svg></span>
-                <span className="ptag">B2B · Property</span>
-              </div>
-              <h3>RentFlow</h3>
-              <p className="pdesc">Property management with M-Pesa Paybill reconciliation that actually works on weekends. Built for agencies and managers running real portfolios.</p>
-              <div className="pmotif">
-                <div className="recon-row"><span>Unit 4B · Kilimani</span><span className="amt">KES 45,000</span><span className="badge"><i />Matched</span></div>
-                <div className="recon-row"><span>Unit 2A · Westlands</span><span className="amt">KES 62,500</span><span className="badge"><i />Matched</span></div>
-                <div className="recon-row"><span>Unit 7C · Lavington</span><span className="amt">KES 38,000</span><span className="badge"><i />Matched</span></div>
-              </div>
-              <div className="pspacer" />
-              <div className="pfoot">View RentFlow <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></div>
-            </Link>
-            <Link className="pcard tall" href="/portfoliou" style={{ "--pa": "#A78BFA" } as React.CSSProperties}>
-              <div className="ptop">
-                <span className="pglyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="7" cy="8" r="3" /><circle cx="17" cy="16" r="3" /><path d="M9.5 9.8 14.5 14.2" /></svg></span>
-                <span className="ptag">Marketplace</span>
-              </div>
-              <h3>PortfolioU</h3>
-              <p className="pdesc">A two-sided talent marketplace. Students publish real work; employers hire from proof, not promises.</p>
-              <div className="pspacer" />
-              <div className="pfoot">View PortfolioU <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></div>
-            </Link>
-            <Link className="pcard" href="/trendyyleads" style={{ "--pa": "#FB923C" } as React.CSSProperties}>
-              <div className="ptop">
-                <span className="pglyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 4h18l-7 8v6l-4 2v-8z" /></svg></span>
-                <span className="ptag">B2B · Growth</span>
-              </div>
-              <h3>TrendyyLeads</h3>
-              <p className="pdesc">Lead generation that respects your pipeline. Sourced, scored, and synced — no spray-and-pray.</p>
-              <div className="pspacer" />
-              <div className="pfoot">View TrendyyLeads <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></div>
-            </Link>
-            <Link className="pcard" href="/academyos" style={{ "--pa": "#60A5FA" } as React.CSSProperties}>
-              <div className="ptop">
-                <span className="pglyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 8l9-4 9 4-9 4z" /><path d="M7 10.5V15c0 1.5 2.2 2.5 5 2.5s5-1 5-2.5v-4.5" /></svg></span>
-                <span className="ptag">School ops</span>
-              </div>
-              <h3>AcademyOS</h3>
-              <p className="pdesc">School management without the spreadsheet sprawl. Admissions, fees, timetables — one system.</p>
-              <div className="pspacer" />
-              <div className="pfoot">View AcademyOS <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></div>
-            </Link>
-            <Link className="pcard" href="/docs" style={{ "--pa": "#22D3EE" } as React.CSSProperties}>
-              <div className="ptop">
-                <span className="pglyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M7 8l4 4-4 4M13 16h4" /><rect x="3" y="4" width="18" height="16" rx="2" /></svg></span>
-                <span className="ptag">Free · OSS</span>
-              </div>
-              <h3>Developer Tools</h3>
-              <p className="pdesc">Daraja Playground, a scaffolding CLI, and small utilities. Polished gifts to the community.</p>
-              <div className="pspacer" />
-              <div className="pfoot">Browse tools <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></div>
+          <div className="home-svc-grid">
+            {services.map((svc: Service) => (
+              <Link
+                key={svc.slug}
+                className="hsvc-card"
+                href={`/services/${svc.slug}`}
+                style={{ "--pa": svc.accent_color } as React.CSSProperties}
+              >
+                <div className="hsvc-top">
+                  <span className="pglyph">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <path d={svc.icon_path} />
+                    </svg>
+                  </span>
+                  <span className="hsvc-tag">{svc.category_name}</span>
+                </div>
+                <h3>{svc.name}</h3>
+                <p className="hsvc-desc">{svc.tagline}</p>
+                <div className="hsvc-foot">
+                  See how we work {ARROW_SVG}
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div style={{ marginTop: 32, display: "flex", justifyContent: "flex-end" }}>
+            <Link
+              href="/services"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                fontSize: 14, fontWeight: 600, color: "var(--accent-text)",
+                textDecoration: "none",
+              }}
+            >
+              Browse all services
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="14" height="14">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ===== BUILT ON KENYA ===== */}
+      {/* ===== ENGINEERING QUALITY ===== */}
       <section className="section" style={{ borderTop: "1px solid var(--border)" }}>
         <div className="wrap kenya-grid">
           <div>
-            <span className="eyebrow muted">Local depth, no kitsch</span>
+            <span className="eyebrow muted">Engineering quality</span>
             <h2 style={{ margin: 0, fontSize: "clamp(28px,4vw,44px)", lineHeight: 1.04, letterSpacing: "-0.03em", fontWeight: 600 }}>
-              Built for Kenya. Built on Kenya.
+              Shipped right. Not just shipped.
             </h2>
             <p style={{ margin: "16px 0 0", color: "var(--fg-muted)", maxWidth: "48ch" }}>
-              We know this market because we operate in it. That shows up in the boring places that matter — Paybill edge cases, eTIMS compliance, settlement timing — not in the decoration.
+              Production defaults from day one — typed end-to-end, CI on every commit, deployed without downtime. The kind of codebase you can hand off on a Friday and not think about until Monday.
             </p>
             <div className="kenya-chips">
-              <span className="chip"><span className="tick" />M-Pesa Paybill</span>
-              <span className="chip"><span className="tick" />STK Push</span>
-              <span className="chip"><span className="tick" />Daraja v2</span>
-              <span className="chip"><span className="tick" />KRA eTIMS</span>
-              <span className="chip"><span className="tick" />Pesalink</span>
-              <span className="chip"><span className="tick" />B2C payouts</span>
+              <span className="chip"><span className="tick" />Type-safe end-to-end</span>
+              <span className="chip"><span className="tick" />CI/CD on every commit</span>
+              <span className="chip"><span className="tick" />Zero-downtime deploys</span>
+              <span className="chip"><span className="tick" />Automated test suites</span>
+              <span className="chip"><span className="tick" />Edge deployment</span>
+              <span className="chip"><span className="tick" />99.96% uptime</span>
             </div>
             <p className="kenya-note">
-              {"// "}<b>Saturday, 14:32 EAT.</b> A Paybill settlement lands. RentFlow matches it to an invoice before the tenant closes the app. No batch job. No Monday.
+              {"// "}<b>Deploy at 23:47 on a Friday.</b>{" "}Types check. Tests pass. Container ships. Your Monday morning is yours.
             </p>
           </div>
           <div>
             <div className="kenya-img-wrap">
-              <Image fill sizes="(max-width: 920px) 100vw, 50vw" src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=700&q=80" alt="Software team reviewing M-Pesa integration in Nairobi" style={{ objectFit: "cover" }} />
+              <Image fill sizes="(max-width: 920px) 100vw, 50vw" src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=700&q=80" alt="Engineers reviewing code" style={{ objectFit: "cover" }} />
             </div>
             <div className="code-window">
               <div className="code-bar">
                 <div className="tl"><i /><i /><i /></div>
-                <span className="fname">stk_push.ts</span>
-                <span className="lang">Daraja</span>
+                <span className="fname">schema.ts</span>
+                <span className="lang">TypeScript</span>
               </div>
               <pre className="code">{`\
-`}<span className="k">const</span>{` `}<span className="v">res</span>{` = `}<span className="k">await</span>{` `}<span className="f">daraja</span>{`.`}<span className="f">stkPush</span>{`({
-  phone: `}<span className="s">&quot;2547XXXXXXXX&quot;</span>{`,
-  amount: `}<span className="n">45000</span>{`,
-  account: `}<span className="s">&quot;UNIT-4B&quot;</span>{`,
-  callback: `}<span className="s">&quot;https://api.rentflow.ke/cb&quot;</span>{`,
+`}<span className="c">// Single source of truth for every layer.</span>{`
+`}<span className="k">export const</span>{` `}<span className="v">UserSchema</span>{` = z.object({
+  id:        z.string().cuid2(),
+  email:     z.string().email(),
+  role:      z.enum([`}<span className="s">&quot;admin&quot;</span>{`, `}<span className="s">&quot;member&quot;</span>{`]),
+  createdAt: z.date(),
 });
 
-`}<span className="c">// → CheckoutRequestID issued in 41ms</span>{`
-`}<span className="c">// → settled + reconciled on callback</span>{`
-`}<span className="p">{`{ ResponseCode: `}<span className="s">&quot;0&quot;</span>{`, status: `}<span className="s">&quot;ok&quot;</span>{` }`}</span></pre>
+`}<span className="k">export type</span>{` `}<span className="v">User</span>{` = z.infer<`}<span className="k">typeof</span>{` UserSchema>;
+
+`}<span className="p">{"// Frontend · backend · database — same type."}</span>{`
+`}<span className="p">{"// → 0 casts · 0 any's · ships Friday"}</span></pre>
             </div>
           </div>
         </div>
@@ -334,35 +297,36 @@ export default function HomeContent() {
       <section className="section divider-top">
         <div className="wrap">
           <div className="section-head">
-            <span className="eyebrow muted">Real operators, real results</span>
-            <h2>The work speaks for itself.</h2>
-            <p>Companies across East Africa run on UrbanTrends products every day.</p>
+            <span className="eyebrow muted">The work speaks for itself</span>
+            <h2>Companies that run on what we build.</h2>
+            <p>Real teams. Real software. No testimonial theatre.</p>
           </div>
           <div className="testimonials-grid">
-            <div className="tcard">
-              <p className="tquote">&ldquo;The Monday reconciliation ritual is gone. We used to spend half a day matching M-Pesa statements to tenant records. RentFlow closes it in seconds — even on Sunday nights.&rdquo;</p>
-              <div className="tfoot">
-                <div className="tavatar"><Image fill sizes="40px" src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=80&q=80" alt="Joy Njeri" style={{ objectFit: "cover" }} /></div>
-                <div><div className="tname">Joy Njeri</div><div className="trole">Director, Jasmine Properties Ltd</div></div>
-                <span className="tprod" style={{ "--pa": "#34D399" } as React.CSSProperties}>RentFlow</span>
+            {displayTestimonials.map((t: Testimonial, i: number) => (
+              <div key={i} className="tcard">
+                <p className="tquote">&ldquo;{t.quote}&rdquo;</p>
+                <div className="tfoot">
+                  <div className="tavatar">
+                    {t.photo_url ? (
+                      <Image fill sizes="40px" src={t.photo_url} alt={t.author_name} style={{ objectFit: "cover" }} />
+                    ) : (
+                      <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: "var(--fg-muted)" }}>
+                        {t.author_name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <div className="tname">{t.author_name}</div>
+                    <div className="trole">{t.author_role}, {t.company}</div>
+                  </div>
+                  {t.product_label && (
+                    <span className="tprod" style={{ "--pa": t.product_accent_color } as React.CSSProperties}>
+                      {t.product_label}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="tcard">
-              <p className="tquote">&ldquo;We integrated STK Push in an afternoon using the Playground and Scaffold CLI. Our previous attempt with the raw Daraja API took a senior engineer almost two weeks.&rdquo;</p>
-              <div className="tfoot">
-                <div className="tavatar"><Image fill sizes="40px" src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?auto=format&fit=crop&w=80&q=80" alt="David Kamau" style={{ objectFit: "cover" }} /></div>
-                <div><div className="tname">David Kamau</div><div className="trole">CTO, Pesabase</div></div>
-                <span className="tprod" style={{ "--pa": "#22D3EE" } as React.CSSProperties}>Dev Tools</span>
-              </div>
-            </div>
-            <div className="tcard">
-              <p className="tquote">&ldquo;PortfolioU sent us three candidates with real, verifiable work. We hired two of them. It&apos;s the only place we&apos;ve found developers who can actually show what they&apos;ve built.&rdquo;</p>
-              <div className="tfoot">
-                <div className="tavatar"><Image fill sizes="40px" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80" alt="Amina Mohamed" style={{ objectFit: "cover" }} /></div>
-                <div><div className="tname">Amina Mohamed</div><div className="trole">Head of Engineering, Acacia Labs</div></div>
-                <span className="tprod" style={{ "--pa": "#A78BFA" } as React.CSSProperties}>PortfolioU</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -378,19 +342,19 @@ export default function HomeContent() {
           <div className="tools-grid">
             <div className="tool">
               <div className="thead">
-                <span className="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M7 8l4 4-4 4M13 16h4" /><rect x="3" y="4" width="18" height="16" rx="2" /></svg></span>
-                <h4>Daraja Playground</h4><span className="free">Free</span>
+                <span className="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18" /></svg></span>
+                <h4>Inspector</h4><span className="free">Free</span>
               </div>
-              <p>Fire STK pushes, inspect callbacks, and replay webhooks against the M-Pesa sandbox — no Postman gymnastics.</p>
-              <div className="cmd"><span className="pr">$</span> open daraja.urbantrends.dev <span className="cp">copy</span></div>
+              <p>Intercept, inspect, and replay HTTP requests in real-time. Debug webhooks and API calls without touching Postman.</p>
+              <div className="cmd"><span className="pr">$</span> inspector.urbantrends.dev <span className="cp">open</span></div>
             </div>
             <div className="tool">
               <div className="thead">
                 <span className="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 3v18M3 7l9-4 9 4M3 17l9 4 9-4" /></svg></span>
-                <h4>Scaffold CLI</h4><span className="free">Free</span>
+                <h4>Scaffold</h4><span className="free">Free</span>
               </div>
-              <p>Generate a Daraja-wired backend, typed routes, and reconciliation jobs in one command. Opinionated, on purpose.</p>
-              <div className="cmd"><span className="pr">$</span> npx @urbantrends/scaffold <span className="cp">copy</span></div>
+              <p>Generate a type-safe backend from your database schema in one command. Typed routes, migrations, and tests included.</p>
+              <div className="cmd"><span className="pr">$</span> npx @ut/scaffold init <span className="cp">copy</span></div>
             </div>
             <div className="tool">
               <div className="thead">
@@ -401,6 +365,21 @@ export default function HomeContent() {
               <div className="cmd"><span className="pr">$</span> og.urbantrends.dev/new <span className="cp">copy</span></div>
             </div>
           </div>
+          <div style={{ marginTop: 28, display: "flex", justifyContent: "flex-end" }}>
+            <Link
+              href="/tools"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                fontSize: 14, fontWeight: 600, color: "var(--accent-text)",
+                textDecoration: "none",
+              }}
+            >
+              Browse all tools
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="14" height="14">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -408,14 +387,14 @@ export default function HomeContent() {
       <section className="cta-band">
         <div className="wrap cta-inner">
           <div>
-            <h2>Ship something serious.</h2>
-            <p>Pick a product, or build on the tools. Either way, you&apos;re starting on rails that already hold up.</p>
+            <h2>Let&apos;s build something serious.</h2>
+            <p>Tell us what you&apos;re running. We&apos;ll scope it, price it fairly, and build it properly.</p>
           </div>
           <div className="hero-cta" style={{ margin: 0 }}>
-            <a className="btn btn-primary" href="#products">
-              Explore products
+            <Link className="btn btn-primary" href="/services">
+              Our services
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </a>
+            </Link>
             <Link className="btn btn-ghost" href="/contact">Talk to the team</Link>
           </div>
         </div>

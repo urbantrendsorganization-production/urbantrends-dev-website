@@ -10,48 +10,152 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+import dj_database_url
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / ".env")
+
+FRONTEND_BASE_URL = os.environ.get("FRONTEND_BASE_URL", "http://localhost:3000")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)$zhath3q+jzo4-3keihz=q@d-_jp5ubrwh)zylt1$@p!b(o+t'
+SECRET_KEY = os.environ.get("SECRET_KEY", "change-me-in-production")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = []
+_extra_hosts = os.environ.get("ALLOWED_HOSTS", "")
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [h.strip() for h in _extra_hosts.split(",") if h.strip()]
+
+# Origins the browser may forward through the Next.js rewrite proxy.
+# In production add: CSRF_TRUSTED_ORIGINS=https://urbantrends.dev,https://www.urbantrends.dev
+_extra_origins = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:8000",
+] + [o.strip() for o in _extra_origins.split(",") if o.strip()]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',  # must be before django.contrib.admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+
+    'allauth',
+    'allauth.account',
+    'allauth.mfa',
+    'allauth.headless',
+
+    'anymail',
+
     'accounts',
     'qsessions',
+
+    'rest_framework',
+    'services',
+    'blog',
+    'cms',
+    'contracts',
 ]
+
+JAZZMIN_SETTINGS = {
+    'site_title':         'UrbanTrends HQ',
+    'site_header':        'UrbanTrends',
+    'site_brand':         'UrbanTrends',
+    'site_logo':          'admin/img/ut-logo.svg',
+    'site_icon':          'admin/img/ut-favicon.svg',
+    'site_logo_classes':  'brand-image-xl',
+    'custom_css':         'admin/css/urbantrends.css',
+    'welcome_sign':       'Good to have you back.',
+    'copyright':          'UrbanTrends.dev',
+    'search_model':  ['accounts.User', 'services.Order', 'services.QuoteRequest', 'blog.Post'],
+    'order_with_respect_to': ['accounts', 'cms', 'contracts', 'services', 'blog'],
+    'icons': {
+        'accounts':           'fas fa-users',
+        'accounts.User':      'fas fa-user',
+        'services':               'fas fa-briefcase',
+        'services.Service':       'fas fa-box',
+        'services.Order':         'fas fa-shopping-cart',
+        'services.Invoice':       'fas fa-file-invoice-dollar',
+        'services.QuoteRequest':  'fas fa-file-alt',
+        'blog':               'fas fa-newspaper',
+        'blog.Post':          'fas fa-newspaper',
+        'blog.Comment':       'fas fa-comment',
+        'blog.Subscription':  'fas fa-envelope',
+        'cms':                'fas fa-sliders-h',
+        'cms.SiteSettings':   'fas fa-sliders-h',
+        'cms.HeroStat':       'fas fa-chart-bar',
+        'cms.Partner':        'fas fa-handshake',
+        'cms.Testimonial':    'fas fa-star',
+        'cms.ChangelogEntry': 'fas fa-history',
+        'cms.TeamMember':     'fas fa-id-card',
+        'cms.AboutMetric':    'fas fa-tachometer-alt',
+        'cms.ServiceStatus':  'fas fa-heartbeat',
+        'cms.Tool':            'fas fa-wrench',
+        'cms.ContactInquiry':    'fas fa-envelope-open-text',
+        'contracts':             'fas fa-file-contract',
+        'contracts.Client':      'fas fa-user-tie',
+        'contracts.Receipt':     'fas fa-receipt',
+    },
+    'default_icon_parents':  'fas fa-chevron-circle-right',
+    'default_icon_children': 'fas fa-circle',
+    'related_modal_active':  True,
+    'show_ui_builder':       False,
+    'changeform_format':     'horizontal_tabs',
+    # Injects monitoring alert banner into every admin page
+    'custom_js':             'admin/js/monitoring_alert.js',
+}
+
+JAZZMIN_UI_TWEAKS = {
+    'navbar':                    'navbar-dark',
+    'no_navbar_border':          True,
+    'sidebar':                   'sidebar-dark-primary',
+    'sidebar_nav_compact_style': True,
+    'theme':                     'darkly',
+    'dark_mode_theme':           'darkly',
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'qsessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'main_backend.urls'
+
+# Next.js strips trailing slashes before proxying, so Django must not redirect.
+APPEND_SLASH = False
 
 TEMPLATES = [
     {
@@ -71,13 +175,27 @@ TEMPLATES = [
 WSGI_APPLICATION = 'main_backend.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+# Database — PostgreSQL in production (DATABASE_URL), SQLite locally.
+_db_url = os.environ.get('DATABASE_URL')
+if _db_url:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=_db_url,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     }
 }
 
@@ -103,8 +221,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # session engine
 SESSION_ENGINE = "qsessions.backends.cached_db"
 
-# 1. Force cookies over HTTPS only
-SESSION_COOKIE_SECURE = True
+# 1. Force cookies over HTTPS only. Relaxed in DEBUG so http://localhost dev works.
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 # 2. Block JavaScript from reading session cookies (Prevents XSS theft)
 SESSION_COOKIE_HTTPONLY = True
@@ -114,6 +233,56 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 
 # 4. Expire session when the browser tab closes (Optional, good for banking/SaaS)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+
+# Authentication
+AUTH_USER_MODEL = "accounts.User"
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+# django-allauth: email-only signup, no password fields, passkey-first.
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*"]
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
+ACCOUNT_LOGIN_BY_CODE_ENABLED = True
+ACCOUNT_PREVENT_ENUMERATION = False
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_ADAPTER = "accounts.adapters.AccountAdapter"
+
+# Passkey (WebAuthn) is the primary credential. TOTP + recovery codes stay
+# available as additional second factors users can opt into later.
+MFA_PASSKEY_LOGIN_ENABLED = True
+MFA_PASSKEY_SIGNUP_ENABLED = True
+MFA_SUPPORTED_TYPES = ["webauthn", "totp", "recovery_codes"]
+# Allow http://localhost in dev (browsers treat localhost as secure, but fido2
+# verifies the origin strictly by default).
+MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = DEBUG
+
+# WebAuthn relying party. RP_ID must be the apex domain in production.
+WEBAUTHN_RP_ID = os.environ.get("WEBAUTHN_RP_ID", "localhost")
+
+# Headless API: emails point at the Next.js frontend, which POSTs the key
+# back to /_allauth/browser/v1/auth/... to complete the flow.
+HEADLESS_FRONTEND_URLS = {
+    "account_confirm_email": f"{FRONTEND_BASE_URL}/account/verify-email/{{key}}",
+    "account_reset_password": f"{FRONTEND_BASE_URL}/account/password/reset",
+    "account_reset_password_from_key": f"{FRONTEND_BASE_URL}/account/password/reset/key/{{key}}",
+    "account_signup": f"{FRONTEND_BASE_URL}/account/signup",
+}
+
+# Email backend — Resend via django-anymail. RESEND_API_KEY comes from .env.
+EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+ANYMAIL = {
+    "RESEND_API_KEY": os.environ.get("RESEND_API_KEY", ""),
+}
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@urbantrends.dev")
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+STAFF_NOTIFICATION_EMAIL = os.environ.get("STAFF_NOTIFICATION_EMAIL", DEFAULT_FROM_EMAIL)
 
 
 # Internationalization
@@ -132,3 +301,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

@@ -3,188 +3,320 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Developers",
-  description: "Build on the same M-Pesa and Daraja primitives our products run on. Free and documented.",
+  description:
+    "Build integrations on Africa's payment and product infrastructure. Join the UrbanTrends developer community.",
 };
+
+const PRODUCTS = [
+  {
+    name: "RentFlow",
+    pa: "#34D399",
+    tagline: "Plug rent payments and M-Pesa reconciliation into your property app.",
+    available: true,
+  },
+  {
+    name: "PortfolioU",
+    pa: "#A78BFA",
+    tagline: "Access the talent shortlist API to match candidates to roles.",
+    available: false,
+  },
+  {
+    name: "TrendyyLeads",
+    pa: "#FB923C",
+    tagline: "Pull enriched, scored leads directly into your CRM.",
+    available: false,
+  },
+  {
+    name: "AcademyOS",
+    pa: "#60A5FA",
+    tagline: "Integrate fee collection and grade reporting into school portals.",
+    available: false,
+  },
+  {
+    name: "Developer Tools",
+    pa: "#22D3EE",
+    tagline: "Daraja Playground, Scaffold CLI, and OG Studio — free to use.",
+    available: true,
+  },
+];
+
+const STACK = [
+  "Next.js",
+  "Django",
+  "TypeScript",
+  "Python",
+  "M-Pesa / Daraja",
+  "WebAuthn",
+  "PostgreSQL",
+  "Resend",
+];
+
+const TOOLS = [
+  {
+    name: "Daraja Playground",
+    desc: "Browser sandbox for STK Push and callbacks. No Postman. No setup.",
+    cmd: "open daraja.urbantrends.dev",
+    pr: "$",
+  },
+  {
+    name: "Scaffold CLI",
+    desc: "Generates a wired Daraja backend with typed routes, callback handler, and .env template.",
+    cmd: "npx @urbantrends/scaffold my-app",
+    pr: "$",
+  },
+  {
+    name: "OG Studio",
+    desc: "Programmatic 1200×630 Open Graph cards from a URL. Useful for blog posts, docs, and product cards.",
+    cmd: "og.urbantrends.dev/new?title=...",
+    pr: "→",
+  },
+];
 
 export default function DocsPage() {
   return (
     <>
-      <section className="page-head" data-screen-label="Developers" style={{ paddingBottom: 8 }}>
+      {/* ── 1. Hero ── */}
+      <section className="page-head" data-screen-label="Developers">
         <div className="wrap">
-          <div className="breadcrumb"><Link href="/">Home</Link><span className="sep">/</span><span>Developers</span></div>
-          <h1 className="page-title" style={{ fontSize: "clamp(30px,4vw,46px)" }}>Build on the <span className="em">reconciliation core.</span></h1>
-          <p className="page-lead">The same M-Pesa and Daraja primitives our products run on, documented and free to use. Dark by default, because of course.</p>
+          <div className="breadcrumb">
+            <Link href="/">Home</Link>
+            <span className="sep">/</span>
+            <span>Developers</span>
+          </div>
+          <span className="eyebrow" style={{ marginBottom: 18, display: "inline-flex" }}>
+            <span className="dot-led" />
+            For developers
+          </span>
+          <h1 className="page-title">
+            Build on Africa&apos;s{" "}
+            <span className="em">payment infrastructure.</span>
+          </h1>
+          <p className="page-lead">
+            UrbanTrends exposes the same Daraja, M-Pesa, and reconciliation
+            primitives our products run on. Use them in your own apps,
+            integrations, and services.
+          </p>
+          <div className="hero-cta" style={{ marginTop: 32 }}>
+            <a className="btn btn-primary" href="#community">
+              Join the community
+            </a>
+            <a className="btn btn-ghost" href="#tools">
+              Explore the tools
+            </a>
+          </div>
         </div>
       </section>
 
-      <section className="section" style={{ paddingTop: 0 }}>
-        <div className="wrap docs-layout">
-          <aside className="docs-side">
-            <h6>Get started</h6>
-            <a className="active" href="#introduction">Introduction</a>
-            <a href="#quickstart">Quickstart</a>
-            <a href="#auth">Authentication</a>
-            <h6>Daraja</h6>
-            <a href="#stk">STK Push</a>
-            <a href="#callback">Callbacks</a>
-            <a href="#reconcile">Reconcile</a>
-            <h6>Tools</h6>
-            <a href="#tools">Daraja Playground</a>
-            <a href="#tools">Scaffold CLI</a>
-            <a href="#tools">OG Studio</a>
-            <h6>Reference</h6>
-            <a href="#api">API reference</a>
-            <a href="#webhooks">Webhooks</a>
-            <a href="#errors">Errors</a>
-          </aside>
+      {/* ── 2. Integration surface ── */}
+      <section className="section divider-top">
+        <div className="wrap">
+          <div className="section-head">
+            <span className="eyebrow muted">Integration surface</span>
+            <h2>
+              Five products.{" "}
+              <span className="em">One platform to build on.</span>
+            </h2>
+            <p>
+              Each product in our portfolio exposes an API surface. Connect your
+              app to the data and workflows that matter to your users.
+            </p>
+          </div>
 
-          <div className="docs-content">
-            <h2 id="introduction">Introduction</h2>
-            <p>The UrbanTrends SDK wraps Safaricom&apos;s Daraja API with sane defaults, typed responses, and the reconciliation logic we use in production. Install it, point it at your Paybill, and stop hand-rolling callback parsers.</p>
-            <div className="callout">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v4h1" /></svg>
-              <div>You&apos;ll need Daraja sandbox credentials. Grab them from the <span className="inline-code">Daraja Playground</span> — no Safaricom portal spelunking required.</div>
+          <div className="dev-grid">
+            {PRODUCTS.map((p) => (
+              <div
+                key={p.name}
+                className="dev-card"
+                style={{ "--pa": p.pa } as React.CSSProperties}
+              >
+                <div className="dev-card-top">
+                  <span className="dev-card-name">{p.name}</span>
+                  <span
+                    className="dev-card-badge"
+                    data-available={p.available ? "" : undefined}
+                  >
+                    {p.available ? "Available" : "Coming soon"}
+                  </span>
+                </div>
+                <p className="dev-card-desc">{p.tagline}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 3. The stack ── */}
+      <section className="section divider-top">
+        <div className="wrap">
+          <span className="eyebrow muted">What we build with</span>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 10,
+              marginTop: 20,
+            }}
+          >
+            {STACK.map((s) => (
+              <span className="chip" key={s}>
+                {s}
+              </span>
+            ))}
+          </div>
+          <p
+            style={{
+              marginTop: 20,
+              color: "var(--fg-muted)",
+              fontSize: "clamp(14px,1.3vw,16px)",
+              maxWidth: "54ch",
+            }}
+          >
+            Our stack is standard. Our domain expertise isn&apos;t. If you know
+            these tools, you&apos;re ready.
+          </p>
+        </div>
+      </section>
+
+      {/* ── 4. Free tools ── */}
+      <section className="section divider-top" id="tools">
+        <div className="wrap">
+          <div className="section-head">
+            <span className="eyebrow">
+              <span className="dot-led" />
+              Free tools
+            </span>
+            <h2>
+              Built for ourselves.{" "}
+              <span className="em">Open to everyone.</span>
+            </h2>
+            <p>
+              All tools are free, require no account, and are useful whether or
+              not you&apos;re building on UrbanTrends.
+            </p>
+          </div>
+
+          <div className="tools-grid">
+            {TOOLS.map((t) => (
+              <div className="tool" key={t.name}>
+                <div className="thead">
+                  <h4>{t.name}</h4>
+                  <span className="free">Free</span>
+                </div>
+                <p>{t.desc}</p>
+                <div className="cmd">
+                  <span className="pr">{t.pr}</span>
+                  <span>{t.cmd}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 5. How to get involved ── */}
+      <section className="section divider-top">
+        <div className="wrap">
+          <div className="section-head">
+            <span className="eyebrow muted">Getting started</span>
+            <h2>
+              Three steps to{" "}
+              <span className="em">building with us.</span>
+            </h2>
+          </div>
+
+          <div
+            className="process-grid"
+            style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
+          >
+            <div className="process-step">
+              <div className="ps-num">01</div>
+              <h3>Join the community</h3>
+              <p>
+                WhatsApp/Telegram group. Introduce yourself, share what
+                you&apos;re building, and ask questions directly to the team.
+              </p>
             </div>
-
-            <h3 id="quickstart">Quickstart</h3>
-            <p>Install the SDK and scaffold a Daraja-wired backend in one command.</p>
-            <div className="code-window">
-              <div className="code-bar"><div className="tl"><i></i><i></i><i></i></div><span className="fname">terminal</span><span className="lang">bash</span></div>
-              <pre className="code"><span className="p">$</span> npm i <span className="s">@urbantrends/mpesa</span>{"\n"}<span className="p">$</span> npx <span className="s">@urbantrends/scaffold</span> my-app{"\n"}<span className="c">{"# → typed routes, reconciliation jobs, .env template"}</span></pre>
+            <div className="process-step">
+              <div className="ps-num">02</div>
+              <h3>Explore the APIs</h3>
+              <p>
+                Daraja Playground and the product APIs are all accessible. No
+                account needed to get started experimenting.
+              </p>
             </div>
-
-            <h3 id="auth">Authentication</h3>
-            <p>Initialise the client with your consumer key and secret. Tokens are fetched and refreshed for you.</p>
-            <div className="endpoint"><span className="verb">GET</span><span className="path">/oauth/v1/generate</span><button className="copy-btn" type="button">Copy</button></div>
-            <div className="code-window">
-              <div className="code-bar"><div className="tl"><i></i><i></i><i></i></div><span className="fname">client.ts</span><span className="lang">TypeScript</span></div>
-              <pre className="code"><span className="k">import</span> {"{ Daraja }"} <span className="k">from</span> <span className="s">{`"@urbantrends/mpesa"`}</span>;{"\n"}{"\n"}<span className="k">const</span> <span className="v">daraja</span> = <span className="k">new</span> <span className="f">Daraja</span>{"({"}{"\n"}{"  "}key: process.env.<span className="v">DARAJA_KEY</span>,{"\n"}{"  "}secret: process.env.<span className="v">DARAJA_SECRET</span>,{"\n"}{"  "}env: <span className="s">{`"sandbox"`}</span>,{"\n"}{"});"}</pre>
+            <div className="process-step">
+              <div className="ps-num">03</div>
+              <h3>Ship an integration</h3>
+              <p>
+                Built something on the platform? Share it in the community. We
+                feature standout integrations on this page.
+              </p>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <h3 id="stk">Trigger an STK Push</h3>
-            <p>Prompt a customer to authorise a payment from their phone. The promise resolves with a <span className="inline-code">CheckoutRequestID</span> you can track to settlement.</p>
-            <div className="endpoint"><span className="verb post">POST</span><span className="path">/mpesa/stkpush/v1/processrequest</span><button className="copy-btn" type="button">Copy</button></div>
-            <div className="code-window">
-              <div className="code-bar"><div className="tl"><i></i><i></i><i></i></div><span className="fname">checkout.ts</span><span className="lang">TypeScript</span></div>
-              <pre className="code"><span className="k">const</span> <span className="v">res</span> = <span className="k">await</span> <span className="f">daraja</span>.<span className="f">stkPush</span>{"({"}{"\n"}{"  "}phone: <span className="s">{`"2547XXXXXXXX"`}</span>,{"\n"}{"  "}amount: <span className="n">45000</span>,{"\n"}{"  "}account: <span className="s">{`"UNIT-4B"`}</span>,{"\n"}{"  "}callback: <span className="s">{`"https://api.example.ke/cb"`}</span>,{"\n"}{"});"}{"\n"}<span className="c">{"// res.CheckoutRequestID → track to settlement"}</span></pre>
-            </div>
-
-            <h3 id="callback">Handle the callback</h3>
-            <p>Daraja posts the result to your callback URL. Parse it once, trust it always — the SDK verifies and normalises the payload.</p>
-            <div className="code-window">
-              <div className="code-bar"><div className="tl"><i></i><i></i><i></i></div><span className="fname">callback.ts</span><span className="lang">TypeScript</span></div>
-              <pre className="code"><span className="f">app</span>.<span className="f">post</span>(<span className="s">{`"/cb"`}</span>, <span className="k">async</span> {"(req, res) =>"} {"{"}{"\n"}{"  "}<span className="k">const</span> tx = <span className="f">daraja</span>.<span className="f">parseCallback</span>{"(req.body);"}{"\n"}{"  "}<span className="k">if</span> {"(tx.ok)"} <span className="k">await</span> <span className="f">ledger</span>.<span className="f">apply</span>{"(tx);"}{"\n"}{"  "}res.<span className="f">json</span>{"({ ResultCode: "}<span className="n">0</span>{" });"}{"\n"}{"});"}</pre>
-            </div>
-
-            <h3 id="reconcile">Reconcile</h3>
-            <p>Match settled transactions to your own records. Idempotent by design — replaying a callback never double-applies.</p>
-            <div className="code-window">
-              <div className="code-bar"><div className="tl"><i></i><i></i><i></i></div><span className="fname">reconcile.ts</span><span className="lang">TypeScript</span></div>
-              <pre className="code"><span className="k">await</span> <span className="f">daraja</span>.<span className="f">reconcile</span>{"(tx, {"}{"\n"}{"  "}against: <span className="s">{`"invoices"`}</span>,{"\n"}{"  "}idempotencyKey: tx.receipt,{"\n"}{"  "}tolerance: <span className="n">0</span>,{"\n"}{"});"}{"\n"}<span className="p">{"→ matched · 38ms · safe to retry"}</span></pre>
-            </div>
-
-            <div className="callout" style={{ marginTop: 34 }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M13 2 3 14h7l-1 8 10-12h-7z" /></svg>
-              <div>Ready to try it live? Open the <Link href="/docs#tools" style={{ color: "var(--accent-text)", textDecoration: "underline" }}>Daraja Playground</Link> and fire your first STK Push in under a minute.</div>
-            </div>
-
-            <h2 id="tools">Tools</h2>
-            <p>All tools are free, open-source, and require no account. They&apos;re utilities we built for ourselves and polished enough to share.</p>
-
-            <h3>Daraja Playground</h3>
-            <p>A browser-based sandbox for firing STK Pushes, inspecting callbacks, and replaying webhook payloads — no Postman setup needed. Point it at your sandbox or production shortcode.</p>
-            <div className="code-window">
-              <div className="code-bar"><div className="tl"><i></i><i></i><i></i></div><span className="fname">terminal</span><span className="lang">bash</span></div>
-              <pre className="code"><span className="c">{"# Open in browser"}</span>{"\n"}<span className="p">$</span> open daraja.urbantrends.dev</pre>
-            </div>
-
-            <h3>Scaffold CLI</h3>
-            <p>Generate a fully wired Daraja backend — typed routes, reconciliation jobs, callback handler, and <span className="inline-code">.env</span> template — in a single command.</p>
-            <div className="code-window">
-              <div className="code-bar"><div className="tl"><i></i><i></i><i></i></div><span className="fname">terminal</span><span className="lang">bash</span></div>
-              <pre className="code"><span className="p">$</span> npx <span className="s">@urbantrends/scaffold</span> my-app{"\n"}{"\n"}<span className="c">{"# → my-app/"}</span>{"\n"}<span className="c">{"#   src/daraja/client.ts"}</span>{"\n"}<span className="c">{"#   src/daraja/callback.ts"}</span>{"\n"}<span className="c">{"#   src/reconcile/index.ts"}</span>{"\n"}<span className="c">{"#   .env.example"}</span></pre>
-            </div>
-
-            <h3>OG Studio</h3>
-            <p>Programmatic Open Graph cards from a URL. Pass a template name and query params; get a 1200×630 PNG. Useful for blog posts, docs pages, and dynamic product cards.</p>
-            <div className="code-window">
-              <div className="code-bar"><div className="tl"><i></i><i></i><i></i></div><span className="fname">usage</span><span className="lang">URL</span></div>
-              <pre className="code"><span className="s">https://og.urbantrends.dev/new</span>{"\n"}  ?title=RentFlow+Quickstart{"\n"}  &amp;tag=Engineering{"\n"}  &amp;accent=%2322D3EE</pre>
-            </div>
-
-            <h2 id="webhooks">Webhooks</h2>
-            <p>UrbanTrends products emit webhooks for key lifecycle events. All webhook payloads are signed with HMAC-SHA256 using your account&apos;s webhook secret.</p>
-
-            <h3>Verify a webhook signature</h3>
-            <div className="code-window">
-              <div className="code-bar"><div className="tl"><i></i><i></i><i></i></div><span className="fname">verify.ts</span><span className="lang">TypeScript</span></div>
-              <pre className="code"><span className="k">import</span> {"{ createHmac }"} <span className="k">from</span> <span className="s">{`"crypto"`}</span>;{"\n"}{"\n"}<span className="k">function</span> <span className="f">verifyWebhook</span>{"(payload: string, sig: string, secret: string)"} {"{"}{"\n"}{"  "}<span className="k">const</span> expected = <span className="f">createHmac</span>(<span className="s">{`"sha256"`}</span>, secret){"\n"}{"    "}.<span className="f">update</span>(payload).<span className="f">digest</span>(<span className="s">{`"hex"`}</span>);{"\n"}{"  "}<span className="k">return</span> <span className="f">timingSafeEqual</span>({"\n"}{"    "}Buffer.<span className="f">from</span>(sig), Buffer.<span className="f">from</span>(expected){"\n"}{"  "});{"\n"}{"}"}</pre>
-            </div>
-
-            <h3>Webhook events</h3>
-            <div className="compare" style={{ marginTop: 20 }}>
-              <table>
-                <thead><tr><th>Event</th><th>Trigger</th><th>Products</th></tr></thead>
-                <tbody>
-                  <tr><td className="inline-code">payment.matched</td><td>Transaction reconciled to an invoice</td><td>RentFlow</td></tr>
-                  <tr><td className="inline-code">payment.orphaned</td><td>Payment received with no matching invoice</td><td>RentFlow</td></tr>
-                  <tr><td className="inline-code">stk.success</td><td>STK Push completed and settled</td><td>All</td></tr>
-                  <tr><td className="inline-code">stk.failed</td><td>STK Push cancelled or timed out</td><td>All</td></tr>
-                  <tr><td className="inline-code">lead.scored</td><td>New lead enriched and scored</td><td>TrendyyLeads</td></tr>
-                  <tr><td className="inline-code">application.submitted</td><td>Candidate applied to a shortlist</td><td>PortfolioU</td></tr>
-                </tbody>
-              </table>
-            </div>
-
-            <h2 id="api">API Reference</h2>
-            <p>All API endpoints are REST over HTTPS. Responses are JSON. Authentication uses Bearer tokens obtained via the OAuth endpoint above.</p>
-
-            <h3>Base URL</h3>
-            <div className="code-window">
-              <div className="code-bar"><div className="tl"><i></i><i></i><i></i></div><span className="fname">base</span><span className="lang">URL</span></div>
-              <pre className="code"><span className="s">https://api.urbantrends.dev/v1</span></pre>
-            </div>
-
-            <h3>Core endpoints</h3>
-            <div className="endpoint"><span className="verb">GET</span><span className="path">/transactions</span><button className="copy-btn" type="button">Copy</button></div>
-            <p>List reconciled transactions. Supports <span className="inline-code">since</span>, <span className="inline-code">until</span>, <span className="inline-code">status</span> query params.</p>
-
-            <div className="endpoint"><span className="verb post">POST</span><span className="path">/transactions/reconcile</span><button className="copy-btn" type="button">Copy</button></div>
-            <p>Manually trigger reconciliation for a transaction by its M-Pesa receipt number. Idempotent.</p>
-
-            <div className="endpoint"><span className="verb">GET</span><span className="path">/invoices</span><button className="copy-btn" type="button">Copy</button></div>
-            <p>List invoices. Filter by <span className="inline-code">status</span> (<span className="inline-code">paid</span>, <span className="inline-code">unpaid</span>, <span className="inline-code">partial</span>), <span className="inline-code">tenant_id</span>, or <span className="inline-code">unit_id</span>.</p>
-
-            <div className="endpoint"><span className="verb post">POST</span><span className="path">/stk/push</span><button className="copy-btn" type="button">Copy</button></div>
-            <p>Trigger an STK Push. Returns a <span className="inline-code">CheckoutRequestID</span> for tracking.</p>
-
-            <div className="endpoint"><span className="verb">GET</span><span className="path">/webhooks</span><button className="copy-btn" type="button">Copy</button></div>
-            <p>List registered webhook endpoints for your account.</p>
-
-            <div className="endpoint"><span className="verb post">POST</span><span className="path">/webhooks</span><button className="copy-btn" type="button">Copy</button></div>
-            <p>Register a new webhook endpoint. Accepts <span className="inline-code">url</span>, <span className="inline-code">events[]</span>, and <span className="inline-code">secret</span>.</p>
-
-            <h2 id="errors">Errors</h2>
-            <p>The API uses conventional HTTP status codes. Errors return a JSON body with a <span className="inline-code">code</span> and <span className="inline-code">message</span> field.</p>
-
-            <div className="compare" style={{ marginTop: 20 }}>
-              <table>
-                <thead><tr><th>Code</th><th>HTTP</th><th>Meaning</th></tr></thead>
-                <tbody>
-                  <tr><td className="inline-code">UNAUTHENTICATED</td><td>401</td><td>Missing or invalid Bearer token</td></tr>
-                  <tr><td className="inline-code">FORBIDDEN</td><td>403</td><td>Token valid but lacks permission for this resource</td></tr>
-                  <tr><td className="inline-code">NOT_FOUND</td><td>404</td><td>Resource does not exist or is not visible to your account</td></tr>
-                  <tr><td className="inline-code">RATE_LIMITED</td><td>429</td><td>Too many requests — back off and retry after <span className="inline-code">Retry-After</span> seconds</td></tr>
-                  <tr><td className="inline-code">DARAJA_ERROR</td><td>502</td><td>Safaricom Daraja returned an error — check <span className="inline-code">daraja_code</span> in response</td></tr>
-                  <tr><td className="inline-code">RECONCILE_CONFLICT</td><td>409</td><td>Transaction already reconciled to a different invoice</td></tr>
-                  <tr><td className="inline-code">INTERNAL</td><td>500</td><td>Unexpected server error — our team is paged automatically</td></tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div className="callout" style={{ marginTop: 28 }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v4h1" /></svg>
-              <div>Daraja error codes (e.g. <span className="inline-code">1032</span> — request cancelled by user) are passed through verbatim in the <span className="inline-code">daraja_code</span> field. See the <a href="https://developer.safaricom.co.ke" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-text)", textDecoration: "underline" }}>Safaricom Daraja docs</a> for the full list.</div>
+      {/* ── 6. Community CTA ── */}
+      <section className="section divider-top" id="community">
+        <div className="wrap">
+          <div
+            style={{
+              background: "var(--surface-1)",
+              border: "1px solid var(--border)",
+              borderRadius: 16,
+              padding: "clamp(40px, 6vw, 80px)",
+              textAlign: "center",
+              maxWidth: 640,
+              margin: "0 auto",
+            }}
+          >
+            <span className="eyebrow" style={{ justifyContent: "center" }}>
+              <span className="dot-led" />
+              Developer community
+            </span>
+            <h2
+              style={{
+                fontSize: "clamp(26px, 3.5vw, 40px)",
+                fontWeight: 600,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.1,
+                margin: "18px 0 0",
+              }}
+            >
+              Ready to build?
+            </h2>
+            <p
+              style={{
+                color: "var(--fg-muted)",
+                fontSize: "clamp(14px, 1.3vw, 16px)",
+                margin: "16px auto 0",
+                maxWidth: "46ch",
+                lineHeight: 1.65,
+              }}
+            >
+              Join developers across East Africa building on UrbanTrends. Get
+              support, share what you&apos;re working on, and collaborate with
+              the team directly.
+            </p>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 12,
+                marginTop: 32,
+              }}
+            >
+              <a className="btn btn-primary" href="/contact" style={{ minWidth: 200 }}>
+                Join on WhatsApp
+              </a>
+              <Link
+                href="/contact"
+                className="btn btn-ghost"
+                style={{ minWidth: 200 }}
+              >
+                Or reach us by email
+              </Link>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 
 const NAMES: Record<string, string> = {
@@ -26,40 +27,51 @@ function readCookie(name: string): string | null {
 }
 
 async function detectCountry(): Promise<string | null> {
-  // 1. Vercel cookie (set by middleware in production)
+  // 1. Cookie (set by Django /api/geo/)
   const fromCookie = readCookie("ut-country");
   if (fromCookie && /^[A-Z]{2}$/.test(fromCookie)) return fromCookie;
 
-  // 2. localStorage cache so we don't hit the API on every visit
+  // 2. localStorage cache so we don't hit the backend on every visit
   try {
     const cached = localStorage.getItem("ut-country-cache");
     if (cached && /^[A-Z]{2}$/.test(cached)) return cached;
   } catch { /* private browsing */ }
 
-  // 3. Free IP geolocation API fallback (dev / no Vercel headers)
+  // 3. Own backend endpoint — reads x-vercel-ip-country forwarded by Next.js rewrite
   try {
-    const res = await fetch("https://ipapi.co/country/", {
+    const res = await fetch("/api/geo/", {
       cache: "no-store",
       signal: AbortSignal.timeout(4000),
     });
     if (res.ok) {
-      const cc = (await res.text()).trim();
-      if (/^[A-Z]{2}$/.test(cc)) {
+      const data = await res.json();
+      const cc: unknown = data?.country;
+      if (typeof cc === "string" && /^[A-Z]{2}$/.test(cc)) {
         try { localStorage.setItem("ut-country-cache", cc); } catch { /* ok */ }
         return cc;
       }
     }
-  } catch { /* network error or blocked — silently skip */ }
+  } catch { /* offline / backend not running in dev */ }
 
   return null;
 }
 
 export default function CountryFlag() {
   const [cc, setCC] = useState<string | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    detectCountry().then((code) => { if (code) setCC(code); });
-  }, []);
+    detectCountry().then((code) => {
+      if (!code) return;
+      setCC(code);
+      // On first visit the middleware hasn't set the cookie yet, so redirect
+      // client-side. The next visit the middleware handles it instantly.
+      if (pathname === "/") {
+        router.replace(`/${code.toLowerCase()}`);
+      }
+    });
+  }, [pathname, router]);
 
   if (!cc) return null;
 

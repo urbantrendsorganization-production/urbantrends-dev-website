@@ -22,11 +22,11 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://urbantrends.dev"
   ),
   title: {
-    default: "UrbanTrends — Infrastructure for the East African internet",
+    default: "UrbanTrends — Production-grade software, shipped",
     template: "%s — UrbanTrends",
   },
   description:
-    "A Nairobi software studio building M-Pesa-native SaaS and developer tooling for East African operators.",
+    "A Nairobi software studio that designs, builds, and ships production-grade products, tools, and infrastructure.",
   openGraph: {
     type: "website",
     siteName: "UrbanTrends",
