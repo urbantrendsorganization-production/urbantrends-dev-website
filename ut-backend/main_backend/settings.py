@@ -23,6 +23,24 @@ load_dotenv(BASE_DIR / ".env")
 
 FRONTEND_BASE_URL = os.environ.get("FRONTEND_BASE_URL", "http://localhost:3000")
 
+# Third-party integration credentials (GitHub, Vercel, Google/Gmail).
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+GITHUB_CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID", "")
+GITHUB_CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", "")
+GITHUB_OAUTH_REDIRECT_URI = os.environ.get("GITHUB_OAUTH_REDIRECT_URI", "http://localhost:8000/api/github/callback")
+# Shared secret used to verify GitHub webhook payloads (X-Hub-Signature-256).
+GITHUB_WEBHOOK_SECRET = os.environ.get("GITHUB_WEBHOOK_SECRET", "")
+import logging as _logging
+if not GITHUB_WEBHOOK_SECRET:
+    _logging.getLogger('django').warning(
+        "GITHUB_WEBHOOK_SECRET is not set — GitHub webhook delivery will be rejected"
+    )
+VERCEL_TOKEN = os.environ.get("VERCEL_TOKEN", "")
+VERCEL_TEAM_ID = os.environ.get("VERCEL_TEAM_ID", "")
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI = os.environ.get("GOOGLE_REDIRECT_URI", "")
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -43,6 +61,12 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:8000",
 ] + [o.strip() for o in _extra_origins.split(",") if o.strip()]
+
+# Required when running behind a reverse proxy (nginx/Caddy) that terminates
+# TLS. Without this, request.is_secure() always returns False, which breaks
+# WebAuthn origin checks, HSTS enforcement, and secure cookie delivery.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
 
 
 # Application definition
@@ -72,6 +96,9 @@ INSTALLED_APPS = [
     'blog',
     'cms',
     'contracts',
+    'github_repos',
+    'deployments',
+    'gmail',
 ]
 
 JAZZMIN_SETTINGS = {
@@ -85,7 +112,7 @@ JAZZMIN_SETTINGS = {
     'welcome_sign':       'Good to have you back.',
     'copyright':          'UrbanTrends.dev',
     'search_model':  ['accounts.User', 'services.Order', 'services.QuoteRequest', 'blog.Post'],
-    'order_with_respect_to': ['accounts', 'cms', 'contracts', 'services', 'blog'],
+    'order_with_respect_to': ['accounts', 'cms', 'contracts', 'github_repos', 'deployments', 'gmail', 'services', 'blog'],
     'icons': {
         'accounts':           'fas fa-users',
         'accounts.User':      'fas fa-user',
@@ -112,6 +139,16 @@ JAZZMIN_SETTINGS = {
         'contracts':             'fas fa-file-contract',
         'contracts.Client':      'fas fa-user-tie',
         'contracts.Receipt':     'fas fa-receipt',
+        'github_repos':                'fab fa-github',
+        'github_repos.GitHubAccount':  'fab fa-github',
+        'github_repos.GitHubRepo':     'fas fa-code-branch',
+        'deployments':                 'fas fa-rocket',
+        'deployments.VercelProject':   'fas fa-layer-group',
+        'deployments.Deployment':      'fas fa-history',
+        'gmail':                  'fas fa-envelope',
+        'gmail.GmailCredential':  'fas fa-key',
+        'gmail.GmailThread':      'fas fa-comments',
+        'gmail.GmailMessage':     'fas fa-comment-dots',
     },
     'default_icon_parents':  'fas fa-chevron-circle-right',
     'default_icon_children': 'fas fa-circle',
@@ -310,3 +347,11 @@ STORAGES = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Production-only security headers. HSTS tells browsers to always use HTTPS —
+# enable only once the site is reliably on HTTPS (not on first deploy).
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True

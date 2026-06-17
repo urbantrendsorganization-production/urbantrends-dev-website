@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import ContactForm from "./ContactForm";
 
 export const metadata: Metadata = {
@@ -76,7 +75,7 @@ export default function ContactPage() {
           </div>
 
           <div className="contact-panel-note">
-            <p className="kenya-note">// Response time is typically &lt; 4 hours during Nairobi business hours (EAT, UTC+3).</p>
+            <p className="kenya-note">{'// '}Response time is typically &lt; 4 hours during Nairobi business hours (EAT, UTC+3).</p>
           </div>
         </div>
 

@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev",
     "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@simplewebauthn/browser": "^13.3.0",
@@ -16,9 +17,15 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5"
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.9",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^15.15.0",
+    "typescript": "^5",
+    "typescript-eslint": "^8.61.0"
   }
 }

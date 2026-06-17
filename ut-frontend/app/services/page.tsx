@@ -484,9 +484,9 @@ export default async function ServicesPage() {
             <p>Tell us what you&apos;re trying to do. We&apos;ll tell you honestly whether and how we can help.</p>
           </div>
           <div className="hero-cta" style={{ margin: 0 }}>
-            <a className="btn btn-primary" href="/contact">
+            <Link className="btn btn-primary" href="/contact">
               Start a conversation <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </a>
+            </Link>
             <Link className="btn btn-ghost" href="/about">About us</Link>
           </div>
         </div>

@@ -20,8 +20,17 @@ class ClientAdmin(admin.ModelAdmin):
         return request.user.is_superuser
 
 
+class RepoInline(admin.TabularInline):
+    model = Receipt.repos.through
+    extra = 0
+    verbose_name = 'Linked repository'
+    verbose_name_plural = 'Linked repositories'
+    autocomplete_fields = ['githubrepo']
+
+
 @admin.register(Receipt)
 class ReceiptAdmin(admin.ModelAdmin):
+    inlines = [RepoInline]
     list_display        = [
         'receipt_number', 'client', 'title_short',
         'currency', 'total_display', 'status_badge', 'issue_date',
@@ -37,7 +46,7 @@ class ReceiptAdmin(admin.ModelAdmin):
     actions             = ['send_receipt', 'mark_as_paid']
     fieldsets = (
         ('Client & Project', {
-            'fields': ('client', 'title', 'description'),
+            'fields': ('client', 'title', 'description', 'deployment'),
         }),
         ('Line Items', {
             'fields': ('line_items',),

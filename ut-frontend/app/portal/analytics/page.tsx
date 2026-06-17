@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getAnalytics, STATUS_LABELS, type AnalyticsData } from "@/lib/services";
 
@@ -67,7 +66,6 @@ function MonthBar({ month, count, max }: { month: string; count: number; max: nu
 }
 
 export default function AnalyticsPage() {
-  const router = useRouter();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [denied, setDenied] = useState(false);

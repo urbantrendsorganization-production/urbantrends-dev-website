@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtualenv (built fresh inside the image)
+venv/
+.venv/
+
+# Secrets and local config — injected at runtime, never baked in
+.env
+*.env
+
+# Local SQLite database (Docker uses Postgres)
+db.sqlite3
+
+# Collected static — regenerated during build
+staticfiles/
+
+# User-uploaded media (lives on a mounted volume, not in the image)
+media/
+
+# VCS and editor noise
+.git/
+.gitignore
+.vscode/
+*.md
+.python-version
+
+# Docker artifacts
+Dockerfile
+.dockerignore

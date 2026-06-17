@@ -8,18 +8,18 @@ export default function CodeTemplate() {
           <span className="lang">TypeScript</span>
         </div>
         <pre className="code" style={{ fontSize: 12 }}>{`\
-`}<span className="k">import</span>{` { z } `}<span className="k">from</span>{` `}<span className="s">"zod"</span>{`;
+`}<span className="k">import</span>{` { z } `}<span className="k">from</span>{` `}<span className="s">&quot;zod&quot;</span>{`;
 
 `}<span className="k">export const</span>{` `}<span className="v">UserSchema</span>{` = z.object({
   id:        z.string().cuid2(),
   email:     z.string().email(),
-  role:      z.enum([`}<span className="s">"admin"</span>{`, `}<span className="s">"member"</span>{`]),
+  role:      z.enum([`}<span className="s">&quot;admin&quot;</span>{`, `}<span className="s">&quot;member&quot;</span>{`]),
   createdAt: z.date(),
 });
 
 `}<span className="k">export type</span>{` `}<span className="v">User</span>{` = z.infer<`}<span className="k">typeof</span>{` UserSchema>;
 
-`}<span className="c">// Same type on frontend, backend, and db.</span>{`
+`}<span className="c">{'// '}Same type on frontend, backend, and db.</span>{`
 `}<span className="p">{"// → 0 casts · 0 any's · ships Friday"}</span></pre>
       </div>
 

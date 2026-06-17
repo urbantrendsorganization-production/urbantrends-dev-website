@@ -56,7 +56,7 @@ export default function SiteNav() {
     checkAuth();
     window.addEventListener("auth:changed", checkAuth);
     return () => window.removeEventListener("auth:changed", checkAuth);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleSignOut() {
     try {
@@ -93,7 +93,7 @@ export default function SiteNav() {
   }, []);
 
   useEffect(() => {
-    setMobileOpen(false);
+    setMobileOpen(false); // eslint-disable-line react-hooks/set-state-in-effect
   }, [pathname]);
 
   useEffect(() => {

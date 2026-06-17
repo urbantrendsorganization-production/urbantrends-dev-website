@@ -6,13 +6,6 @@ export const metadata: Metadata = {
   description: "Property management with M-Pesa Paybill reconciliation that works on weekends.",
 };
 
-function CheckIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M5 12l5 5L20 6" />
-    </svg>
-  );
-}
 
 export default function RentFlowPage() {
   return (
@@ -26,8 +19,8 @@ export default function RentFlowPage() {
               <h1 className="page-title">Rent that <span className="em">reconciles itself.</span></h1>
               <p className="page-lead">RentFlow ties every M-Pesa Paybill settlement to the right unit, the right tenant, and the right invoice — automatically, including on weekends. Less spreadsheet archaeology, more collected rent.</p>
               <div className="head-cta">
-                <a className="btn btn-primary" href="/signup">Start free trial <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
-                <a className="btn btn-ghost" href="/contact">Book a demo</a>
+                <Link className="btn btn-primary" href="/signup">Start free trial <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
+                <Link className="btn btn-ghost" href="/contact">Book a demo</Link>
               </div>
               <div className="stat-band" style={{ marginTop: 38 }}>
                 <div className="sb"><div className="n">98.4%</div><div className="l">Auto-matched on first pass</div></div>
@@ -140,7 +133,7 @@ export default function RentFlowPage() {
             <p>Free for your first 15 units. No card, no Paybill migration, no Monday.</p>
           </div>
           <div className="hero-cta" style={{ margin: 0 }}>
-            <a className="btn btn-primary" href="/signup">Start free trial <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+            <Link className="btn btn-primary" href="/signup">Start free trial <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
             <Link className="btn btn-ghost" href="/contact">Talk to us</Link>
           </div>
         </div>

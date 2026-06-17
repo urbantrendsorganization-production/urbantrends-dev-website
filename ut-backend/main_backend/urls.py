@@ -30,6 +30,9 @@ urlpatterns = [
     path('api/', include('blog.urls')),
     path('api/', include('cms.urls')),
     path('api/', include('contracts.urls')),
+    path('api/', include('github_repos.urls')),
+    path('api/', include('deployments.urls')),
+    path('api/', include('gmail.urls')),
 ]
 
 if settings.DEBUG:

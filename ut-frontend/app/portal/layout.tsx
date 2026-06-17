@@ -67,6 +67,9 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       >
         {navLink("/portal/orders", "My Orders")}
         {isStaff && navLink("/portal/analytics", "Analytics")}
+        {isStaff && navLink("/portal/repos", "Repos")}
+        {isStaff && navLink("/portal/deployments", "Deployments")}
+        {isStaff && navLink("/portal/gmail", "Gmail")}
       </nav>
       {children}
     </div>

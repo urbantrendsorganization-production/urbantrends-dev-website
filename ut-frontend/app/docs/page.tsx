@@ -307,9 +307,9 @@ export default function DocsPage() {
                 marginTop: 32,
               }}
             >
-              <a className="btn btn-primary" href="/contact" style={{ minWidth: 200 }}>
+              <Link className="btn btn-primary" href="/contact" style={{ minWidth: 200 }}>
                 Join on WhatsApp
-              </a>
+              </Link>
               <Link
                 href="/contact"
                 className="btn btn-ghost"

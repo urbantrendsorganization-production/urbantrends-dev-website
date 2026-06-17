@@ -276,7 +276,7 @@ export default async function HomeContent() {
                 <span className="lang">TypeScript</span>
               </div>
               <pre className="code">{`\
-`}<span className="c">// Single source of truth for every layer.</span>{`
+`}<span className="c">{'// '}Single source of truth for every layer.</span>{`
 `}<span className="k">export const</span>{` `}<span className="v">UserSchema</span>{` = z.object({
   id:        z.string().cuid2(),
   email:     z.string().email(),

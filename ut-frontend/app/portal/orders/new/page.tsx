@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
-import { getService, createOrder, type Service, type PricingPlan } from "@/lib/services";
+import { createOrder, type Service, type PricingPlan } from "@/lib/services";
 
 function NewOrderForm() {
   const router = useRouter();

@@ -411,6 +411,38 @@ body {
     </div>
     {% endif %}
 
+    {% if receipt.repos.exists or receipt.deployment %}
+    <div style="margin-top:24px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:#aaa;font-weight:600;margin-bottom:12px;">
+        Project Resources
+      </div>
+      {% if receipt.repos.exists %}
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12px;color:#aaa;margin-bottom:6px;">Repositories</div>
+        {% for repo in receipt.repos.all %}
+        <a href="{{ repo.html_url }}" target="_blank" rel="noopener"
+           style="display:inline-block;color:#22D3EE;text-decoration:none;font-size:13px;
+                  font-family:monospace;margin-right:16px;margin-bottom:4px;">
+          {{ repo.full_name }}{% if repo.is_private %} (private){% endif %}
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% if receipt.deployment %}
+      <div>
+        <div style="font-size:12px;color:#aaa;margin-bottom:6px;">Live Project</div>
+        <a href="{{ receipt.deployment.production_url }}" target="_blank" rel="noopener"
+           style="color:#22D3EE;text-decoration:none;font-size:13px;">
+          {{ receipt.deployment.production_url }}
+        </a>
+        {% if receipt.deployment.custom_domain %}
+        <span style="font-size:12px;color:#777;margin-left:8px;">({{ receipt.deployment.custom_domain }})</span>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
   </div><!-- /r-body -->
 
   <!-- ── Footer ── -->

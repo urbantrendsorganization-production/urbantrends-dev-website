@@ -87,7 +87,7 @@ export default function CareersPage() {
               </a>
             ))}
           </div>
-          <p className="kenya-note" style={{ marginTop: 28 }}>// Don&apos;t see your role? Email <b>jobs@urbantrends.dev</b> with what you&apos;d build here. We read every one.</p>
+          <p className="kenya-note" style={{ marginTop: 28 }}>{'// '}Don&apos;t see your role? Email <b>jobs@urbantrends.dev</b> with what you&apos;d build here. We read every one.</p>
         </div>
       </section>
 

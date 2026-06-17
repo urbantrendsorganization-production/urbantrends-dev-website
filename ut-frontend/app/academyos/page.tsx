@@ -6,13 +6,6 @@ export const metadata: Metadata = {
   description: "School management in one system: admissions, M-Pesa fees, timetables and reports.",
 };
 
-function CheckIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M5 12l5 5L20 6" />
-    </svg>
-  );
-}
 
 export default function AcademyOSPage() {
   return (
@@ -26,8 +19,8 @@ export default function AcademyOSPage() {
               <h1 className="page-title">Run the whole school, <span className="em">one system.</span></h1>
               <p className="page-lead">AcademyOS replaces the spreadsheet sprawl: admissions, fee collection over M-Pesa, timetables, attendance and reports — in a single place that parents, teachers and administrators all trust.</p>
               <div className="head-cta">
-                <a className="btn btn-primary" href="/contact">Join the beta <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
-                <a className="btn btn-ghost" href="/contact">Book a demo</a>
+                <Link className="btn btn-primary" href="/contact">Join the beta <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
+                <Link className="btn btn-ghost" href="/contact">Book a demo</Link>
               </div>
               <div className="stat-band" style={{ marginTop: 38 }}>
                 <div className="sb"><div className="n">40+</div><div className="l">Schools in beta</div></div>
@@ -105,7 +98,7 @@ export default function AcademyOSPage() {
         <div className="wrap cta-inner">
           <div><h2>Retire the spreadsheets.</h2><p>Join the beta — onboarding and setup are on us while we&apos;re early.</p></div>
           <div className="hero-cta" style={{ margin: 0 }}>
-            <a className="btn btn-primary" href="/contact">Join the beta <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+            <Link className="btn btn-primary" href="/contact">Join the beta <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
             <Link className="btn btn-ghost" href="/products">All products</Link>
           </div>
         </div>

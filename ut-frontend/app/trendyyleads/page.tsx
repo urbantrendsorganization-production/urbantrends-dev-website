@@ -6,13 +6,6 @@ export const metadata: Metadata = {
   description: "B2B lead generation for East Africa — sourced, scored and synced to your CRM.",
 };
 
-function CheckIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M5 12l5 5L20 6" />
-    </svg>
-  );
-}
 
 export default function TrendyyLeadsPage() {
   return (
@@ -26,8 +19,8 @@ export default function TrendyyLeadsPage() {
               <h1 className="page-title">Leads that respect <span className="em">your pipeline.</span></h1>
               <p className="page-lead">TrendyyLeads sources, enriches, and scores B2B prospects for the East African market, then syncs the good ones into your CRM. Less list-buying, more conversations worth having.</p>
               <div className="head-cta">
-                <a className="btn btn-primary" href="/signup">Start sourcing <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
-                <a className="btn btn-ghost" href="/contact">Book a demo</a>
+                <Link className="btn btn-primary" href="/signup">Start sourcing <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
+                <Link className="btn btn-ghost" href="/contact">Book a demo</Link>
               </div>
               <div className="stat-band" style={{ marginTop: 38 }}>
                 <div className="sb"><div className="n">3.2x</div><div className="l">Reply-rate vs cold lists</div></div>
@@ -105,7 +98,7 @@ export default function TrendyyLeadsPage() {
         <div className="wrap cta-inner">
           <div><h2>Fill the pipeline. Skip the junk.</h2><p>Start a free trial and grade your first 200 leads today.</p></div>
           <div className="hero-cta" style={{ margin: 0 }}>
-            <a className="btn btn-primary" href="/signup">Start free trial <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+            <Link className="btn btn-primary" href="/signup">Start free trial <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></Link>
             <Link className="btn btn-ghost" href="/products">All products</Link>
           </div>
         </div>

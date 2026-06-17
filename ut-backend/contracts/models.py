@@ -1,5 +1,8 @@
 import uuid
-from django.db import models
+from decimal import Decimal
+
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
 from django.utils import timezone
 
 
@@ -56,6 +59,19 @@ class Receipt(models.Model):
     download_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     sent_at        = models.DateTimeField(null=True, blank=True, editable=False)
     created_at     = models.DateTimeField(auto_now_add=True)
+    repos          = models.ManyToManyField(
+        'github_repos.GitHubRepo',
+        blank=True,
+        related_name='receipts',
+        help_text='GitHub repos associated with this project',
+    )
+    deployment     = models.ForeignKey(
+        'deployments.VercelProject',
+        null=True, blank=True,
+        on_delete=models.SET_NULL,
+        related_name='receipts',
+        help_text='Primary Vercel project for this receipt',
+    )
 
     class Meta:
         ordering = ['-created_at']
@@ -63,23 +79,38 @@ class Receipt(models.Model):
     def __str__(self):
         return f"{self.receipt_number or '(draft)'} — {self.client.name}"
 
+    def clean(self):
+        if self.line_items:
+            for i, item in enumerate(self.line_items):
+                if not isinstance(item, dict):
+                    raise ValidationError(f"line_items[{i}] must be an object")
+                try:
+                    Decimal(str(item.get('qty', 1)))
+                    Decimal(str(item.get('unit_price', 0)))
+                except Exception:
+                    raise ValidationError(f"line_items[{i}] qty and unit_price must be numeric")
+
     def save(self, *args, **kwargs):
         if not self.receipt_number:
-            year  = timezone.now().year
-            count = Receipt.objects.filter(receipt_number__startswith=f'UT-{year}-').count()
-            self.receipt_number = f'UT-{year}-{str(count + 1).zfill(4)}'
+            with transaction.atomic():
+                year = timezone.now().year
+                count = Receipt.objects.select_for_update().filter(
+                    receipt_number__startswith=f'UT-{year}-'
+                ).count()
+                self.receipt_number = f'UT-{year}-{str(count + 1).zfill(4)}'
         super().save(*args, **kwargs)
 
     @property
     def subtotal(self):
         return round(sum(
-            float(item.get('qty', 1)) * float(item.get('unit_price', 0))
-            for item in (self.line_items or [])
+            (Decimal(str(item.get('qty', 1))) * Decimal(str(item.get('unit_price', 0)))
+             for item in (self.line_items or [])),
+            Decimal('0'),
         ), 2)
 
     @property
     def tax_amount(self):
-        return round(self.subtotal * float(self.tax_rate) / 100, 2)
+        return round(self.subtotal * self.tax_rate / Decimal('100'), 2)
 
     @property
     def total(self):

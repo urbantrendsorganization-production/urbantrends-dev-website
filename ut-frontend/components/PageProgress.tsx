@@ -23,7 +23,7 @@ export default function PageProgress() {
   }, []);
 
   useEffect(() => {
-    setState((prev) => {
+    setState((prev) => { // eslint-disable-line react-hooks/set-state-in-effect
       if (prev === "loading") return "done";
       return prev;
     });

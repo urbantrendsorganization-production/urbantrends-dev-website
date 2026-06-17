@@ -1,0 +1,31 @@
+# Dependencies (reinstalled via npm ci inside the image)
+node_modules/
+.pnp
+.pnp.*
+
+# Build output (regenerated during build)
+.next/
+out/
+build/
+
+# Secrets and local env — injected at runtime, never baked in
+.env
+.env.*
+!.env.example
+
+# VCS and editor noise
+.git/
+.gitignore
+.vscode/
+*.md
+
+# TypeScript/Next caches
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel
+.vercel
+
+# Docker artifacts
+Dockerfile
+.dockerignore

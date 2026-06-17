@@ -14,6 +14,9 @@ const securityHeaders = [
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8000";
 
 const nextConfig: NextConfig = {
+  // Emit a self-contained server bundle for Docker (copies only the files
+  // needed to run, so the runtime image doesn't need node_modules).
+  output: "standalone",
   // Disable automatic trailing-slash redirects so /api/orders/ isn't
   // 308-redirected before the backend rewrite fires.
   skipTrailingSlashRedirect: true,
