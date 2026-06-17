@@ -1,12 +1,12 @@
 # UrbanTrends — self-hosted stack for a single VPS.
 #
 #   db       Postgres 16 (data persisted in a named volume)
-#   backend  Django + gunicorn  → 127.0.0.1:8000 (host nginx proxies to it)
-#   frontend Next.js standalone → 127.0.0.1:3000 (host nginx proxies to it)
+#   backend  Django + gunicorn  → 127.0.0.1:8000 (Caddy proxies to it)
+#   frontend Next.js standalone → 127.0.0.1:3000 (Caddy proxies to it)
 #
-# TLS and the public-facing port (80/443) are handled by the host nginx/Caddy —
+# TLS and the public-facing port (80/443) are handled by Caddy on the host —
 # not by a container. The two service ports are bound to loopback only so they
-# are never reachable from outside the machine.
+# are never reachable from outside the machine. See Caddyfile.example.
 #
 # Usage:
 #   cp .env.example .env        # fill in real values
@@ -63,7 +63,7 @@ services:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-}
     restart: unless-stopped
     environment:
-      # Same-origin proxying happens at nginx; next.config.ts rewrites still
+      # Same-origin proxying happens at Caddy; next.config.ts rewrites still
       # forward /api, /_allauth, /accounts to the backend service directly.
       BACKEND_URL: http://backend:8000
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-}

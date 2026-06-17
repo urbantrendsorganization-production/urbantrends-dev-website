@@ -1,0 +1,36 @@
+# UrbanTrends — Caddy reverse proxy config.
+#
+# Copy to /etc/caddy/Caddyfile (or import from your global Caddyfile).
+# Caddy provisions and renews Let's Encrypt certificates automatically.
+#
+# Assumes docker compose is running with:
+#   backend  → 127.0.0.1:8000
+#   frontend → 127.0.0.1:3000
+
+urbantrends.dev, www.urbantrends.dev {
+
+    # Django: API, allauth, accounts, admin, and static/media assets
+    handle /api/* {
+        reverse_proxy localhost:8000
+    }
+    handle /_allauth/* {
+        reverse_proxy localhost:8000
+    }
+    handle /accounts/* {
+        reverse_proxy localhost:8000
+    }
+    handle /admin/* {
+        reverse_proxy localhost:8000
+    }
+    handle /static/* {
+        reverse_proxy localhost:8000
+    }
+    handle /media/* {
+        reverse_proxy localhost:8000
+    }
+
+    # Next.js: everything else
+    handle {
+        reverse_proxy localhost:3000
+    }
+}
