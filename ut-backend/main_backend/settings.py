@@ -52,7 +52,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "change-me-in-production")
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 _extra_hosts = os.environ.get("ALLOWED_HOSTS", "")
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"] + [h.strip() for h in _extra_hosts.split(",") if h.strip()]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "backend"] + [h.strip() for h in _extra_hosts.split(",") if h.strip()]
 
 # Origins the browser may forward through the Next.js rewrite proxy.
 # In production add: CSRF_TRUSTED_ORIGINS=https://urbantrends.dev,https://www.urbantrends.dev
