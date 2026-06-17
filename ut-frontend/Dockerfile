@@ -10,12 +10,13 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Copy source and build. BACKEND_URL is only read by next.config.ts rewrites at
-# runtime (the standalone server reads process.env at boot), so it isn't needed
-# here. NEXT_PUBLIC_SITE_URL, however, is inlined into the client bundle at
-# build time, so it must be supplied as a build arg when set.
+# Rewrites in next.config.ts are baked into routes-manifest.json at build time,
+# so BACKEND_URL must be a build arg. NEXT_PUBLIC_SITE_URL is also inlined into
+# the client bundle at build time.
 ARG NEXT_PUBLIC_SITE_URL
+ARG BACKEND_URL=http://backend:8000
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+ENV BACKEND_URL=${BACKEND_URL}
 
 COPY . .
 RUN npm run build

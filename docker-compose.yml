@@ -59,8 +59,9 @@ services:
     build:
       context: ./ut-frontend
       args:
-        # Inlined into the client bundle at build time.
+        # Both are baked into the build output at build time.
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-}
+        BACKEND_URL: http://backend:8000
     restart: unless-stopped
     environment:
       # Same-origin proxying happens at Caddy; next.config.ts rewrites still
