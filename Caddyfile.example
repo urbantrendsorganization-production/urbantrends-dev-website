@@ -7,30 +7,18 @@
 #   backend  → 127.0.0.1:8000
 #   frontend → 127.0.0.1:3000
 
+# Public website — all traffic goes to Next.js.
+# next.config.ts rewrites proxy /_allauth/*, /api/*, and /accounts/* to the
+# backend container over the internal Docker network, so no path splits needed.
 urbantrends.dev, www.urbantrends.dev {
+    reverse_proxy localhost:3000
+}
 
-    # Django: API, allauth, accounts, admin, and static/media assets
-    handle /api/* {
-        reverse_proxy localhost:8000
-    }
-    handle /_allauth/* {
-        reverse_proxy localhost:8000
-    }
-    handle /accounts/* {
-        reverse_proxy localhost:8000
-    }
-    handle /admin/* {
-        reverse_proxy localhost:8000
-    }
-    handle /static/* {
-        reverse_proxy localhost:8000
-    }
-    handle /media/* {
-        reverse_proxy localhost:8000
-    }
-
-    # Next.js: everything else
-    handle {
-        reverse_proxy localhost:3000
+# Django backend — admin dashboard and direct API access.
+# Django reads X-Forwarded-Proto to determine request.is_secure(), which is
+# required for WebAuthn origin checks and secure-cookie delivery.
+api.urbantrends.dev {
+    reverse_proxy localhost:8000 {
+        header_up X-Forwarded-Proto {scheme}
     }
 }
