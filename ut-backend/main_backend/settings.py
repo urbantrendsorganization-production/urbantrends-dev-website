@@ -165,7 +165,7 @@ JAZZMIN_UI_TWEAKS = {
     'sidebar':                   'sidebar-dark-primary',
     'sidebar_nav_compact_style': True,
     'theme':                     'darkly',
-    'dark_mode_theme':           'darkly',
+    'default_theme_mode':        'dark',
 }
 
 REST_FRAMEWORK = {
@@ -345,8 +345,45 @@ STORAGES = {
     "staticfiles": {"BACKEND": "main_backend.storage.ManifestStaticFilesStorage"},
 }
 
+# Fall back to the unhashed filename instead of raising ValueError when a file
+# is missing from staticfiles.json. Prevents 500s from stale or partial manifests.
+WHITENOISE_MANIFEST_STRICT = False
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO" if DEBUG else "WARNING",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}
 
 # Production-only security headers. HSTS tells browsers to always use HTTPS —
 # enable only once the site is reliably on HTTPS (not on first deploy).
