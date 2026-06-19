@@ -11,9 +11,12 @@ from rest_framework.response import Response
 from .models import GmailThread
 from .serializers import GmailThreadSerializer, GmailThreadDetailSerializer
 
+# Google always returns extra scopes (openid, profile, email) alongside the
+# requested ones. Tell oauthlib not to treat a broader scope as an error.
+os.environ.setdefault('OAUTHLIB_RELAX_TOKEN_SCOPE', '1')
+
 if settings.DEBUG:
     os.environ.setdefault('OAUTHLIB_INSECURE_TRANSPORT', '1')
-    os.environ.setdefault('OAUTHLIB_RELAX_TOKEN_SCOPE', '1')
 
 
 @staff_member_required
