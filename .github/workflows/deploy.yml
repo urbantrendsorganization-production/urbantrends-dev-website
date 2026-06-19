@@ -49,7 +49,7 @@ jobs:
 
             echo "→ logging in to GHCR"
             echo "${{ secrets.VPS_GHCR_TOKEN }}" | \
-              docker login ghcr.io -u "${OWNER}" --password-stdin
+              docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
             echo "→ setting image tags (${SHA:0:7})"
             export BACKEND_IMAGE="ghcr.io/${OWNER}/urbantrends-backend:${SHA}"
