@@ -47,6 +47,17 @@ def fetch_user_repos(login, token=None):
     return results
 
 
+def fetch_user_orgs(token=None):
+    r = requests.get(
+        f'{BASE}/user/orgs',
+        headers=_headers(token),
+        params={'per_page': 100},
+        timeout=15,
+    )
+    r.raise_for_status()
+    return r.json()
+
+
 def fetch_org_repos(org, token=None):
     results = []
     page = 1

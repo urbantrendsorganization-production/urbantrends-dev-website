@@ -2,6 +2,14 @@ from rest_framework import serializers
 from .models import GitHubAccount, GitHubRepo
 
 
+class GitHubAccountSerializer(serializers.ModelSerializer):
+    repo_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = GitHubAccount
+        fields = ['id', 'login', 'account_type', 'avatar_url', 'synced_at', 'repo_count']
+
+
 class GitHubRepoSerializer(serializers.ModelSerializer):
     account_login = serializers.CharField(source='account.login', read_only=True)
 

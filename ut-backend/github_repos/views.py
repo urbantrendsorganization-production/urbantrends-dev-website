@@ -12,11 +12,12 @@ from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from django.db.models import Count
 from rest_framework import generics, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import GitHubRepo
-from .serializers import GitHubRepoSerializer
+from .models import GitHubAccount, GitHubRepo
+from .serializers import GitHubAccountSerializer, GitHubRepoSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -86,12 +87,35 @@ def github_callback(request):
         },
     )
 
-    # Immediately sync repos
+    # Sync personal repos immediately
     from .management.commands.sync_github_repos import sync_account
+    from .github_api import fetch_user_orgs
     try:
         sync_account(account)
     except Exception:
         logger.exception("Failed to sync repos for GitHub account %s", account.pk)
+
+    # Auto-create and sync each org the user belongs to
+    try:
+        orgs = fetch_user_orgs(access_token)
+    except Exception:
+        logger.exception("Failed to fetch org memberships for %s", login)
+        orgs = []
+
+    for org in orgs:
+        org_account, _ = GitHubAccount.objects.update_or_create(
+            login=org['login'],
+            defaults={
+                'account_type': 'org',
+                'avatar_url': org.get('avatar_url', ''),
+                'access_token': access_token,
+                'is_active': True,
+            },
+        )
+        try:
+            sync_account(org_account)
+        except Exception:
+            logger.exception("Failed to sync repos for org %s", org['login'])
 
     return redirect('/admin/github_repos/githubaccount/')
 
@@ -139,6 +163,18 @@ def github_webhook(request):
         except Exception as exc:
             errors[account.login] = str(exc)
     return JsonResponse({'event': event, 'synced': results, 'errors': errors})
+
+
+class GitHubAccountListView(generics.ListAPIView):
+    serializer_class = GitHubAccountSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_queryset(self):
+        return (
+            GitHubAccount.objects.filter(is_active=True)
+            .annotate(repo_count=Count('repos'))
+            .order_by('account_type', 'login')
+        )
 
 
 class GitHubRepoListView(generics.ListAPIView):

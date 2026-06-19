@@ -45,6 +45,24 @@ export async function listRepos(params?: {
   return res.json();
 }
 
+export type GitHubAccount = {
+  id: number;
+  login: string;
+  account_type: "user" | "org";
+  avatar_url: string;
+  synced_at: string | null;
+  repo_count: number;
+};
+
+export async function listAccounts(): Promise<GitHubAccount[]> {
+  const res = await fetch(`${API}/github/accounts`, {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
 export async function syncRepos(): Promise<{ ok: boolean; error?: string }> {
   const res = await fetch(`${API}/github/sync`, {
     method: "POST",
