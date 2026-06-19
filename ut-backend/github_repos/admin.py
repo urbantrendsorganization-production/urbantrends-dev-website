@@ -135,11 +135,11 @@ class GitHubRepoAdmin(admin.ModelAdmin):
     @admin.display(description='Visibility')
     def privacy_badge(self, obj):
         if obj.is_private:
-            return format_html(
+            return mark_safe(
                 '<span style="background:#374151;color:#9ca3af;padding:2px 8px;'
                 'border-radius:12px;font-size:11px;font-weight:700;">Private</span>'
             )
-        return format_html(
+        return mark_safe(
             '<span style="background:#d1fae5;color:#065f46;padding:2px 8px;'
             'border-radius:12px;font-size:11px;font-weight:700;">Public</span>'
         )

@@ -18,24 +18,55 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-      - name: Deploy via SSH
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      # Ship the compose file to the VPS — the only file the server needs.
+      # Source code never touches the server; containers are pulled from GHCR.
+      - name: Copy docker-compose.yml to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: docker-compose.yml
+          target: ${{ secrets.VPS_DEPLOY_PATH }}
+
+      - name: Pull images & restart services
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || '22' }}
+          port: ${{ secrets.VPS_PORT || 22 }}
           script: |
             set -e
-            cd ${{ secrets.VPS_DEPLOY_PATH }}
 
-            echo "→ pulling latest code"
-            git pull origin main
+            SHA="${{ github.event.workflow_run.head_sha }}"
+            OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
 
-            echo "→ rebuilding containers"
-            docker compose up -d --build --remove-orphans
+            echo "→ logging in to GHCR"
+            echo "${{ secrets.VPS_GHCR_TOKEN }}" | \
+              docker login ghcr.io -u "${OWNER}" --password-stdin
 
-            echo "→ removing dangling images"
+            echo "→ setting image tags (${SHA:0:7})"
+            export BACKEND_IMAGE="ghcr.io/${OWNER}/urbantrends-backend:${SHA}"
+            export FRONTEND_IMAGE="ghcr.io/${OWNER}/urbantrends-frontend:${SHA}"
+
+            cd "${{ secrets.VPS_DEPLOY_PATH }}"
+
+            echo "→ pulling images"
+            docker compose pull backend frontend
+
+            echo "→ starting services"
+            docker compose up -d --no-build --remove-orphans
+
+            echo "→ running migrations"
+            docker compose exec -T backend python manage.py migrate --noinput
+
+            echo "→ pruning old images"
             docker image prune -f
 
-            echo "✓ deploy complete"
+            echo "✓ deployed ${SHA:0:7}"
