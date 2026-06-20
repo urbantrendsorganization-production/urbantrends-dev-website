@@ -13,6 +13,14 @@ const securityHeaders = [
 
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8000";
 
+// The SiteChat staff dashboard is a separate Next zone. When this is set, the
+// site proxies /tools/sitechat/* to it (multi-zone). The dashboard is built
+// with basePath=/tools/sitechat, so it owns that whole subtree, assets
+// included. Leave unset to disable (the route then 404s like any other page).
+// Examples: a Vercel deployment URL, or http://sitechat-dashboard:3000 on a
+// shared Docker network.
+const SITECHAT_DASHBOARD_URL = process.env.SITECHAT_DASHBOARD_URL;
+
 const nextConfig: NextConfig = {
   // Emit a self-contained server bundle for Docker (copies only the files
   // needed to run, so the runtime image doesn't need node_modules).
@@ -44,11 +52,34 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    return [
-      { source: "/api/:path*", destination: `${BACKEND_URL}/api/:path*` },
-      { source: "/_allauth/:path*", destination: `${BACKEND_URL}/_allauth/:path*` },
-      { source: "/accounts/:path*", destination: `${BACKEND_URL}/accounts/:path*` },
-    ];
+    // SiteChat zone is in beforeFiles so it owns /tools/sitechat even if a
+    // filesystem route ever appears there. Its API/WebSocket calls go straight
+    // to the relay (baked NEXT_PUBLIC_API_URL), not through these rewrites.
+    if (process.env.NODE_ENV === "production" && !SITECHAT_DASHBOARD_URL) {
+      console.warn(
+        "[SiteChat] SITECHAT_DASHBOARD_URL is unset — /tools/sitechat will 404",
+      );
+    }
+    const sitechat = SITECHAT_DASHBOARD_URL
+      ? [
+          {
+            source: "/tools/sitechat",
+            destination: `${SITECHAT_DASHBOARD_URL}/tools/sitechat`,
+          },
+          {
+            source: "/tools/sitechat/:path*",
+            destination: `${SITECHAT_DASHBOARD_URL}/tools/sitechat/:path*`,
+          },
+        ]
+      : [];
+    return {
+      beforeFiles: sitechat,
+      afterFiles: [
+        { source: "/api/:path*", destination: `${BACKEND_URL}/api/:path*` },
+        { source: "/_allauth/:path*", destination: `${BACKEND_URL}/_allauth/:path*` },
+        { source: "/accounts/:path*", destination: `${BACKEND_URL}/accounts/:path*` },
+      ],
+    };
   },
 };
 
