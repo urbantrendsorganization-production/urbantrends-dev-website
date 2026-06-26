@@ -122,9 +122,6 @@ class ProjectsView(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class   = ProjectSerializer
 
-    def get_serializer_context(self):
-        return {'request': self.request}
-
     def get_queryset(self):
         qs = Project.objects.filter(is_active=True)
         if self.request.query_params.get('featured') in ('1', 'true', 'True'):

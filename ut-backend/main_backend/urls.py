@@ -15,9 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.static import serve as serve_media
 
 from accounts.views import geo
 
@@ -33,7 +33,12 @@ urlpatterns = [
     path('api/', include('github_repos.urls')),
     path('api/', include('deployments.urls')),
     path('api/', include('gmail.urls')),
-]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Serve user-uploaded media in every environment. WhiteNoise only handles
+    # STATIC_ROOT (and indexes at boot, so it can't serve runtime uploads), and
+    # the deployed Caddy config forwards everything on api.urbantrends.dev to
+    # Django — so Django itself must serve /media/. Fine for a low-traffic,
+    # admin-managed marketing site; front it with a CDN/object storage if this
+    # ever gets hot.
+    re_path(r'^media/(?P<path>.*)$', serve_media, {'document_root': settings.MEDIA_ROOT}),
+]

@@ -41,7 +41,14 @@ RUN SECRET_KEY=build-time-collectstatic DEBUG=False \
 
 # Non-root user for defence-in-depth. UID 1001 avoids colliding with any
 # system account present in the base image.
+#
+# Create MEDIA_ROOT (/app/media) at build time so that when the named `media`
+# volume is first mounted onto it, Docker propagates this dir's django
+# ownership into the fresh volume. Without this the mountpoint is created
+# root-owned and the non-root process can't write uploads (e.g. admin image
+# uploads -> PermissionError on /app/media/<upload_to>).
 RUN useradd --system --uid 1001 --no-create-home django \
+    && mkdir -p /app/media \
     && chown -R django:django /app
 
 # Entrypoint installed as root so it can live in /usr/local/bin.

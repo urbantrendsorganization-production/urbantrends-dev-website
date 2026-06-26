@@ -78,6 +78,10 @@ const nextConfig: NextConfig = {
         { source: "/api/:path*", destination: `${BACKEND_URL}/api/:path*` },
         { source: "/_allauth/:path*", destination: `${BACKEND_URL}/_allauth/:path*` },
         { source: "/accounts/:path*", destination: `${BACKEND_URL}/accounts/:path*` },
+        // User-uploaded media (partner logos, project covers) is served by
+        // Django. Proxy it so the browser loads it same-origin instead of
+        // hitting the internal backend host directly.
+        { source: "/media/:path*", destination: `${BACKEND_URL}/media/:path*` },
       ],
     };
   },

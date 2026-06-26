@@ -31,10 +31,11 @@ class PartnerSerializer(serializers.ModelSerializer):
         fields = ['name', 'category', 'logo', 'website_url']
 
     def get_logo(self, obj):
+        # Return a relative /media/... path so the browser loads it same-origin
+        # (proxied through the frontend), rather than an absolute URL built from
+        # the internal backend host (http://backend:8000) seen on server-side
+        # fetches.
         if obj.logo_image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.logo_image.url)
             return obj.logo_image.url
         return obj.logo_url or ''
 
@@ -90,10 +91,8 @@ class ProjectSerializer(serializers.ModelSerializer):
         ]
 
     def get_cover(self, obj):
+        # Relative /media/... path — see PartnerSerializer.get_logo.
         if obj.cover_image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.cover_image.url)
             return obj.cover_image.url
         return obj.cover_url or ''
 
