@@ -230,6 +230,62 @@ class Tool(models.Model):
         return self.name
 
 
+class Project(models.Model):
+    """A delivered piece of work, shown in the 'Recent work' showcase."""
+
+    CATEGORY_CHOICES = [
+        ('product',     'Product Build'),
+        ('web',         'Website / Web App'),
+        ('mobile',      'Mobile App'),
+        ('integration', 'API & Integration'),
+        ('tooling',     'Developer Tooling'),
+        ('branding',    'Design & Branding'),
+        ('other',       'Other'),
+    ]
+
+    title       = models.CharField(max_length=200)
+    slug        = models.SlugField(unique=True, help_text='URL-friendly identifier, e.g. "rentflow-rebuild"')
+    client      = models.CharField(max_length=150, blank=True, help_text='Client / company name (optional)')
+    category    = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='product')
+    summary     = models.CharField(max_length=300, help_text='One-liner shown on the card')
+    description = models.TextField(blank=True, help_text='Longer write-up shown on the project page (Markdown supported)')
+
+    cover_image = models.ImageField(
+        upload_to='projects/', blank=True, null=True,
+        help_text='Upload a cover image (PNG, JPG, SVG, or WebP).'
+    )
+    cover_url   = models.URLField(
+        blank=True,
+        help_text='Alternative to uploading: paste a direct URL to the cover image.'
+    )
+
+    tags         = models.JSONField(
+        default=list, blank=True,
+        help_text='List of strings shown as chips, e.g. ["Next.js", "Django", "M-Pesa"].'
+    )
+    accent_color = models.CharField(max_length=20, default='#22D3EE', blank=True,
+                                    help_text='Hex color for the card accent')
+
+    live_url      = models.URLField(blank=True, help_text='Live site / product URL (optional)')
+    result_metric = models.CharField(
+        max_length=120, blank=True,
+        help_text='Headline outcome, e.g. "2.4M transactions reconciled" (optional)'
+    )
+    year          = models.CharField(max_length=10, blank=True, help_text='e.g. "2025"')
+    completed_at  = models.DateField(null=True, blank=True, help_text='Completion date — newest shown first')
+
+    is_featured = models.BooleanField(default=False, help_text='Show in the homepage "Recent work" teaser')
+    is_active   = models.BooleanField(default=True)
+    order       = models.PositiveSmallIntegerField(default=0)
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-completed_at', '-created_at']
+
+    def __str__(self):
+        return f'{self.title}' + (f' — {self.client}' if self.client else '')
+
+
 class ContactInquiry(models.Model):
     SUBJECT_CHOICES = [
         ('general',     'General enquiry'),

@@ -7,7 +7,7 @@ from django.utils.html import format_html
 
 from .models import (
     SiteSettings, HeroStat, Partner, Testimonial,
-    ChangelogEntry, TeamMember, AboutMetric, ServiceStatus, Tool, ContactInquiry,
+    ChangelogEntry, TeamMember, AboutMetric, ServiceStatus, Tool, Project, ContactInquiry,
 )
 
 
@@ -246,6 +246,58 @@ class ToolAdmin(admin.ModelAdmin):
     @admin.display(boolean=True, description='Has icon')
     def has_icon(self, obj):
         return bool(obj.icon_svg)
+
+
+@admin.register(Project)
+class ProjectAdmin(admin.ModelAdmin):
+    list_display  = ['title', 'client', 'category', 'year', 'is_featured', 'order', 'is_active', 'cover_preview']
+    list_editable = ['is_featured', 'order', 'is_active']
+    list_filter   = ['category', 'is_featured', 'is_active']
+    search_fields = ['title', 'client', 'summary', 'description']
+    prepopulated_fields = {'slug': ('title',)}
+    ordering      = ['order', '-completed_at']
+    readonly_fields = ['cover_preview']
+    fieldsets = (
+        ('Identity', {
+            'fields': ('title', 'slug', 'client', 'category'),
+        }),
+        ('Content', {
+            'fields': ('summary', 'description', 'tags'),
+            'description': (
+                'Tags format: a JSON list of strings, e.g. '
+                '<code>["Next.js", "Django", "M-Pesa"]</code>.'
+            ),
+        }),
+        ('Cover', {
+            'fields': ('cover_image', 'cover_url', 'cover_preview'),
+            'description': (
+                'Upload a file <strong>or</strong> paste an image URL — whichever you set is used. '
+                'Upload takes priority over URL if both are filled.'
+            ),
+        }),
+        ('Details', {
+            'fields': ('accent_color', 'live_url', 'result_metric', 'year', 'completed_at'),
+        }),
+        ('Display', {
+            'fields': ('is_featured', 'is_active', 'order'),
+            'description': 'Check <strong>is_featured</strong> to surface the project in the homepage "Recent work" teaser.',
+        }),
+    )
+
+    @admin.display(description='Cover')
+    def cover_preview(self, obj):
+        src = ''
+        if obj.cover_image:
+            src = obj.cover_image.url
+        elif obj.cover_url:
+            src = obj.cover_url
+        if src:
+            return format_html(
+                '<img src="{}" style="height:54px;max-width:160px;object-fit:cover;'
+                'background:#161619;border-radius:6px;" />',
+                src
+            )
+        return '—'
 
 
 @admin.register(ContactInquiry)

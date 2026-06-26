@@ -5,8 +5,9 @@ import OrbitalTemplate from "@/components/hero/OrbitalTemplate";
 import CodeTemplate from "@/components/hero/CodeTemplate";
 import GridTemplate from "@/components/hero/GridTemplate";
 import MinimalTemplate from "@/components/hero/MinimalTemplate";
-import { getHomeData, type SiteSettings, type HeroStat, type Partner, type Testimonial } from "@/lib/cms";
+import { getHomeData, getProjects, type SiteSettings, type HeroStat, type Partner, type Testimonial } from "@/lib/cms";
 import { listServices, type Service } from "@/lib/services";
+import ProjectCard from "@/components/ProjectCard";
 
 const FALLBACK_RAILS = ["TypeScript", "PostgreSQL", "Next.js", "Django", "Redis", "Docker"];
 
@@ -98,12 +99,14 @@ const ARROW_SVG = (
 );
 
 export default async function HomeContent() {
-  const [{ settings, stats, partners_rails, partners_trusted, testimonials }, apiServices] = await Promise.all([
+  const [{ settings, stats, partners_rails, partners_trusted, testimonials }, apiServices, featuredProjects] = await Promise.all([
     getHomeData(),
     listServices().catch(() => []),
+    getProjects({ featured: true }).catch(() => []),
   ]);
 
   const services = apiServices.length > 0 ? apiServices : FALLBACK_SERVICES;
+  const projects = featuredProjects.slice(0, 3);
 
   const railsItems = partners_rails.length > 0
     ? partners_rails.map((p: Partner) => p.name)
@@ -241,6 +244,45 @@ export default async function HomeContent() {
           </div>
         </div>
       </section>
+
+      {/* ===== RECENT WORK ===== */}
+      {projects.length > 0 && (
+        <section className="section" id="work" style={{ borderTop: "1px solid var(--border)" }}>
+          <div className="wrap">
+            <div className="section-head">
+              <span className="eyebrow muted">Recent work</span>
+              <h2>Shipped, deployed, still running.</h2>
+              <p>A few of the products and systems we&apos;ve built and put into production lately.</p>
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 340px), 1fr))",
+                gap: 22,
+              }}
+            >
+              {projects.map((project) => (
+                <ProjectCard key={project.slug} project={project} />
+              ))}
+            </div>
+            <div style={{ marginTop: 32, display: "flex", justifyContent: "flex-end" }}>
+              <Link
+                href="/work"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  fontSize: 14, fontWeight: 600, color: "var(--accent-text)",
+                  textDecoration: "none",
+                }}
+              >
+                View all work
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="14" height="14">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ===== ENGINEERING QUALITY ===== */}
       <section className="section" style={{ borderTop: "1px solid var(--border)" }}>

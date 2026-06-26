@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     SiteSettings, HeroStat, Partner, Testimonial,
-    ChangelogEntry, TeamMember, AboutMetric, Tool, ContactInquiry,
+    ChangelogEntry, TeamMember, AboutMetric, Tool, Project, ContactInquiry,
 )
 
 
@@ -75,6 +75,27 @@ class ToolSerializer(serializers.ModelSerializer):
             'cta_label', 'cta_url',
             'is_free', 'is_coming_soon',
         ]
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    cover          = serializers.SerializerMethodField()
+    category_label = serializers.CharField(source='get_category_display', read_only=True)
+
+    class Meta:
+        model  = Project
+        fields = [
+            'title', 'slug', 'client', 'category', 'category_label',
+            'summary', 'description', 'cover', 'tags', 'accent_color',
+            'live_url', 'result_metric', 'year', 'is_featured',
+        ]
+
+    def get_cover(self, obj):
+        if obj.cover_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.cover_image.url)
+            return obj.cover_image.url
+        return obj.cover_url or ''
 
 
 class ContactInquirySerializer(serializers.ModelSerializer):

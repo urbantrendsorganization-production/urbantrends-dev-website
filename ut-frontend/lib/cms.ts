@@ -104,6 +104,26 @@ export type Tool = {
   is_coming_soon: boolean;
 };
 
+export type ProjectCategory =
+  | 'product' | 'web' | 'mobile' | 'integration' | 'tooling' | 'branding' | 'other';
+
+export type Project = {
+  title: string;
+  slug: string;
+  client: string;
+  category: ProjectCategory;
+  category_label: string;
+  summary: string;
+  description: string;
+  cover: string;
+  tags: string[];
+  accent_color: string;
+  live_url: string;
+  result_metric: string;
+  year: string;
+  is_featured: boolean;
+};
+
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -186,6 +206,18 @@ export async function getSiteStatus(): Promise<ServiceStatusResult[]> {
 export async function getTools(): Promise<Tool[]> {
   try {
     const res = await fetch(`${API}/cms/tools`, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : (data.results ?? []);
+  } catch {
+    return [];
+  }
+}
+
+export async function getProjects(opts: { featured?: boolean } = {}): Promise<Project[]> {
+  try {
+    const qs = opts.featured ? '?featured=true' : '';
+    const res = await fetch(`${API}/cms/projects${qs}`, { cache: 'no-store' });
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data : (data.results ?? []);

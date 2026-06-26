@@ -13,13 +13,13 @@ from rest_framework import serializers as drf_serializers
 
 from .models import (
     SiteSettings, HeroStat, Partner, Testimonial,
-    ChangelogEntry, TeamMember, AboutMetric, ServiceStatus, Tool, ContactInquiry,
+    ChangelogEntry, TeamMember, AboutMetric, ServiceStatus, Tool, Project, ContactInquiry,
 )
 from .serializers import (
     SiteSettingsSerializer, HeroStatSerializer, PartnerSerializer,
     TestimonialSerializer, ChangelogEntrySerializer,
     TeamMemberSerializer, AboutMetricSerializer, ToolSerializer,
-    ContactInquirySerializer,
+    ProjectSerializer, ContactInquirySerializer,
 )
 
 
@@ -106,6 +106,29 @@ class ToolsView(ListAPIView):
 
     def get_queryset(self):
         qs = Tool.objects.filter(is_active=True)
+        category = self.request.query_params.get('category')
+        if category:
+            qs = qs.filter(category=category)
+        return qs
+
+
+class ProjectsView(ListAPIView):
+    """GET /api/cms/projects — published portfolio entries.
+
+    Query params:
+      ?featured=true   only homepage-featured projects
+      ?category=<key>  filter by category
+    """
+    permission_classes = [AllowAny]
+    serializer_class   = ProjectSerializer
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+
+    def get_queryset(self):
+        qs = Project.objects.filter(is_active=True)
+        if self.request.query_params.get('featured') in ('1', 'true', 'True'):
+            qs = qs.filter(is_featured=True)
         category = self.request.query_params.get('category')
         if category:
             qs = qs.filter(category=category)

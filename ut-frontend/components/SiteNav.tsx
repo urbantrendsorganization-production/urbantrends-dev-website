@@ -130,6 +130,13 @@ export default function SiteNav() {
           </Link>
           <Link
             className="nav-link"
+            href={p("work")}
+            aria-current={active(pathname.endsWith("/work"))}
+          >
+            Work
+          </Link>
+          <Link
+            className="nav-link"
             href={p("docs")}
             aria-current={active(pathname.endsWith("/docs"))}
           >
@@ -289,6 +296,7 @@ export default function SiteNav() {
       <nav className="mnav-section" aria-label="Site navigation">
         <Link className="mnav-link" href={p("tools")} aria-current={active(pathname.includes("/tools"))} onClick={() => setMobileOpen(false)}>Tools</Link>
         <Link className="mnav-link" href={p("services")} aria-current={active(pathname.endsWith("/services"))} onClick={() => setMobileOpen(false)}>Services</Link>
+        <Link className="mnav-link" href={p("work")} aria-current={active(pathname.endsWith("/work"))} onClick={() => setMobileOpen(false)}>Work</Link>
         <Link className="mnav-link" href={p("docs")} aria-current={active(pathname.endsWith("/docs"))} onClick={() => setMobileOpen(false)}>Developers</Link>
         <Link className="mnav-link" href={p("blog")} aria-current={active(pathname.endsWith("/blog"))} onClick={() => setMobileOpen(false)}>Blog</Link>
         <Link className="mnav-link" href={p("changelog")} aria-current={active(pathname.endsWith("/changelog"))} onClick={() => setMobileOpen(false)}>Changelog</Link>
