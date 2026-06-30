@@ -622,7 +622,7 @@ pre.code .v { color: #e6e6ee; }
   background: var(--bg);
   border-top: 1px solid var(--border);
   display: flex; flex-direction: column; align-items: center; text-align: center;
-  padding: 7rem 1.25rem 4.5rem;
+  padding: 7.75rem 1.25rem 4.5rem;
 }
 .lamp-stage {
   position: absolute; top: 0; left: 50%; z-index: 0;
@@ -693,6 +693,14 @@ pre.code .v { color: #e6e6ee; }
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .lamp-sub { margin: 16px 0 0; color: var(--fg-muted); max-width: 52ch; font-size: 15px; }
+@media (max-width: 640px) {
+  .lamp { padding: 8.25rem 1.25rem 3.5rem; }
+  .lamp-stage { height: 13rem; }
+  .lamp-title { font-size: clamp(1.7rem, 8.5vw, 2.3rem); letter-spacing: -1px; max-width: 14ch; }
+  .lamp-sub { font-size: 14px; }
+  .lamp-line, .lamp-glow { top: 6rem; }
+  .lamp-spot { top: 5.5rem; }
+}
 @media (prefers-reduced-motion: reduce) {
   .lamp-cone, .lamp-spot, .lamp-line, .lamp-content { transition: none; }
 }
