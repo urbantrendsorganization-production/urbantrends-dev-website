@@ -8,6 +8,9 @@ import MinimalTemplate from "@/components/hero/MinimalTemplate";
 import { getHomeData, getProjects, type SiteSettings, type HeroStat, type Partner, type Testimonial } from "@/lib/cms";
 import { listServices, type Service } from "@/lib/services";
 import ProjectCard from "@/components/ProjectCard";
+import CyberneticGridShader from "@/components/ui/cybernetic-grid-shader";
+import { LampContainer } from "@/components/ui/lamp";
+import RevealController from "@/components/ui/RevealController";
 
 const FALLBACK_RAILS = ["TypeScript", "PostgreSQL", "Next.js", "Django", "Redis", "Docker"];
 
@@ -99,14 +102,18 @@ const ARROW_SVG = (
 );
 
 export default async function HomeContent() {
-  const [{ settings, stats, partners_rails, partners_trusted, testimonials }, apiServices, featuredProjects] = await Promise.all([
+  const [{ settings, stats, partners_rails, partners_trusted, testimonials }, apiServices, allProjects] = await Promise.all([
     getHomeData(),
     listServices().catch(() => []),
-    getProjects({ featured: true }).catch(() => []),
+    getProjects().catch(() => []),
   ]);
 
   const services = apiServices.length > 0 ? apiServices : FALLBACK_SERVICES;
-  const projects = featuredProjects.slice(0, 3);
+  // Show featured projects first, then fill up to 4 cards with the most recent
+  // remaining work. Anything beyond that lives on the /work page.
+  const projects = [...allProjects]
+    .sort((a, b) => Number(b.is_featured) - Number(a.is_featured))
+    .slice(0, 4);
 
   const railsItems = partners_rails.length > 0
     ? partners_rails.map((p: Partner) => p.name)
@@ -116,6 +123,11 @@ export default async function HomeContent() {
 
   return (
     <>
+      <RevealController />
+      <noscript>
+        <style>{`[data-reveal]{opacity:1!important;transform:none!important}`}</style>
+      </noscript>
+
       {/* ===== HERO ===== */}
       <section className="hero">
         <div className="hero-bg">
@@ -128,6 +140,10 @@ export default async function HomeContent() {
             priority
             aria-hidden="true"
           />
+        </div>
+
+        <div className="hero-shader">
+          <CyberneticGridShader />
         </div>
 
         <div className="wrap hero-grid">
@@ -198,18 +214,19 @@ export default async function HomeContent() {
       {/* ===== SERVICES ===== */}
       <section className="section" id="services" style={{ borderTop: "1px solid var(--border)" }}>
         <div className="wrap">
-          <div className="section-head">
+          <div className="section-head" data-reveal>
             <span className="eyebrow muted">What we build</span>
             <h2>Software that earns its keep.</h2>
             <p>From end-to-end product development to targeted integrations and consulting — we build whatever the operation needs, then stand behind it.</p>
           </div>
           <div className="home-svc-grid">
-            {services.map((svc: Service) => (
+            {services.map((svc: Service, i: number) => (
               <Link
                 key={svc.slug}
                 className="hsvc-card"
                 href={`/services/${svc.slug}`}
-                style={{ "--pa": svc.accent_color } as React.CSSProperties}
+                data-reveal
+                style={{ "--pa": svc.accent_color, "--reveal-delay": `${(i % 3) * 0.07}s` } as React.CSSProperties}
               >
                 <div className="hsvc-top">
                   <span className="pglyph">
@@ -245,49 +262,102 @@ export default async function HomeContent() {
         </div>
       </section>
 
+      {/* ===== HOW WE WORK ===== */}
+      <section className="section" id="process" style={{ borderTop: "1px solid var(--border)" }}>
+        <div className="wrap">
+          <div className="section-head" data-reveal>
+            <span className="eyebrow muted">How we work</span>
+            <h2>From kickoff to production.</h2>
+            <p>A tight, transparent loop. No black boxes, no surprise invoices — you see the work take shape every week.</p>
+          </div>
+          <div className="process-grid">
+            {[
+              { n: "01", t: "Scope", d: "We map the problem, pin the constraints, and agree on what 'done' means before a line is written." },
+              { n: "02", t: "Design", d: "Architecture, data model, and UX flows — reviewed with you so there are no surprises in the build." },
+              { n: "03", t: "Build", d: "Typed end-to-end, CI on every commit, shipped to a preview URL you can click through weekly." },
+              { n: "04", t: "Ship", d: "Zero-downtime deploy, docs handed over, and support while it beds in. Then it's yours." },
+            ].map((s, i) => (
+              <div key={s.n} className="process-step" data-reveal style={{ "--reveal-delay": `${i * 0.09}s` } as React.CSSProperties}>
+                <span className="process-num">{s.n}</span>
+                <h3>{s.t}</h3>
+                <p>{s.d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ===== RECENT WORK ===== */}
-      {projects.length > 0 && (
-        <section className="section" id="work" style={{ borderTop: "1px solid var(--border)" }}>
+      <section className="section" id="work" style={{ borderTop: "1px solid var(--border)" }}>
           <div className="wrap">
-            <div className="section-head">
+            <div className="section-head" data-reveal>
               <span className="eyebrow muted">Recent work</span>
               <h2>Shipped, deployed, still running.</h2>
               <p>A few of the products and systems we&apos;ve built and put into production lately.</p>
             </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 340px), 1fr))",
-                gap: 22,
-              }}
-            >
-              {projects.map((project) => (
-                <ProjectCard key={project.slug} project={project} />
-              ))}
+
+            <div className="work-showcase">
+              <figure className="work-shot" data-reveal>
+                <Image
+                  src="/images/showcase/multi-device.jpg"
+                  alt="A product build shown across laptop, tablet, and phone"
+                  fill
+                  sizes="(max-width: 760px) 100vw, 56vw"
+                  style={{ objectFit: "cover" }}
+                />
+                <figcaption>Responsive across every device</figcaption>
+              </figure>
+              <figure className="work-shot" data-reveal style={{ "--reveal-delay": "0.08s" } as React.CSSProperties}>
+                <Image
+                  src="/images/showcase/laptop-windows.jpg"
+                  alt="An end-to-end web platform shown on a laptop"
+                  fill
+                  sizes="(max-width: 760px) 100vw, 40vw"
+                  style={{ objectFit: "cover" }}
+                />
+                <figcaption>Designed &amp; shipped end-to-end</figcaption>
+              </figure>
             </div>
-            <div style={{ marginTop: 32, display: "flex", justifyContent: "flex-end" }}>
-              <Link
-                href="/work"
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                  fontSize: 14, fontWeight: 600, color: "var(--accent-text)",
-                  textDecoration: "none",
-                }}
-              >
-                View all work
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="14" height="14">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-              </Link>
-            </div>
+
+            {projects.length > 0 && (
+              <>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 340px), 1fr))",
+                    gap: 22,
+                  }}
+                >
+                  {projects.map((project, i) => (
+                    <div key={project.slug} data-reveal style={{ "--reveal-delay": `${(i % 4) * 0.07}s` } as React.CSSProperties}>
+                      <ProjectCard project={project} />
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: 32, display: "flex", justifyContent: "flex-end" }}>
+                  <Link
+                    href="/work"
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      fontSize: 14, fontWeight: 600, color: "var(--accent-text)",
+                      textDecoration: "none",
+                    }}
+                  >
+                    View all work
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="14" height="14">
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </section>
-      )}
 
       {/* ===== ENGINEERING QUALITY ===== */}
       <section className="section" style={{ borderTop: "1px solid var(--border)" }}>
         <div className="wrap kenya-grid">
-          <div>
+          <div data-reveal>
             <span className="eyebrow muted">Engineering quality</span>
             <h2 style={{ margin: 0, fontSize: "clamp(28px,4vw,44px)", lineHeight: 1.04, letterSpacing: "-0.03em", fontWeight: 600 }}>
               Shipped right. Not just shipped.
@@ -307,7 +377,7 @@ export default async function HomeContent() {
               {"// "}<b>Deploy at 23:47 on a Friday.</b>{" "}Types check. Tests pass. Container ships. Your Monday morning is yours.
             </p>
           </div>
-          <div>
+          <div data-reveal style={{ "--reveal-delay": "0.1s" } as React.CSSProperties}>
             <div className="kenya-img-wrap">
               <Image fill sizes="(max-width: 920px) 100vw, 50vw" src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=700&q=80" alt="Engineers reviewing code" style={{ objectFit: "cover" }} />
             </div>
@@ -335,17 +405,71 @@ export default async function HomeContent() {
         </div>
       </section>
 
+      {/* ===== BENTO CAPABILITIES ===== */}
+      <section className="section" style={{ borderTop: "1px solid var(--border)" }}>
+        <div className="wrap">
+          <div className="section-head" data-reveal>
+            <span className="eyebrow muted">Built in, not bolted on</span>
+            <h2>Production defaults from commit one.</h2>
+            <p>The things teams usually retrofit under pressure — we wire them in from the start.</p>
+          </div>
+          <div className="bento-grid">
+            <div className="bento-tile bento-lg" data-reveal>
+              <span className="bento-tag">// always-on</span>
+              <h3>Observable, resilient, awake at 3AM so you aren&apos;t.</h3>
+              <p>Health checks, structured logs, alerting, and graceful failure baked into every service we ship.</p>
+              <div className="bento-orb">
+                <div className="bento-orb-grid" />
+              </div>
+            </div>
+
+            <div className="bento-tile" data-reveal style={{ "--reveal-delay": "0.06s" } as React.CSSProperties}>
+              <span className="bento-glyph">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="20" height="20"><path d="M7 8l4 4-4 4M13 16h4M3 4h18v16H3" /></svg>
+              </span>
+              <h3>Type-safe end to end</h3>
+              <p>One schema, zero casts — frontend, backend, and database share the same types.</p>
+            </div>
+
+            <div className="bento-tile" data-reveal style={{ "--reveal-delay": "0.12s" } as React.CSSProperties}>
+              <span className="bento-glyph">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="20" height="20"><path d="M13 2 3 14h7l-1 8 10-12h-7z" /></svg>
+              </span>
+              <h3>Zero-downtime deploys</h3>
+              <p>Ship on a Friday. Rollbacks are one click; users never see a blip.</p>
+            </div>
+
+            <div className="bento-tile bento-wide" data-reveal style={{ "--reveal-delay": "0.06s" } as React.CSSProperties}>
+              <span className="bento-tag">// p95 latency, trailing 24h</span>
+              <h3>Fast by measurement, not by vibes.</h3>
+              <div className="bento-bars">
+                {[0.5, 0.7, 0.45, 0.8, 0.6, 0.9, 0.55, 0.75, 0.5, 0.85, 0.65, 0.7].map((_, i) => (
+                  <i key={i} style={{ animationDelay: `${i * 0.12}s` }} />
+                ))}
+              </div>
+            </div>
+
+            <div className="bento-tile" data-reveal style={{ "--reveal-delay": "0.12s" } as React.CSSProperties}>
+              <span className="bento-tag">// uptime</span>
+              <div className="bento-spacer" />
+              <div className="bento-stat">99.96%</div>
+              <p>Trailing 90 days, across every service in production.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ===== TESTIMONIALS ===== */}
       <section className="section divider-top">
         <div className="wrap">
-          <div className="section-head">
+          <div className="section-head" data-reveal>
             <span className="eyebrow muted">The work speaks for itself</span>
             <h2>Companies that run on what we build.</h2>
             <p>Real teams. Real software. No testimonial theatre.</p>
           </div>
           <div className="testimonials-grid">
             {displayTestimonials.map((t: Testimonial, i: number) => (
-              <div key={i} className="tcard">
+              <div key={i} className="tcard" data-reveal style={{ "--reveal-delay": `${(i % 3) * 0.07}s` } as React.CSSProperties}>
                 <p className="tquote">&ldquo;{t.quote}&rdquo;</p>
                 <div className="tfoot">
                   <div className="tavatar">
@@ -373,16 +497,53 @@ export default async function HomeContent() {
         </div>
       </section>
 
+      {/* ===== STACK / INTEGRATIONS ===== */}
+      <section className="section" style={{ borderTop: "1px solid var(--border)" }}>
+        <div className="wrap">
+          <div className="section-head" data-reveal>
+            <span className="eyebrow muted">The stack we build on</span>
+            <h2>Boring tech where it counts. Sharp tech where it pays.</h2>
+            <p>Proven, well-supported tools — plus the integrations that connect your business to the rest of the world.</p>
+          </div>
+          <div className="stack-grid">
+            {[
+              { m: "TS", n: "TypeScript", c: "Language" },
+              { m: "Nx", n: "Next.js", c: "Frontend" },
+              { m: "Re", n: "React", c: "UI" },
+              { m: "Dj", n: "Django", c: "Backend" },
+              { m: "Py", n: "Python", c: "Language" },
+              { m: "Pg", n: "PostgreSQL", c: "Database" },
+              { m: "Rd", n: "Redis", c: "Cache / Queue" },
+              { m: "Dk", n: "Docker", c: "Runtime" },
+              { m: "K8", n: "Kubernetes", c: "Orchestration" },
+              { m: "AWS", n: "AWS", c: "Cloud" },
+              { m: "Vc", n: "Vercel", c: "Edge / Deploy" },
+              { m: "St", n: "Stripe", c: "Payments" },
+              { m: "GQL", n: "GraphQL", c: "API" },
+              { m: "Gh", n: "GitHub", c: "CI / CD" },
+            ].map((s, i) => (
+              <div key={s.n} className="stack-item" data-reveal style={{ "--reveal-delay": `${(i % 7) * 0.05}s` } as React.CSSProperties}>
+                <span className="stack-mono">{s.m}</span>
+                <span className="stack-meta">
+                  <span className="stack-name">{s.n}</span>
+                  <span className="stack-cat">{s.c}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ===== TOOLS ===== */}
       <section className="section" id="tools" style={{ borderTop: "1px solid var(--border)" }}>
         <div className="wrap">
-          <div className="section-head">
+          <div className="section-head" data-reveal>
             <span className="eyebrow muted">Tool-led, not gated</span>
             <h2>Free tools we built because we needed them.</h2>
             <p>No email wall, no trial clock. If it saves us an afternoon, it&apos;ll save you one too.</p>
           </div>
           <div className="tools-grid">
-            <div className="tool">
+            <div className="tool" data-reveal>
               <div className="thead">
                 <span className="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18" /></svg></span>
                 <h4>Inspector</h4><span className="free">Free</span>
@@ -390,7 +551,7 @@ export default async function HomeContent() {
               <p>Intercept, inspect, and replay HTTP requests in real-time. Debug webhooks and API calls without touching Postman.</p>
               <div className="cmd"><span className="pr">$</span> inspector.urbantrends.dev <span className="cp">open</span></div>
             </div>
-            <div className="tool">
+            <div className="tool" data-reveal>
               <div className="thead">
                 <span className="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 3v18M3 7l9-4 9 4M3 17l9 4 9-4" /></svg></span>
                 <h4>Scaffold</h4><span className="free">Free</span>
@@ -398,7 +559,7 @@ export default async function HomeContent() {
               <p>Generate a type-safe backend from your database schema in one command. Typed routes, migrations, and tests included.</p>
               <div className="cmd"><span className="pr">$</span> npx @ut/scaffold init <span className="cp">copy</span></div>
             </div>
-            <div className="tool">
+            <div className="tool" data-reveal>
               <div className="thead">
                 <span className="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 9h18M8 14h5" /></svg></span>
                 <h4>OG Studio</h4><span className="free">Free</span>
@@ -425,22 +586,18 @@ export default async function HomeContent() {
         </div>
       </section>
 
-      {/* ===== CTA BAND ===== */}
-      <section className="cta-band">
-        <div className="wrap cta-inner">
-          <div>
-            <h2>Let&apos;s build something serious.</h2>
-            <p>Tell us what you&apos;re running. We&apos;ll scope it, price it fairly, and build it properly.</p>
-          </div>
-          <div className="hero-cta" style={{ margin: 0 }}>
-            <Link className="btn btn-primary" href="/services">
-              Our services
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </Link>
-            <Link className="btn btn-ghost" href="/contact">Talk to the team</Link>
-          </div>
+      {/* ===== CTA BAND (lamp) ===== */}
+      <LampContainer>
+        <h2 className="lamp-title">Let&apos;s build something serious.</h2>
+        <p className="lamp-sub">Tell us what you&apos;re running. We&apos;ll scope it, price it fairly, and build it properly.</p>
+        <div className="hero-cta" style={{ marginTop: 24, justifyContent: "center" }}>
+          <Link className="btn btn-primary" href="/services">
+            Our services
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </Link>
+          <Link className="btn btn-ghost" href="/contact">Talk to the team</Link>
         </div>
-      </section>
+      </LampContainer>
     </>
   );
 }

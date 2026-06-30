@@ -10,6 +10,7 @@ import {
   confirmLoginCode,
   type AllauthResponse,
 } from "@/lib/auth";
+import { MercuryBackdrop } from "@/components/ui/mercury-auth";
 
 type Mode = "passkey" | "code";
 type CodeStep = "email" | "verify";
@@ -192,16 +193,21 @@ export default function LoginForm() {
   };
 
   return (
-    <div
-      style={{
-        width: "100%",
-        maxWidth: 380,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      {LOGO}
+    <>
+      <MercuryBackdrop />
+
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          maxWidth: 380,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        {LOGO}
 
       {mode === "passkey" && (
         <>
@@ -357,6 +363,7 @@ export default function LoginForm() {
           Sign up
         </Link>
       </p>
-    </div>
+      </div>
+    </>
   );
 }

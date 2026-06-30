@@ -10,6 +10,7 @@ import {
   passkeySignupCeremony,
   type AllauthResponse,
 } from "@/lib/auth";
+import { MercuryBackdrop } from "@/components/ui/mercury-auth";
 
 type Step = "email" | "verify" | "passkey" | "done";
 type Status = { kind: "idle" } | { kind: "info" | "success" | "error"; msg: string };
@@ -222,177 +223,183 @@ export default function SignupForm() {
   };
 
   return (
-    <div
-      style={{
-        width: "100%",
-        maxWidth: 380,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      {LOGO}
+    <>
+      <MercuryBackdrop />
 
-      {step === "email" && (
-        <>
-          <h1 style={titleStyle}>Create your account</h1>
-          <p style={subtitleStyle}>Sign up with your work or personal email.</p>
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          maxWidth: 380,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        {LOGO}
 
-          {emailTaken && (
-            <div
-              role="alert"
+        {step === "email" && (
+          <>
+            <h1 style={titleStyle}>Create your account</h1>
+            <p style={subtitleStyle}>Sign up with your work or personal email.</p>
+
+            {emailTaken && (
+              <div
+                role="alert"
+                style={{
+                  width: "100%",
+                  padding: "10px 14px",
+                  borderRadius: 8,
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "rgba(255,255,255,0.04)",
+                  fontSize: 13,
+                  color: "rgba(255,255,255,0.6)",
+                  marginBottom: 12,
+                  textAlign: "center",
+                }}
+              >
+                That email already has an account.{" "}
+                <Link href="/login" style={{ color: "#22D3EE", textDecoration: "none" }}>
+                  Sign in instead
+                </Link>
+              </div>
+            )}
+
+            <form
+              onSubmit={submitEmail}
+              style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}
+            >
+              <input
+                type="email"
+                placeholder="you@company.ke"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={inputStyle}
+              />
+              <AuthBtn primary type="submit" disabled={pending}>
+                {pending ? "…" : "Continue with email"}
+              </AuthBtn>
+            </form>
+
+            <StatusMsg s={status} />
+
+            <p
               style={{
-                width: "100%",
-                padding: "10px 14px",
-                borderRadius: 8,
-                border: "1px solid rgba(255,255,255,0.1)",
-                background: "rgba(255,255,255,0.04)",
-                fontSize: 13,
-                color: "rgba(255,255,255,0.6)",
-                marginBottom: 12,
+                marginTop: 16,
+                fontSize: 12,
+                color: "rgba(255,255,255,0.28)",
                 textAlign: "center",
+                lineHeight: 1.5,
               }}
             >
-              That email already has an account.{" "}
-              <Link href="/login" style={{ color: "#22D3EE", textDecoration: "none" }}>
-                Sign in instead
+              By signing up, you agree to our{" "}
+              <Link href="/terms" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>
+                Privacy Policy
               </Link>
+              .
+            </p>
+          </>
+        )}
+
+        {step === "verify" && (
+          <>
+            <h1 style={titleStyle}>Check your inbox</h1>
+            <p style={subtitleStyle}>
+              Enter the code sent to{" "}
+              <span style={{ color: "rgba(255,255,255,0.7)" }}>{email}</span>
+            </p>
+
+            <form
+              onSubmit={submitCode}
+              style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}
+            >
+              <input
+                type="text"
+                inputMode="text"
+                autoComplete="one-time-code"
+                placeholder="XXXX-XXXX"
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value.toUpperCase())}
+                style={{
+                  ...inputStyle,
+                  letterSpacing: ".2em",
+                  textTransform: "uppercase",
+                  textAlign: "center",
+                  fontSize: 16,
+                }}
+              />
+              <AuthBtn primary type="submit" disabled={pending}>
+                {pending ? "Verifying…" : "Verify code"}
+              </AuthBtn>
+              <AuthBtn
+                onClick={() => { setStep("email"); setStatus({ kind: "idle" }); }}
+                disabled={pending}
+              >
+                Use a different email
+              </AuthBtn>
+            </form>
+
+            <StatusMsg s={status} />
+          </>
+        )}
+
+        {step === "passkey" && (
+          <>
+            <h1 style={titleStyle}>Add a passkey</h1>
+            <p style={subtitleStyle}>
+              Use your device — fingerprint, Face ID, or Windows Hello — instead of a password.
+            </p>
+
+            <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
+              <AuthBtn primary onClick={registerPasskey} disabled={pending}>
+                {pending ? "Waiting for authenticator…" : "Register passkey"}
+              </AuthBtn>
+              <AuthBtn
+                onClick={() => { router.push("/"); router.refresh(); }}
+                disabled={pending}
+              >
+                Skip — I&apos;ll use email codes
+              </AuthBtn>
             </div>
-          )}
 
-          <form
-            onSubmit={submitEmail}
-            style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}
-          >
-            <input
-              type="email"
-              placeholder="you@company.ke"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={inputStyle}
-            />
-            <AuthBtn primary type="submit" disabled={pending}>
-              {pending ? "…" : "Continue with email"}
-            </AuthBtn>
-          </form>
+            <StatusMsg s={status} />
+          </>
+        )}
 
-          <StatusMsg s={status} />
+        {step === "done" && (
+          <>
+            <h1 style={titleStyle}>You&apos;re in.</h1>
+            <p style={subtitleStyle}>Redirecting…</p>
+          </>
+        )}
 
+        {step !== "done" && (
           <p
             style={{
-              marginTop: 16,
-              fontSize: 12,
-              color: "rgba(255,255,255,0.28)",
+              marginTop: 28,
+              fontSize: 13,
+              color: "rgba(255,255,255,0.35)",
               textAlign: "center",
-              lineHeight: 1.5,
             }}
           >
-            By signing up, you agree to our{" "}
-            <Link href="/terms" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>
-              Privacy Policy
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}
+            >
+              Log in
             </Link>
-            .
           </p>
-        </>
-      )}
-
-      {step === "verify" && (
-        <>
-          <h1 style={titleStyle}>Check your inbox</h1>
-          <p style={subtitleStyle}>
-            Enter the code sent to{" "}
-            <span style={{ color: "rgba(255,255,255,0.7)" }}>{email}</span>
-          </p>
-
-          <form
-            onSubmit={submitCode}
-            style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}
-          >
-            <input
-              type="text"
-              inputMode="text"
-              autoComplete="one-time-code"
-              placeholder="XXXX-XXXX"
-              required
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              style={{
-                ...inputStyle,
-                letterSpacing: ".2em",
-                textTransform: "uppercase",
-                textAlign: "center",
-                fontSize: 16,
-              }}
-            />
-            <AuthBtn primary type="submit" disabled={pending}>
-              {pending ? "Verifying…" : "Verify code"}
-            </AuthBtn>
-            <AuthBtn
-              onClick={() => { setStep("email"); setStatus({ kind: "idle" }); }}
-              disabled={pending}
-            >
-              Use a different email
-            </AuthBtn>
-          </form>
-
-          <StatusMsg s={status} />
-        </>
-      )}
-
-      {step === "passkey" && (
-        <>
-          <h1 style={titleStyle}>Add a passkey</h1>
-          <p style={subtitleStyle}>
-            Use your device — fingerprint, Face ID, or Windows Hello — instead of a password.
-          </p>
-
-          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
-            <AuthBtn primary onClick={registerPasskey} disabled={pending}>
-              {pending ? "Waiting for authenticator…" : "Register passkey"}
-            </AuthBtn>
-            <AuthBtn
-              onClick={() => { router.push("/"); router.refresh(); }}
-              disabled={pending}
-            >
-              Skip — I&apos;ll use email codes
-            </AuthBtn>
-          </div>
-
-          <StatusMsg s={status} />
-        </>
-      )}
-
-      {step === "done" && (
-        <>
-          <h1 style={titleStyle}>You&apos;re in.</h1>
-          <p style={subtitleStyle}>Redirecting…</p>
-        </>
-      )}
-
-      {step !== "done" && (
-        <p
-          style={{
-            marginTop: 28,
-            fontSize: 13,
-            color: "rgba(255,255,255,0.35)",
-            textAlign: "center",
-          }}
-        >
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}
-          >
-            Log in
-          </Link>
-        </p>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }
