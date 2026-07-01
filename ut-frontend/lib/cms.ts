@@ -6,7 +6,7 @@ const API =
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type SiteSettings = {
-  active_hero_template: 'orbital' | 'code' | 'grid' | 'minimal';
+  active_hero_template: 'orbital' | 'code' | 'grid' | 'minimal' | 'aurora' | 'bento';
   hero_eyebrow: string;
   hero_headline: string;
   hero_subheading: string;

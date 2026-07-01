@@ -5,6 +5,8 @@ import OrbitalTemplate from "@/components/hero/OrbitalTemplate";
 import CodeTemplate from "@/components/hero/CodeTemplate";
 import GridTemplate from "@/components/hero/GridTemplate";
 import MinimalTemplate from "@/components/hero/MinimalTemplate";
+import AuroraTemplate from "@/components/hero/AuroraTemplate";
+import BentoTemplate from "@/components/hero/BentoTemplate";
 import { getHomeData, getProjects, type SiteSettings, type HeroStat, type Partner, type Testimonial } from "@/lib/cms";
 import { listServices, type Service } from "@/lib/services";
 import ProjectCard from "@/components/ProjectCard";
@@ -40,6 +42,8 @@ function HeroArt({ template }: { template: SiteSettings["active_hero_template"] 
     case "code":    return <CodeTemplate />;
     case "grid":    return <GridTemplate />;
     case "minimal": return <MinimalTemplate />;
+    case "aurora":  return <AuroraTemplate />;
+    case "bento":   return <BentoTemplate />;
     default:        return <OrbitalTemplate />;
   }
 }

@@ -1,0 +1,11 @@
+/* Let the wide pricing-tier inline scroll horizontally instead of squashing columns. */
+.inline-group .tabular fieldset.module {
+  overflow-x: auto;
+}
+.inline-group .tabular table {
+  width: max-content;
+  min-width: 100%;
+}
+.inline-group .tabular textarea {
+  min-width: 220px;
+}

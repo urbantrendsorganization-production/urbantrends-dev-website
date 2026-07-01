@@ -322,6 +322,7 @@ def auto_send_invoice_on_create(sender, instance, created, **kwargs):
 def notify_on_order(sender, instance, created, **kwargs):
     if created:
         _notify_staff_new_order(instance)
+        _notify_customer_status_change(instance)  # "We've received your order" confirmation
         instance._loaded_status = instance.status
         return
 

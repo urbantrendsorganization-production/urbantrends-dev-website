@@ -7,6 +7,8 @@ class SiteSettings(models.Model):
         ('code',    'Code Window'),
         ('grid',    '3D Grid'),
         ('minimal', 'Minimal Typography'),
+        ('aurora',  'Platform Stack (layered)'),
+        ('bento',   'Capability Bento (what we build)'),
     ]
 
     active_hero_template = models.CharField(

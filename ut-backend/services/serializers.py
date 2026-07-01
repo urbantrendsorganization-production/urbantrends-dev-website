@@ -13,7 +13,7 @@ class PricingPlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = PricingPlan
         fields = [
-            'id', 'name', 'price', 'billing_cycle',
+            'id', 'tier', 'name', 'description', 'price', 'billing_cycle',
             'is_quote', 'features', 'is_popular', 'order',
         ]
 
@@ -21,17 +21,25 @@ class PricingPlanSerializer(serializers.ModelSerializer):
 class ServiceListSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     category_slug = serializers.CharField(source='category.slug', read_only=True)
-    plans = PricingPlanSerializer(many=True, read_only=True)
+    is_tiered = serializers.BooleanField(source='uses_tiers', read_only=True)
+    plans = serializers.SerializerMethodField()
 
     class Meta:
         model = Service
         fields = [
             'id', 'name', 'slug', 'tagline',
             'icon_path', 'accent_color',
-            'is_featured', 'order',
+            'is_featured', 'is_tiered', 'order',
             'category_name', 'category_slug',
             'plans',
         ]
+
+    def get_plans(self, obj):
+        plans = list(obj.plans.all())
+        # For tier-based services, order cards Basic → Standard → Premium.
+        if obj.uses_tiers:
+            plans.sort(key=lambda p: (PricingPlan.TIER_RANK.get(p.tier, 99), p.order))
+        return PricingPlanSerializer(plans, many=True).data
 
 
 class ServiceDetailSerializer(ServiceListSerializer):

@@ -9,6 +9,10 @@ class ServiceCategory(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
     description = models.TextField(blank=True)
+    is_tiered = models.BooleanField(
+        default=False,
+        help_text="Services in this category are sold as Basic / Standard / Premium tiers.",
+    )
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -37,6 +41,11 @@ class Service(models.Model):
     )
     is_active = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False)
+    is_tiered = models.BooleanField(
+        default=False,
+        help_text="Sell this service as Basic / Standard / Premium tiers "
+                  "(also enabled automatically for tier-based categories).",
+    )
     order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -46,6 +55,10 @@ class Service(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def uses_tiers(self):
+        return self.is_tiered or (self.category_id is not None and self.category.is_tiered)
+
 
 class PricingPlan(models.Model):
     BILLING_CHOICES = [
@@ -53,8 +66,24 @@ class PricingPlan(models.Model):
         ('monthly', 'Monthly'),
         ('yearly', 'Yearly'),
     ]
+    TIER_CHOICES = [
+        ('basic', 'Basic'),
+        ('standard', 'Standard'),
+        ('premium', 'Premium'),
+    ]
+    # Rank used to order tier cards Basic → Standard → Premium.
+    TIER_RANK = {'basic': 0, 'standard': 1, 'premium': 2}
+
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='plans')
+    tier = models.CharField(
+        max_length=20, choices=TIER_CHOICES, blank=True,
+        help_text="Set for services in a tier-based category. Leave blank for custom plans.",
+    )
     name = models.CharField(max_length=100)
+    description = models.TextField(
+        blank=True,
+        help_text="Short summary shown under the tier name on the pricing card.",
+    )
     price = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True,
         help_text="Leave blank when is_quote=True",

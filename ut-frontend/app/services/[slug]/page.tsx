@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getService, type PricingPlan } from "@/lib/services";
+import { currencyForCountry, formatPrice, kesRate, type DisplayCurrency } from "@/lib/currency";
 import QuoteButton from "../QuoteButton";
+import GetStartedButton from "../GetStartedButton";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -22,7 +25,27 @@ const BILLING_LABELS: Record<string, string> = {
   yearly: "/ year",
 };
 
-function PlanCard({ plan, accent, serviceName }: { plan: PricingPlan; accent: string; serviceName: string }) {
+const TIER_LABELS: Record<string, string> = {
+  basic: "Basic",
+  standard: "Standard",
+  premium: "Premium",
+};
+
+function PlanCard({
+  plan,
+  accent,
+  serviceId,
+  serviceName,
+  currency,
+  rate,
+}: {
+  plan: PricingPlan;
+  accent: string;
+  serviceId: number;
+  serviceName: string;
+  currency: DisplayCurrency;
+  rate: number;
+}) {
   return (
     <div
       className={`plan-card${plan.is_popular ? " popular" : ""}`}
@@ -30,7 +53,11 @@ function PlanCard({ plan, accent, serviceName }: { plan: PricingPlan; accent: st
     >
       {plan.is_popular && <span className="plan-popular-badge">Most popular</span>}
 
+      {plan.tier && <span className="plan-tier-badge">{TIER_LABELS[plan.tier]}</span>}
+
       <div className="plan-name">{plan.name}</div>
+
+      {plan.description && <p className="plan-desc">{plan.description}</p>}
 
       {plan.is_quote ? (
         <>
@@ -41,7 +68,7 @@ function PlanCard({ plan, accent, serviceName }: { plan: PricingPlan; accent: st
         <>
           <div className="plan-price">
             {plan.price
-              ? <>KES {Number(plan.price).toLocaleString("en-KE")}<span> {BILLING_LABELS[plan.billing_cycle] ?? ""}</span></>
+              ? <>{formatPrice(Number(plan.price), currency, rate)}<span> {BILLING_LABELS[plan.billing_cycle] ?? ""}</span></>
               : "—"}
           </div>
           {plan.billing_cycle && (
@@ -53,16 +80,24 @@ function PlanCard({ plan, accent, serviceName }: { plan: PricingPlan; accent: st
       <div className="plan-divider" />
 
       {plan.features.length > 0 && (
-        <ul className="plan-features">
-          {plan.features.map((f) => (
-            <li key={f}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="13" height="13">
-                <path d="M5 12l5 5L20 6" />
-              </svg>
-              {f}
-            </li>
-          ))}
-        </ul>
+        <details className="plan-includes">
+          <summary>
+            <span>What&apos;s included</span>
+            <svg className="pi-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="14" height="14">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </summary>
+          <ul className="plan-features">
+            {plan.features.map((f) => (
+              <li key={f}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="13" height="13">
+                  <path d="M5 12l5 5L20 6" />
+                </svg>
+                {f}
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
 
       <div className="plan-cta">
@@ -74,8 +109,11 @@ function PlanCard({ plan, accent, serviceName }: { plan: PricingPlan; accent: st
             style={{ width: "100%", justifyContent: "center" }}
           />
         ) : (
-          <Link
-            href="/contact"
+          <GetStartedButton
+            serviceId={serviceId}
+            serviceName={serviceName}
+            planId={plan.id}
+            planName={plan.name}
             className="btn btn-primary"
             style={{
               width: "100%",
@@ -83,12 +121,7 @@ function PlanCard({ plan, accent, serviceName }: { plan: PricingPlan; accent: st
               background: plan.is_popular ? accent : undefined,
               borderColor: plan.is_popular ? accent : undefined,
             }}
-          >
-            Get started
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2">
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
-          </Link>
+          />
         )}
       </div>
     </div>
@@ -101,6 +134,20 @@ export default async function ServiceDetailPage({ params }: Props) {
   if (!service) notFound();
 
   const hasPlans = service.plans && service.plans.length > 0;
+
+  // Localise pricing to the visitor: KES for Kenya, approximate USD elsewhere.
+  const hdrs = await headers();
+  const country =
+    hdrs.get("x-vercel-ip-country") ||
+    (await cookies()).get("ut-country")?.value ||
+    "";
+  let currency = currencyForCountry(country);
+  let rate = 1;
+  if (currency !== "KES") {
+    const r = await kesRate(currency);
+    if (r) rate = r;
+    else currency = "KES"; // rate unavailable — fall back to the base currency
+  }
 
   return (
     <>
@@ -168,12 +215,20 @@ export default async function ServiceDetailPage({ params }: Props) {
           <div className="wrap">
             <div className="section-head">
               <span className="eyebrow muted">Pricing</span>
-              <h2>Choose a plan.</h2>
+              <h2>{service.is_tiered ? "Choose your tier." : "Choose a plan."}</h2>
               <p>All plans include a scoping call. No lock-in — scope adjustments are always a conversation, not a contract fight.</p>
             </div>
             <div className="plans-grid">
               {service.plans.map((plan) => (
-                <PlanCard key={plan.id} plan={plan} accent={service.accent_color} serviceName={service.name} />
+                <PlanCard
+                  key={plan.id}
+                  plan={plan}
+                  accent={service.accent_color}
+                  serviceId={service.id}
+                  serviceName={service.name}
+                  currency={currency}
+                  rate={rate}
+                />
               ))}
             </div>
           </div>

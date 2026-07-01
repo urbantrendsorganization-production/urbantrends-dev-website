@@ -1,4 +1,6 @@
+from django import forms
 from django.contrib import admin, messages
+from django.forms.models import BaseInlineFormSet
 
 from .models import Invoice, Order, OrderMessage, PricingPlan, QuoteRequest, Service, ServiceCategory
 from .signals import send_invoice_email
@@ -14,33 +16,111 @@ class ServiceInline(admin.TabularInline):
 
 @admin.register(ServiceCategory)
 class ServiceCategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'order')
+    list_display = ('name', 'slug', 'is_tiered', 'order')
+    list_editable = ('is_tiered', 'order')
     prepopulated_fields = {'slug': ('name',)}
     inlines = [ServiceInline]
 
 
+def _is_tiered(service):
+    return bool(service and service.pk and service.uses_tiers)
+
+
+def _missing_tiers(service):
+    """Tiers not yet created for this service, in Basic → Standard → Premium order."""
+    existing = set(service.plans.values_list('tier', flat=True))
+    return [(t, label) for t, label in PricingPlan.TIER_CHOICES if t not in existing]
+
+
+class PricingPlanInlineFormSet(BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get('instance')
+        if _is_tiered(instance):
+            # Pre-fill the extra rows with the tier + name that are still missing,
+            # so staff only have to set prices/descriptions to complete the three tiers.
+            kwargs['initial'] = [
+                {'tier': t, 'name': label} for t, label in _missing_tiers(instance)
+            ]
+        super().__init__(*args, **kwargs)
+
+
+class PricingPlanAdminForm(forms.ModelForm):
+    """Edit the `features` JSON list as one inclusion per line."""
+    features = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'rows': 5, 'cols': 30, 'placeholder': 'One inclusion per line'}),
+        help_text="One item per line — shown in the card's “What's included” dropdown.",
+    )
+
+    class Meta:
+        model = PricingPlan
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk and isinstance(self.instance.features, list):
+            self.initial['features'] = '\n'.join(self.instance.features)
+
+    def clean_features(self):
+        raw = self.cleaned_data.get('features', '') or ''
+        return [line.strip() for line in raw.splitlines() if line.strip()]
+
+
 class PricingPlanInline(admin.TabularInline):
     model = PricingPlan
-    fields = ('name', 'price', 'billing_cycle', 'is_quote', 'is_popular', 'order')
-    extra = 1
+    form = PricingPlanAdminForm
+    formset = PricingPlanInlineFormSet
+    fields = ('tier', 'name', 'description', 'features', 'price', 'billing_cycle', 'is_quote', 'is_popular', 'order')
+    extra = 0
+
+    def get_extra(self, request, obj=None, **kwargs):
+        # For a tier-based service, surface one pre-filled row per still-missing tier.
+        if _is_tiered(obj):
+            return len(_missing_tiers(obj))
+        return 0
+
+    def get_max_num(self, request, obj=None, **kwargs):
+        # Tier-based services are capped at exactly three tiers.
+        if _is_tiered(obj):
+            return 3
+        return super().get_max_num(request, obj, **kwargs)
 
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'is_active', 'is_featured', 'order')
-    list_filter = ('is_active', 'is_featured', 'category')
-    list_editable = ('is_active', 'is_featured', 'order')
+    list_display = ('name', 'category', 'is_active', 'is_featured', 'is_tiered', 'order')
+    list_filter = ('is_active', 'is_featured', 'is_tiered', 'category')
+    list_editable = ('is_active', 'is_featured', 'is_tiered', 'order')
     search_fields = ('name', 'tagline', 'description')
     prepopulated_fields = {'slug': ('name',)}
+    actions = ['mark_tiered', 'unmark_tiered']
+
+    class Media:
+        css = {'all': ('services/admin_inline.css',)}
+
     fieldsets = (
         (None, {
             'fields': ('category', 'name', 'slug', 'tagline', 'description'),
         }),
         ('Display', {
-            'fields': ('icon_path', 'accent_color', 'order', 'is_active', 'is_featured'),
+            'fields': ('icon_path', 'accent_color', 'order', 'is_active', 'is_featured', 'is_tiered'),
         }),
     )
     inlines = [PricingPlanInline]
+
+    @admin.action(description='Mark as tiered (Basic / Standard / Premium)')
+    def mark_tiered(self, request, queryset):
+        updated = queryset.update(is_tiered=True)
+        self.message_user(
+            request,
+            f"{updated} service(s) marked as tiered. Open each one to fill in its three tiers.",
+            messages.SUCCESS,
+        )
+
+    @admin.action(description='Remove tiered pricing')
+    def unmark_tiered(self, request, queryset):
+        updated = queryset.update(is_tiered=False)
+        self.message_user(request, f"{updated} service(s) no longer tiered.", messages.SUCCESS)
 
 
 class InvoiceInline(admin.StackedInline):

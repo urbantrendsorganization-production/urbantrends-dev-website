@@ -7,7 +7,9 @@ const API =
 
 export type PricingPlan = {
   id: number;
+  tier: "" | "basic" | "standard" | "premium";
   name: string;
+  description: string;
   price: string | null;
   billing_cycle: string;
   is_quote: boolean;
@@ -25,6 +27,7 @@ export type Service = {
   icon_path: string;
   accent_color: string;
   is_featured: boolean;
+  is_tiered?: boolean;
   order: number;
   category_name: string;
   category_slug: string;
