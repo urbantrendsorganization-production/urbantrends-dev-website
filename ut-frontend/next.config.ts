@@ -44,11 +44,18 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   async headers() {
+    const noindex = { key: "X-Robots-Tag", value: "noindex, nofollow" };
     return [
       {
         source: "/(.*)",
         headers: securityHeaders,
       },
+      // Private/auth surfaces should never rank. Kept crawlable (not disallowed
+      // in robots.txt) so crawlers can see this header and drop any
+      // already-indexed URLs.
+      { source: "/portal/:path*", headers: [noindex] },
+      { source: "/login", headers: [noindex] },
+      { source: "/signup", headers: [noindex] },
     ];
   },
   async rewrites() {
