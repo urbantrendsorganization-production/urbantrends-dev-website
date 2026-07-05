@@ -498,6 +498,22 @@ pre.code .v { color: #e6e6ee; }
 .pcard.feature { grid-column: span 4; grid-row: span 2; min-height: 0; }
 .pcard.tall { grid-row: span 2; }
 
+/* Even 2×2 layout (products page + homepage teaser) */
+.product-grid.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.product-grid.grid-2 .pcard { grid-column: auto; }
+a.pcard { text-decoration: none; color: inherit; }
+
+.ptag[data-status="live"] { color: #34D399; border-color: color-mix(in srgb, #34D399 45%, var(--border)); }
+.ptag[data-status="beta"] { color: var(--pa); border-color: color-mix(in srgb, var(--pa) 45%, var(--border)); }
+
+.pfeatures { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pfeatures li {
+  display: flex; align-items: flex-start; gap: 9px;
+  font-size: 13.5px; color: var(--fg-muted); line-height: 1.4;
+}
+.pfeatures li svg { width: 15px; height: 15px; flex: none; margin-top: 1px; color: var(--pa); }
+.pfoot-muted { color: var(--fg-subtle) !important; font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+
 .pcard .ptop { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .pglyph {
   width: 38px; height: 38px; border-radius: 9px; flex: none;
@@ -918,7 +934,7 @@ pre.code .v { color: #e6e6ee; }
 }
 @media (max-width: 620px) {
   .cmdk .keys, .signin { display: none; }
-  .product-grid { grid-template-columns: 1fr; }
+  .product-grid, .product-grid.grid-2 { grid-template-columns: 1fr; }
   .pcard, .pcard.feature { grid-column: 1 / -1; }
   .footer-top { grid-template-columns: 1fr 1fr; }
   .hero-meta { gap: 16px 24px; }

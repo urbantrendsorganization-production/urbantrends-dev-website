@@ -10,6 +10,7 @@ import BentoTemplate from "@/components/hero/BentoTemplate";
 import { getHomeData, getProjects, type SiteSettings, type HeroStat, type Partner, type Testimonial } from "@/lib/cms";
 import { listServices, type Service } from "@/lib/services";
 import ProjectCard from "@/components/ProjectCard";
+import ProductShowcase from "@/components/ProductShowcase";
 import CyberneticGridShader from "@/components/ui/cybernetic-grid-shader";
 import { LampContainer } from "@/components/ui/lamp";
 import RevealController from "@/components/ui/RevealController";
@@ -258,6 +259,35 @@ export default async function HomeContent() {
               }}
             >
               Browse all services
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="14" height="14">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== PRODUCTS ===== */}
+      <section className="section products" id="products" style={{ borderTop: "1px solid var(--border)" }}>
+        <div className="wrap">
+          <div className="section-head" data-reveal>
+            <span className="eyebrow muted">Our products</span>
+            <h2>Software we ship and run.</h2>
+            <p>Not just client work — production systems we build, operate, and stand behind. From M-Pesa reconciliation to encrypted chat.</p>
+          </div>
+          <div data-reveal>
+            <ProductShowcase />
+          </div>
+          <div style={{ marginTop: 32, display: "flex", justifyContent: "flex-end" }}>
+            <Link
+              href="/products"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                fontSize: 14, fontWeight: 600, color: "var(--accent-text)",
+                textDecoration: "none",
+              }}
+            >
+              Explore all products
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="14" height="14">
                 <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
