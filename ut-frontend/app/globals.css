@@ -227,7 +227,17 @@ a { color: inherit; text-decoration: none; }
   color: var(--fg-subtle); border: 1px solid var(--border);
   border-radius: 5px; padding: 3px 7px; white-space: nowrap;
 }
+.dd-cat-label {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--fg-subtle); padding: 10px 12px 5px;
+}
 .dd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+.nav-dd-trigger:focus-visible,
+.dd-item:focus-visible,
+.dd-foot:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 10px;
+}
 .dd-item {
   position: relative; display: flex; gap: 12px; align-items: flex-start;
   padding: 11px 12px; border-radius: 10px;
@@ -1592,6 +1602,18 @@ button.sc-link {
   transition: color .14s, background .14s;
 }
 .mnav-sub:hover { color: var(--fg); background: var(--surface-2); }
+.mnav-group { display: flex; flex-direction: column; }
+.mnav-accordion {
+  width: 100%; background: transparent; border: 0; cursor: pointer;
+  font: inherit; text-align: left;
+}
+.mnav-accordion-body { display: flex; flex-direction: column; gap: 1px; padding: 2px 0 6px; }
+.mnav-sub-label {
+  font-family: var(--font-mono); font-size: 9.5px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--fg-subtle); padding: 8px 14px 4px 30px;
+}
+.mnav-sub-all { color: var(--accent-text); font-weight: 500; }
 .mnav-divider { height: 1px; background: var(--border); margin: 14px 0; }
 .mnav-actions { display: flex; flex-direction: column; gap: 10px; padding-top: 6px; }
 .mnav-actions .btn { justify-content: center; width: 100%; height: 46px; font-size: 15px; }

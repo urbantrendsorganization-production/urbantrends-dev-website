@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import CountryFlag from "@/components/CountryFlag";
+import { ServicesDropdown, ServicesMobileGroup } from "@/components/ServicesNav";
 import { getSession, logout, type AuthUser } from "@/lib/auth";
 
 const LOGO = (
@@ -121,12 +122,13 @@ export default function SiteNav() {
             Tools
           </Link>
 
+          <ServicesDropdown base={`/${cc}`} isActive={pathname.includes("/services")} />
           <Link
             className="nav-link"
-            href={p("services")}
-            aria-current={active(pathname.endsWith("/services"))}
+            href={p("products")}
+            aria-current={active(pathname.endsWith("/products"))}
           >
-            Services
+            Products
           </Link>
           <Link
             className="nav-link"
@@ -295,7 +297,8 @@ export default function SiteNav() {
     <div className={`mobile-menu${mobileOpen ? " open" : ""}`} aria-hidden={!mobileOpen}>
       <nav className="mnav-section" aria-label="Site navigation">
         <Link className="mnav-link" href={p("tools")} aria-current={active(pathname.includes("/tools"))} onClick={() => setMobileOpen(false)}>Tools</Link>
-        <Link className="mnav-link" href={p("services")} aria-current={active(pathname.endsWith("/services"))} onClick={() => setMobileOpen(false)}>Services</Link>
+        <ServicesMobileGroup base={`/${cc}`} isActive={pathname.includes("/services")} onNavigate={() => setMobileOpen(false)} />
+        <Link className="mnav-link" href={p("products")} aria-current={active(pathname.endsWith("/products"))} onClick={() => setMobileOpen(false)}>Products</Link>
         <Link className="mnav-link" href={p("work")} aria-current={active(pathname.endsWith("/work"))} onClick={() => setMobileOpen(false)}>Work</Link>
         <Link className="mnav-link" href={p("docs")} aria-current={active(pathname.endsWith("/docs"))} onClick={() => setMobileOpen(false)}>Developers</Link>
         <Link className="mnav-link" href={p("blog")} aria-current={active(pathname.endsWith("/blog"))} onClick={() => setMobileOpen(false)}>Blog</Link>
