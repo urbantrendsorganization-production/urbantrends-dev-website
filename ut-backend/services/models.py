@@ -270,3 +270,50 @@ class Invoice(models.Model):
             year = self.created_at.year
             self.invoice_number = f"INV-{year}-{self.pk:04d}"
             Invoice.objects.filter(pk=self.pk).update(invoice_number=self.invoice_number)
+
+
+class Review(models.Model):
+    """A customer's review of a completed order.
+
+    Reviews are private until a staff member approves one; approved reviews
+    surface publicly in the site's Testimonials section (see cms.HomeDataView).
+    One review per order.
+    """
+    RATING_CHOICES = [(i, '★' * i) for i in range(1, 6)]
+
+    order = models.OneToOneField(
+        Order, on_delete=models.CASCADE, related_name='review'
+    )
+    customer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews'
+    )
+    rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES)
+    comment = models.TextField(help_text="The customer's review text.")
+    author_name = models.CharField(
+        max_length=100, blank=True,
+        help_text="Name shown publicly. Defaults to the customer's name.",
+    )
+    author_role = models.CharField(
+        max_length=150, blank=True, help_text="e.g. 'CTO', 'Operations Lead'",
+    )
+    company = models.CharField(max_length=100, blank=True)
+    is_approved = models.BooleanField(
+        default=False,
+        help_text="Approved reviews appear publicly in the Testimonials section.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Review {self.rating}★ on Order #{self.order_id} by {self.customer.email}"
+
+    def save(self, *args, **kwargs):
+        # Stamp approval time on the transition to approved.
+        if self.is_approved and self.approved_at is None:
+            self.approved_at = timezone.now()
+        if not self.is_approved:
+            self.approved_at = None
+        super().save(*args, **kwargs)

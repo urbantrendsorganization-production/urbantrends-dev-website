@@ -9,13 +9,14 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Invoice, Order, OrderMessage, QuoteRequest, Service
+from .models import Invoice, Order, OrderMessage, QuoteRequest, Review, Service
 from .serializers import (
     InvoiceSerializer,
     OrderMessageSerializer,
     OrderSerializer,
     OrderStaffUpdateSerializer,
     QuoteRequestSerializer,
+    ReviewSerializer,
     ServiceDetailSerializer,
     ServiceListSerializer,
 )
@@ -251,3 +252,73 @@ class OrderMessageListCreateView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class OrderReviewView(generics.GenericAPIView):
+    """GET/POST /api/orders/<pk>/review — the customer's review of an order.
+
+    A customer may submit one review per completed order. Reviews are held for
+    staff approval before they appear publicly.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ReviewSerializer
+
+    def _get_order(self):
+        order = generics.get_object_or_404(Order, pk=self.kwargs['pk'])
+        if not self.request.user.is_staff and order.customer != self.request.user:
+            raise PermissionDenied
+        return order
+
+    def get(self, request, pk):
+        order = self._get_order()
+        review = getattr(order, 'review', None)
+        if review is None:
+            return Response(None)
+        return Response(self.get_serializer(review).data)
+
+    def post(self, request, pk):
+        order = self._get_order()
+        if order.customer != request.user:
+            raise PermissionDenied("Only the customer can review their order.")
+        if order.status != 'completed':
+            return Response(
+                {'detail': 'You can only review an order once it is completed.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if hasattr(order, 'review'):
+            return Response(
+                {'detail': 'You have already reviewed this order.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        author_name = (
+            serializer.validated_data.get('author_name')
+            or order.customer.get_full_name()
+            or order.customer.email.split('@')[0]
+        )
+        review = serializer.save(
+            order=order, customer=order.customer, author_name=author_name,
+        )
+        self._notify_staff(review)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def _notify_staff(self, review: Review) -> None:
+        from django.conf import settings as django_settings
+        from django.core.mail import send_mail
+
+        base = getattr(django_settings, 'FRONTEND_BASE_URL', 'http://localhost:3000')
+        send_mail(
+            f'[UrbanTrends] New {review.rating}★ review — Order #{review.order_id}',
+            (
+                f'A new review is awaiting approval.\n\n'
+                f'Rating:  {review.rating}/5\n'
+                f'From:    {review.author_name} ({review.customer.email})\n'
+                f'Order:   #{review.order_id} — {review.order.service.name}\n\n'
+                f'Review:\n{review.comment}\n\n'
+                f'Approve: {base}/admin/services/review/{review.pk}/change/'
+            ),
+            django_settings.DEFAULT_FROM_EMAIL,
+            [getattr(django_settings, 'STAFF_NOTIFICATION_EMAIL', django_settings.DEFAULT_FROM_EMAIL)],
+            fail_silently=True,
+        )

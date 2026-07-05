@@ -33,12 +33,40 @@ export const metadata: Metadata = {
     images: [{ url: "/images/og-image.png", width: 1200, height: 630 }],
   },
   twitter: { card: "summary_large_image" },
+  alternates: { canonical: "/" },
   icons: {
     icon: [
       { url: "/images/favicon.svg", type: "image/svg+xml" },
       { url: "/images/favicon.png", type: "image/png" },
     ],
     apple: "/images/favicon.png",
+  },
+};
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://urbantrends.dev";
+
+// Organization structured data for rich results / knowledge panel. `sameAs`
+// is intentionally omitted until verified social profiles exist — add the
+// real profile URLs here rather than guessing.
+const ORG_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "UrbanTrends",
+  legalName: "UrbanTrends.dev",
+  url: SITE_URL,
+  logo: `${SITE_URL}/images/favicon.png`,
+  description:
+    "A Nairobi software studio that designs, builds, and ships production-grade products, tools, and infrastructure.",
+  email: "info@urbantrends.dev",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Nairobi",
+    addressCountry: "KE",
+  },
+  contactPoint: {
+    "@type": "ContactPoint",
+    email: "info@urbantrends.dev",
+    contactType: "customer support",
   },
 };
 
@@ -60,6 +88,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('ut-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}})()`,
           }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSONLD) }}
         />
       </head>
       <body>

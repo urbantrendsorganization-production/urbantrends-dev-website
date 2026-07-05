@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin, messages
 from django.forms.models import BaseInlineFormSet
 
-from .models import Invoice, Order, OrderMessage, PricingPlan, QuoteRequest, Service, ServiceCategory
+from .models import Invoice, Order, OrderMessage, PricingPlan, QuoteRequest, Review, Service, ServiceCategory
 from .signals import send_invoice_email
 
 
@@ -295,3 +295,38 @@ class InvoiceAdmin(admin.ModelAdmin):
             self.message_user(request, f"{sent} invoice(s) resent.", messages.SUCCESS)
         if skipped:
             self.message_user(request, f"{skipped} cancelled invoice(s) skipped.", messages.WARNING)
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('order', 'author_name', 'rating', 'company', 'is_approved', 'created_at')
+    list_filter = ('is_approved', 'rating', 'created_at')
+    search_fields = ('author_name', 'company', 'comment', 'customer__email')
+    list_select_related = ('order', 'customer')
+    readonly_fields = ('order', 'customer', 'rating', 'comment', 'created_at', 'approved_at')
+    fields = (
+        'order', 'customer', 'rating', 'comment',
+        'author_name', 'author_role', 'company',
+        'is_approved', 'created_at', 'approved_at',
+    )
+    actions = ('approve_reviews', 'unapprove_reviews')
+
+    @admin.action(description="Approve selected reviews (publish to Testimonials)")
+    def approve_reviews(self, request, queryset):
+        count = 0
+        for review in queryset:
+            if not review.is_approved:
+                review.is_approved = True
+                review.save(update_fields=['is_approved', 'approved_at'])
+                count += 1
+        self.message_user(request, f"{count} review(s) approved and now public.", messages.SUCCESS)
+
+    @admin.action(description="Unapprove selected reviews (hide from Testimonials)")
+    def unapprove_reviews(self, request, queryset):
+        count = 0
+        for review in queryset:
+            if review.is_approved:
+                review.is_approved = False
+                review.save(update_fields=['is_approved', 'approved_at'])
+                count += 1
+        self.message_user(request, f"{count} review(s) hidden.", messages.WARNING)

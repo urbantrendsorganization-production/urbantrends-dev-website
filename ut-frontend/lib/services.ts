@@ -71,6 +71,17 @@ export type Invoice = {
   paid_at: string | null;
 };
 
+export type Review = {
+  id: number;
+  rating: number;
+  comment: string;
+  author_name: string;
+  author_role: string;
+  company: string;
+  is_approved: boolean;
+  created_at: string;
+};
+
 export type AnalyticsData = {
   kpis: {
     total_orders: number;
@@ -180,6 +191,39 @@ export async function getInvoice(orderId: number): Promise<Invoice | null> {
   });
   if (!res.ok) return null;
   return res.json();
+}
+
+export async function getReview(orderId: number): Promise<Review | null> {
+  const res = await fetch(`${API}/orders/${orderId}/review`, {
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+  if (!res.ok) return null;
+  return res.json(); // null when no review exists yet
+}
+
+export async function submitReview(
+  orderId: number,
+  body: { rating: number; comment: string; author_name?: string; author_role?: string; company?: string }
+): Promise<{ ok: boolean; data?: Review; error?: string }> {
+  const res = await fetch(`${API}/orders/${orderId}/review`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": csrfToken(),
+    },
+    credentials: "same-origin",
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    const msg =
+      data && typeof data === "object"
+        ? (data.detail ?? Object.values(data).flat().join(" "))
+        : "Failed to submit review.";
+    return { ok: false, error: msg };
+  }
+  return { ok: true, data };
 }
 
 export async function getAnalytics(): Promise<AnalyticsData | null> {

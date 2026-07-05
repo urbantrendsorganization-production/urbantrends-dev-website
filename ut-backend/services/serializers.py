@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Invoice, Order, OrderMessage, PricingPlan, QuoteRequest, Service, ServiceCategory
+from .models import Invoice, Order, OrderMessage, PricingPlan, QuoteRequest, Review, Service, ServiceCategory
 
 
 class QuoteRequestSerializer(serializers.ModelSerializer):
@@ -101,3 +101,24 @@ class OrderMessageSerializer(serializers.ModelSerializer):
         if not self.context['request'].user.is_staff:
             validated_data['is_internal'] = False
         return super().create(validated_data)
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = [
+            'id', 'rating', 'comment',
+            'author_name', 'author_role', 'company',
+            'is_approved', 'created_at',
+        ]
+        read_only_fields = ['id', 'is_approved', 'created_at']
+
+    def validate_rating(self, value):
+        if not 1 <= value <= 5:
+            raise serializers.ValidationError("Rating must be between 1 and 5.")
+        return value
+
+    def validate_comment(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Please write a few words about your experience.")
+        return value.strip()

@@ -39,8 +39,38 @@ class HomeDataView(APIView):
             'stats':            HeroStatSerializer(stats, many=True).data,
             'partners_rails':   PartnerSerializer(partners_rails, many=True, context=ctx).data,
             'partners_trusted': PartnerSerializer(partners_trusted, many=True, context=ctx).data,
-            'testimonials':     TestimonialSerializer(testimonials, many=True).data,
+            'testimonials':     self._testimonials(testimonials),
         })
+
+    def _testimonials(self, editorial):
+        """Editorial testimonials plus approved customer reviews, in one list.
+
+        Reviews (services.Review) are mapped into the same shape the frontend
+        Testimonials section already renders, carrying an extra `rating` so the
+        UI can show stars. Imported lazily to avoid a hard app-load dependency.
+        """
+        data = TestimonialSerializer(editorial, many=True).data
+        for t in data:
+            t['rating'] = None  # keep the shape uniform
+
+        from services.models import Review
+        reviews = (
+            Review.objects.filter(is_approved=True)
+            .select_related('customer')
+            .order_by('-approved_at')[:12]
+        )
+        for r in reviews:
+            data.append({
+                'quote': r.comment,
+                'author_name': r.author_name or 'Client',
+                'author_role': r.author_role,
+                'company': r.company,
+                'photo_url': '',
+                'product_label': '',
+                'product_accent_color': '#34D399',
+                'rating': r.rating,
+            })
+        return data
 
 
 class ChangelogPagination(PageNumberPagination):

@@ -10,6 +10,7 @@ import BentoTemplate from "@/components/hero/BentoTemplate";
 import { getHomeData, getProjects, type SiteSettings, type HeroStat, type Partner, type Testimonial } from "@/lib/cms";
 import { listServices, type Service } from "@/lib/services";
 import ProjectCard from "@/components/ProjectCard";
+import ProductShowcase from "@/components/ProductShowcase";
 import CyberneticGridShader from "@/components/ui/cybernetic-grid-shader";
 import { LampContainer } from "@/components/ui/lamp";
 import RevealController from "@/components/ui/RevealController";
@@ -266,6 +267,35 @@ export default async function HomeContent() {
         </div>
       </section>
 
+      {/* ===== PRODUCTS ===== */}
+      <section className="section products" id="products" style={{ borderTop: "1px solid var(--border)" }}>
+        <div className="wrap">
+          <div className="section-head" data-reveal>
+            <span className="eyebrow muted">Our products</span>
+            <h2>Software we ship and run.</h2>
+            <p>Not just client work — production systems we build, operate, and stand behind. From M-Pesa reconciliation to encrypted chat.</p>
+          </div>
+          <div data-reveal>
+            <ProductShowcase />
+          </div>
+          <div style={{ marginTop: 32, display: "flex", justifyContent: "flex-end" }}>
+            <Link
+              href="/products"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                fontSize: 14, fontWeight: 600, color: "var(--accent-text)",
+                textDecoration: "none",
+              }}
+            >
+              Explore all products
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="14" height="14">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ===== HOW WE WORK ===== */}
       <section className="section" id="process" style={{ borderTop: "1px solid var(--border)" }}>
         <div className="wrap">
@@ -474,6 +504,15 @@ export default async function HomeContent() {
           <div className="testimonials-grid">
             {displayTestimonials.map((t: Testimonial, i: number) => (
               <div key={i} className="tcard" data-reveal style={{ "--reveal-delay": `${(i % 3) * 0.07}s` } as React.CSSProperties}>
+                {typeof t.rating === "number" && (
+                  <div className="tstars" aria-label={`${t.rating} out of 5 stars`}>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <svg key={n} viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true" style={{ color: n <= t.rating! ? "#F59E0B" : "var(--border-strong, #444)" }}>
+                        <path d="M12 2l2.9 6.26 6.9.54-5.24 4.5 1.6 6.7L12 16.9 5.84 20.5l1.6-6.7L2.2 8.8l6.9-.54L12 2z" />
+                      </svg>
+                    ))}
+                  </div>
+                )}
                 <p className="tquote">&ldquo;{t.quote}&rdquo;</p>
                 <div className="tfoot">
                   <div className="tavatar">
@@ -487,7 +526,7 @@ export default async function HomeContent() {
                   </div>
                   <div>
                     <div className="tname">{t.author_name}</div>
-                    <div className="trole">{t.author_role}, {t.company}</div>
+                    <div className="trole">{[t.author_role, t.company].filter(Boolean).join(", ")}</div>
                   </div>
                   {t.product_label && (
                     <span className="tprod" style={{ "--pa": t.product_accent_color } as React.CSSProperties}>

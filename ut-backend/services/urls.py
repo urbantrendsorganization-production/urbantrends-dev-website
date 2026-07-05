@@ -6,6 +6,7 @@ from .views import (
     OrderInvoiceView,
     OrderListCreateView,
     OrderMessageListCreateView,
+    OrderReviewView,
     OrderStaffUpdateView,
     QuoteRequestView,
     ServiceDetailView,
@@ -22,4 +23,5 @@ urlpatterns = [
     path('orders/<int:pk>/update', OrderStaffUpdateView.as_view(), name='order-staff-update'),
     path('orders/<int:pk>/invoice', OrderInvoiceView.as_view(), name='order-invoice'),
     path('orders/<int:pk>/messages', OrderMessageListCreateView.as_view(), name='order-messages'),
+    path('orders/<int:pk>/review', OrderReviewView.as_view(), name='order-review'),
 ]
