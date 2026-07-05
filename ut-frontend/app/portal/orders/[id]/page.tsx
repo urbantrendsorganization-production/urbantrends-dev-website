@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { getOrder, getInvoice, listMessages, postMessage, STATUS_LABELS, type Order, type OrderMessage, type Invoice } from "@/lib/services";
 import { getSession } from "@/lib/auth";
+import ReviewWidget from "./ReviewWidget";
 
 const INVOICE_STATUS: Record<string, { label: string; color: string }> = {
   draft:     { label: "Being prepared",  color: "#6B7280" },
@@ -245,6 +246,9 @@ export default function OrderDetailPage() {
 
       {/* Invoice */}
       <InvoiceCard invoice={invoice} />
+
+      {/* Review — only once the order is done */}
+      {order.status === "completed" && <ReviewWidget orderId={order.id} />}
 
       {/* Thread */}
       <div style={{ marginBottom: 16 }}>

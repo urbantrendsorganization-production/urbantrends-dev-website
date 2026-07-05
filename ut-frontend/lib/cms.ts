@@ -39,6 +39,8 @@ export type Testimonial = {
   photo_url: string;
   product_label: string;
   product_accent_color: string;
+  // Present for approved customer reviews; null for editorial testimonials.
+  rating?: number | null;
 };
 
 export type ChangelogTag = { type: 'new' | 'imp' | 'fix'; text: string };
