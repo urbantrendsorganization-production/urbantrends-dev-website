@@ -196,7 +196,7 @@ a { color: inherit; text-decoration: none; }
 
 .nav-dd-panel {
   position: absolute; top: 100%; left: -10px;
-  width: 560px; padding: 8px;
+  width: min(720px, calc(100vw - 32px)); padding: 8px;
   background: color-mix(in srgb, var(--surface-1) 92%, transparent);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   backdrop-filter: blur(20px) saturate(160%);
@@ -232,15 +232,22 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: .14em; text-transform: uppercase;
   color: var(--fg-subtle); padding: 10px 12px 5px;
 }
-.dd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+/* Horizontal layout: categories sit side by side as columns, each with a
+   short vertical stack of services. Columns wrap on narrow viewports. */
+.dd-cols { display: flex; flex-wrap: wrap; gap: 4px; }
+.dd-col {
+  flex: 1 1 200px; min-width: 0;
+  display: flex; flex-direction: column;
+}
+.dd-col + .dd-col { border-left: 1px solid var(--border); }
 .nav-dd-trigger:focus-visible,
 .dd-item:focus-visible,
 .dd-foot:focus-visible {
   outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 10px;
 }
 .dd-item {
-  position: relative; display: flex; gap: 12px; align-items: flex-start;
-  padding: 11px 12px; border-radius: 10px;
+  position: relative; display: flex; gap: 11px; align-items: flex-start;
+  padding: 9px 10px; border-radius: 10px;
   transition: background .15s ease;
 }
 .dd-item-wide { grid-column: 1 / -1; }
@@ -263,7 +270,11 @@ a { color: inherit; text-decoration: none; }
 .dd-item:hover .dd-glyph { background: color-mix(in srgb, var(--pa) 22%, var(--surface-3)); transform: translateY(-1px); }
 .dd-tt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .dd-tt b { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; display: flex; align-items: center; gap: 7px; }
-.dd-tt i { font-style: normal; font-size: 12.5px; line-height: 1.35; color: var(--fg-muted); }
+.dd-tt i {
+  font-style: normal; font-size: 12.5px; line-height: 1.35; color: var(--fg-muted);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden;
+}
 .dd-badge {
   font-family: var(--font-mono); font-size: 9.5px; font-weight: 500;
   letter-spacing: .1em; text-transform: uppercase; color: var(--pa);
