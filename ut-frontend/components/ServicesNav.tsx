@@ -6,6 +6,21 @@ import { listServices, type Service } from "@/lib/services";
 
 type Group = { name: string; slug: string; services: Service[] };
 
+// Keep the dropdown a lean teaser, not a full directory: a handful of
+// categories, a few services each (featured first). The full list lives on
+// /services, linked from the footer.
+const MAX_GROUPS = 3;
+const PER_GROUP = 3;
+
+function trimGroups(groups: Group[]): Group[] {
+  return groups.slice(0, MAX_GROUPS).map((g) => ({
+    ...g,
+    services: [...g.services]
+      .sort((a, b) => Number(b.is_featured) - Number(a.is_featured))
+      .slice(0, PER_GROUP),
+  }));
+}
+
 // Shared fetch + grouping. Services are grouped by category, preserving the
 // API's ordering (which is category order → service order).
 function useServiceGroups(): Group[] {
@@ -58,6 +73,8 @@ export function ServicesDropdown({
   isActive: boolean;
 }) {
   const groups = useServiceGroups();
+  const shown = useMemo(() => trimGroups(groups), [groups]);
+  const total = useMemo(() => groups.reduce((n, g) => n + g.services.length, 0), [groups]);
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -153,15 +170,13 @@ export function ServicesDropdown({
       <div className="nav-dd-panel" ref={panelRef} role="menu" aria-label="Services" onKeyDown={onPanelKeyDown}>
         <div className="dd-head">
           <span className="mono-label">Services</span>
-          <span className="dd-head-count">
-            {groups.reduce((n, g) => n + g.services.length, 0)} offerings
-          </span>
+          <span className="dd-head-count">{total} offerings</span>
         </div>
 
-        {groups.map((g) => (
-          <div key={g.slug}>
-            <div className="dd-cat-label">{g.name}</div>
-            <div className="dd-grid">
+        <div className="dd-cols">
+          {shown.map((g) => (
+            <div className="dd-col" key={g.slug}>
+              <div className="dd-cat-label">{g.name}</div>
               {g.services.map((s) => (
                 <Link
                   key={s.slug}
@@ -182,8 +197,8 @@ export function ServicesDropdown({
                 </Link>
               ))}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
 
         <Link role="menuitem" className="dd-foot" href={servicesHref} onClick={() => close()}>
           View all services
