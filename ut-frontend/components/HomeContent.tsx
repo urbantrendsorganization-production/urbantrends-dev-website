@@ -7,7 +7,7 @@ import GridTemplate from "@/components/hero/GridTemplate";
 import MinimalTemplate from "@/components/hero/MinimalTemplate";
 import AuroraTemplate from "@/components/hero/AuroraTemplate";
 import BentoTemplate from "@/components/hero/BentoTemplate";
-import { getHomeData, getProjects, type SiteSettings, type HeroStat, type Partner, type Testimonial } from "@/lib/cms";
+import { getHomeData, getProjects, getProducts, type SiteSettings, type HeroStat, type Partner, type Testimonial } from "@/lib/cms";
 import { listServices, type Service } from "@/lib/services";
 import ProjectCard from "@/components/ProjectCard";
 import ProductShowcase from "@/components/ProductShowcase";
@@ -107,10 +107,11 @@ const ARROW_SVG = (
 );
 
 export default async function HomeContent() {
-  const [{ settings, stats, partners_rails, partners_trusted, testimonials }, apiServices, allProjects] = await Promise.all([
+  const [{ settings, stats, partners_rails, partners_trusted, testimonials }, apiServices, allProjects, products] = await Promise.all([
     getHomeData(),
     listServices().catch(() => []),
     getProjects().catch(() => []),
+    getProducts().catch(() => []),
   ]);
 
   const services = apiServices.length > 0 ? apiServices : FALLBACK_SERVICES;
@@ -276,7 +277,7 @@ export default async function HomeContent() {
             <p>Not just client work — production systems we build, operate, and stand behind. From M-Pesa reconciliation to encrypted chat.</p>
           </div>
           <div data-reveal>
-            <ProductShowcase />
+            <ProductShowcase products={products} />
           </div>
           <div style={{ marginTop: 32, display: "flex", justifyContent: "flex-end" }}>
             <Link

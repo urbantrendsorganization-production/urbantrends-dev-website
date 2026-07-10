@@ -3,6 +3,7 @@ import requests as http_requests
 
 from django.db import connection
 from django.core.cache import cache
+from django.utils import timezone
 
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, CreateAPIView
@@ -13,13 +14,15 @@ from rest_framework import serializers as drf_serializers
 
 from .models import (
     SiteSettings, HeroStat, Partner, Testimonial,
-    ChangelogEntry, TeamMember, AboutMetric, ServiceStatus, Tool, Project, ContactInquiry,
+    ChangelogEntry, TeamMember, AboutMetric, ServiceStatus, Tool, Project, Product,
+    DeveloperIntegration, ContactInquiry,
 )
 from .serializers import (
     SiteSettingsSerializer, HeroStatSerializer, PartnerSerializer,
     TestimonialSerializer, ChangelogEntrySerializer,
     TeamMemberSerializer, AboutMetricSerializer, ToolSerializer,
-    ProjectSerializer, ContactInquirySerializer,
+    ProjectSerializer, ProductSerializer, DeveloperIntegrationSerializer,
+    ContactInquirySerializer,
 )
 
 
@@ -162,29 +165,110 @@ class ProjectsView(ListAPIView):
         return qs
 
 
+class ProductsView(ListAPIView):
+    """GET /api/cms/products — active products for the /products grid + homepage teaser."""
+    permission_classes = [AllowAny]
+    serializer_class   = ProductSerializer
+
+    def get_queryset(self):
+        return Product.objects.filter(is_active=True)
+
+
+class DeveloperIntegrationsView(ListAPIView):
+    """GET /api/cms/developer-integrations — the /docs integration-surface grid."""
+    permission_classes = [AllowAny]
+    serializer_class   = DeveloperIntegrationSerializer
+
+    def get_queryset(self):
+        return DeveloperIntegration.objects.filter(is_active=True)
+
+
+def _component_health():
+    """Probe local components (db + cache). Returns (components, overall)."""
+    components = {}
+
+    # Database
+    try:
+        connection.ensure_connection()
+        components['database'] = 'operational'
+    except Exception:
+        components['database'] = 'down'
+
+    # Cache
+    try:
+        cache.set('__health__', 1, 5)
+        components['cache'] = 'operational' if cache.get('__health__') else 'degraded'
+    except Exception:
+        components['cache'] = 'down'
+
+    if any(v == 'down' for v in components.values()):
+        overall = 'down'
+    elif all(v == 'operational' for v in components.values()):
+        overall = 'operational'
+    else:
+        overall = 'degraded'
+    return components, overall
+
+
 class HealthView(APIView):
     """GET /api/health — lightweight liveness + component check."""
     permission_classes = [AllowAny]
 
     def get(self, request):
-        components = {}
-
-        # Database
-        try:
-            connection.ensure_connection()
-            components['database'] = 'operational'
-        except Exception:
-            components['database'] = 'down'
-
-        # Cache
-        try:
-            cache.set('__health__', 1, 5)
-            components['cache'] = 'operational' if cache.get('__health__') else 'degraded'
-        except Exception:
-            components['cache'] = 'down'
-
-        overall = 'operational' if all(v == 'operational' for v in components.values()) else 'degraded'
+        components, overall = _component_health()
         return Response({'status': overall, 'components': components})
+
+
+class PingView(APIView):
+    """GET /api/ping — public, agent-facing status probe.
+
+    A single fast call any external agent or uptime monitor can hit to learn
+    whether UrbanTrends is healthy. Returns overall status plus component and
+    monitored-service breakdowns. Uses *stored* monitored-service results (kept
+    fresh by the `check_services` command) rather than probing live, so the
+    endpoint stays fast and cheap to poll.
+
+    Response shape:
+        {
+          "service": "urbantrends",
+          "status": "operational" | "degraded" | "down",
+          "timestamp": "2026-07-10T09:00:00Z",
+          "components": {"database": "operational", "cache": "operational"},
+          "monitored_services": [
+            {"name": "RentFlow API", "status": "operational", "last_checked": "..."}
+          ]
+        }
+
+    A HEAD request returns 200 with no body — the cheapest possible liveness ping.
+    """
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def head(self, request):
+        return Response(status=200)
+
+    def get(self, request):
+        components, overall = _component_health()
+
+        monitored = []
+        worst = overall
+        rank = {'operational': 0, 'degraded': 1, 'unknown': 1, 'down': 2}
+        for svc in ServiceStatus.objects.filter(is_active=True):
+            monitored.append({
+                'name':         svc.name,
+                'status':       svc.last_status,
+                'last_checked': svc.last_checked_at.isoformat() if svc.last_checked_at else None,
+            })
+            if rank.get(svc.last_status, 1) > rank.get(worst, 0):
+                worst = svc.last_status if svc.last_status != 'unknown' else 'degraded'
+
+        return Response({
+            'service':            'urbantrends',
+            'status':             worst,
+            'timestamp':          timezone.now().isoformat(),
+            'components':         components,
+            'monitored_services': monitored,
+        })
 
 
 class ContactView(CreateAPIView):

@@ -288,6 +288,70 @@ class Project(models.Model):
         return f'{self.title}' + (f' — {self.client}' if self.client else '')
 
 
+class Product(models.Model):
+    """A software product shown on the /products grid and the homepage teaser."""
+
+    STATUS_CHOICES = [
+        ('live', 'Live'),
+        ('beta', 'Beta'),
+        ('soon', 'Coming soon'),
+    ]
+
+    name        = models.CharField(max_length=100)
+    tag         = models.CharField(max_length=100, help_text='Small label under the name, e.g. "SaaS · PropTech"')
+    status      = models.CharField(max_length=10, choices=STATUS_CHOICES, default='soon',
+                                   help_text='Drives the badge (LIVE / BETA / COMING SOON) and card styling.')
+    description = models.TextField(help_text='Short paragraph shown on the card.')
+    features    = models.JSONField(
+        default=list, blank=True,
+        help_text='List of short strings shown as ticked bullets, e.g. ["Auto-reconciliation", "Tenant ledgers"].'
+    )
+    icon_path   = models.TextField(
+        blank=True,
+        help_text='SVG path data only — the value of a single <path d="…"> on a "0 0 24 24" viewBox. '
+                  'Example: M3 21h18M6 21V5a2 2 0 012-2h8a2 2 0 012 2v16'
+    )
+    accent_color = models.CharField(max_length=20, default='#34D399', blank=True,
+                                    help_text='Hex color for the card accent and icon glow.')
+    link_url     = models.CharField(max_length=500, blank=True,
+                                    help_text='Where the card links to, e.g. "/rentflow" or "/contact". '
+                                              'Ignored while status is "Coming soon".')
+    cta_label    = models.CharField(max_length=60, default='View product', blank=True,
+                                    help_text='Card link label, e.g. "View product", "Request access".')
+    is_active    = models.BooleanField(default=True)
+    order        = models.PositiveSmallIntegerField(default=0)
+    created_at   = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+
+    def __str__(self):
+        return f'{self.name} ({self.get_status_display()})'
+
+
+class DeveloperIntegration(models.Model):
+    """An API surface listed on the /docs (Developers) "integration surface" grid."""
+
+    name         = models.CharField(max_length=100)
+    tagline      = models.CharField(max_length=200, help_text='One-liner shown under the name.')
+    accent_color = models.CharField(max_length=20, default='#22D3EE', blank=True,
+                                    help_text='Hex color for the card accent border.')
+    is_available = models.BooleanField(
+        default=False,
+        help_text='Checked = "Available" badge; unchecked = "Coming soon".'
+    )
+    is_active    = models.BooleanField(default=True)
+    order        = models.PositiveSmallIntegerField(default=0)
+    created_at   = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+        verbose_name = 'Developer Integration'
+
+    def __str__(self):
+        return f'{self.name}' + ('' if self.is_available else ' (coming soon)')
+
+
 class ContactInquiry(models.Model):
     SUBJECT_CHOICES = [
         ('general',     'General enquiry'),

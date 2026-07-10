@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ProductShowcase from "@/components/ProductShowcase";
+import { getProducts } from "@/lib/cms";
 
 export const metadata: Metadata = {
   title: "Products",
@@ -14,7 +15,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const products = await getProducts();
   return (
     <>
       <section className="page-head" data-screen-label="Products">
@@ -36,7 +38,7 @@ export default function ProductsPage() {
 
       <section className="section products" style={{ paddingTop: "clamp(20px,3vw,36px)" }}>
         <div className="wrap">
-          <ProductShowcase />
+          <ProductShowcase products={products} />
         </div>
       </section>
 
