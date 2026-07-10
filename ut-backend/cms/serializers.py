@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import (
     SiteSettings, HeroStat, Partner, Testimonial,
-    ChangelogEntry, TeamMember, AboutMetric, Tool, Project, ContactInquiry,
+    ChangelogEntry, TeamMember, AboutMetric, Tool, Project, Product,
+    DeveloperIntegration, ContactInquiry,
 )
 
 
@@ -95,6 +96,36 @@ class ProjectSerializer(serializers.ModelSerializer):
         if obj.cover_image:
             return obj.cover_image.url
         return obj.cover_url or ''
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    # Emit the exact camelCase shape the frontend `Product` type consumes, so the
+    # API payload drops straight into <ProductShowcase /> with no remapping.
+    accent   = serializers.CharField(source='accent_color')
+    cta      = serializers.CharField(source='cta_label')
+    iconPath = serializers.CharField(source='icon_path')
+    href     = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = Product
+        fields = [
+            'name', 'tag', 'accent', 'status', 'description',
+            'features', 'href', 'cta', 'iconPath',
+        ]
+
+    def get_href(self, obj):
+        # "Coming soon" cards are intentionally non-clickable.
+        return '' if obj.status == 'soon' else (obj.link_url or '')
+
+
+class DeveloperIntegrationSerializer(serializers.ModelSerializer):
+    # Match the shape the /docs developer grid renders directly.
+    pa        = serializers.CharField(source='accent_color')
+    available = serializers.BooleanField(source='is_available')
+
+    class Meta:
+        model  = DeveloperIntegration
+        fields = ['name', 'pa', 'tagline', 'available']
 
 
 class ContactInquirySerializer(serializers.ModelSerializer):

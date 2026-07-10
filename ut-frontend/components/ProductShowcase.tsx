@@ -136,10 +136,19 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
-export default function ProductShowcase({ className }: { className?: string }) {
+export default function ProductShowcase({
+  className,
+  products,
+}: {
+  className?: string;
+  // CMS-managed products (from getProducts). Falls back to the hardcoded
+  // catalogue above when none are configured or the API is unreachable.
+  products?: Product[];
+}) {
+  const items = products && products.length > 0 ? products : PRODUCTS;
   return (
     <div className={`product-grid grid-2${className ? ` ${className}` : ""}`}>
-      {PRODUCTS.map((p) => (
+      {items.map((p) => (
         <ProductCard key={p.name} product={p} />
       ))}
     </div>

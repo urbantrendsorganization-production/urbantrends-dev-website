@@ -1,3 +1,5 @@
+import type { Product } from '@/components/ProductShowcase';
+
 const API =
   typeof window === 'undefined'
     ? `${process.env.BACKEND_URL ?? 'http://localhost:8000'}/api`
@@ -208,6 +210,37 @@ export async function getSiteStatus(): Promise<ServiceStatusResult[]> {
 export async function getTools(): Promise<Tool[]> {
   try {
     const res = await fetch(`${API}/cms/tools`, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : (data.results ?? []);
+  } catch {
+    return [];
+  }
+}
+
+export async function getProducts(): Promise<Product[]> {
+  try {
+    const res = await fetch(`${API}/cms/products`, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const list: Product[] = Array.isArray(data) ? data : (data.results ?? []);
+    // A "coming soon" card is non-clickable — the API sends href: "" for those.
+    return list.map((p) => ({ ...p, href: p.href || undefined }));
+  } catch {
+    return [];
+  }
+}
+
+export type DeveloperIntegration = {
+  name: string;
+  pa: string;
+  tagline: string;
+  available: boolean;
+};
+
+export async function getDeveloperIntegrations(): Promise<DeveloperIntegration[]> {
+  try {
+    const res = await fetch(`${API}/cms/developer-integrations`, { cache: 'no-store' });
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data : (data.results ?? []);

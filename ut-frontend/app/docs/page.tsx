@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getDeveloperIntegrations } from "@/lib/cms";
 
 export const metadata: Metadata = {
   title: "Developers",
@@ -7,7 +8,8 @@ export const metadata: Metadata = {
     "Build integrations on Africa's payment and product infrastructure. Join the UrbanTrends developer community.",
 };
 
-const PRODUCTS = [
+// CMS-managed via getDeveloperIntegrations; used when the API returns nothing.
+const FALLBACK_PRODUCTS = [
   {
     name: "RentFlow",
     pa: "#34D399",
@@ -72,7 +74,9 @@ const TOOLS = [
   },
 ];
 
-export default function DocsPage() {
+export default async function DocsPage() {
+  const apiIntegrations = await getDeveloperIntegrations();
+  const PRODUCTS = apiIntegrations.length > 0 ? apiIntegrations : FALLBACK_PRODUCTS;
   return (
     <>
       {/* ── 1. Hero ── */}

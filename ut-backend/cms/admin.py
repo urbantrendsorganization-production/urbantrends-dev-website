@@ -7,7 +7,8 @@ from django.utils.html import format_html
 
 from .models import (
     SiteSettings, HeroStat, Partner, Testimonial,
-    ChangelogEntry, TeamMember, AboutMetric, ServiceStatus, Tool, Project, ContactInquiry,
+    ChangelogEntry, TeamMember, AboutMetric, ServiceStatus, Tool, Project, Product,
+    DeveloperIntegration, ContactInquiry,
 )
 
 
@@ -298,6 +299,69 @@ class ProjectAdmin(admin.ModelAdmin):
                 src
             )
         return '—'
+
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display  = ['name', 'tag', 'status', 'order', 'is_active', 'has_icon']
+    list_editable = ['status', 'order', 'is_active']
+    list_filter   = ['status', 'is_active']
+    search_fields = ['name', 'tag', 'description']
+    ordering      = ['order', '-created_at']
+    fieldsets = (
+        ('Identity', {
+            'fields': ('name', 'tag', 'status', 'description'),
+        }),
+        ('Features', {
+            'fields': ('features',),
+            'description': (
+                'A JSON list of short strings shown as ticked bullets, e.g. '
+                '<code>["Auto-reconciliation", "Tenant ledgers", "Automated receipts"]</code>.'
+            ),
+        }),
+        ('Visual', {
+            'fields': ('icon_path', 'accent_color'),
+            'description': (
+                'Icon: paste <strong>SVG path data only</strong> — the value of a single '
+                '<code>&lt;path d="…"&gt;</code> on a "0 0 24 24" viewBox '
+                '(e.g. <code>M3 3h7v7H3z</code>). Accent color: hex used for the card highlight and icon glow.'
+            ),
+        }),
+        ('Link', {
+            'fields': ('link_url', 'cta_label'),
+            'description': (
+                'Where the card points, e.g. <code>/rentflow</code> or <code>/contact</code>. '
+                'While status is <strong>Coming soon</strong> the card is non-clickable and the link is ignored.'
+            ),
+        }),
+        ('Display', {
+            'fields': ('is_active', 'order'),
+        }),
+    )
+
+    @admin.display(boolean=True, description='Has icon')
+    def has_icon(self, obj):
+        return bool(obj.icon_path)
+
+
+@admin.register(DeveloperIntegration)
+class DeveloperIntegrationAdmin(admin.ModelAdmin):
+    list_display  = ['name', 'tagline', 'is_available', 'order', 'is_active']
+    list_editable = ['is_available', 'order', 'is_active']
+    list_filter   = ['is_available', 'is_active']
+    search_fields = ['name', 'tagline']
+    ordering      = ['order', '-created_at']
+    fieldsets = (
+        ('Identity', {
+            'fields': ('name', 'tagline', 'accent_color'),
+            'description': 'Shown on the <strong>Developers</strong> page "integration surface" grid.',
+        }),
+        ('Display', {
+            'fields': ('is_available', 'is_active', 'order'),
+            'description': 'Check <strong>Is available</strong> for the green "Available" badge; '
+                           'leave unchecked for "Coming soon".',
+        }),
+    )
 
 
 @admin.register(ContactInquiry)
