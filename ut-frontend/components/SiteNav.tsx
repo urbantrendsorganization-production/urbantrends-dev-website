@@ -6,7 +6,12 @@ import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import CountryFlag from "@/components/CountryFlag";
 import { ServicesDropdown, ServicesMobileGroup } from "@/components/ServicesNav";
+import SearchPalette from "@/components/SearchPalette";
 import { getSession, logout, type AuthUser } from "@/lib/auth";
+
+function openSearch() {
+  window.dispatchEvent(new Event("search:open"));
+}
 
 const LOGO = (
   <svg
@@ -172,7 +177,7 @@ export default function SiteNav() {
         <div className="nav-actions">
           <CountryFlag />
           <ThemeToggle />
-          <button className="cmdk" type="button">
+          <button className="cmdk" type="button" onClick={openSearch} aria-label="Search the site">
             <svg
               viewBox="0 0 24 24"
               width="14"
@@ -186,6 +191,19 @@ export default function SiteNav() {
             </svg>
             <span>Search</span>
             <span className="keys">⌘K</span>
+          </button>
+          <button className="cmdk-icon" type="button" onClick={openSearch} aria-label="Search the site">
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-4-4" />
+            </svg>
           </button>
           {user ? (
             <div className="nav-user-wrap" ref={userMenuRef} style={{ position: "relative" }}>
@@ -296,6 +314,17 @@ export default function SiteNav() {
     {/* Mobile menu — position: fixed, rendered outside header flow */}
     <div className={`mobile-menu${mobileOpen ? " open" : ""}`} aria-hidden={!mobileOpen}>
       <nav className="mnav-section" aria-label="Site navigation">
+        <button
+          className="mnav-link mnav-search"
+          type="button"
+          onClick={() => { setMobileOpen(false); openSearch(); }}
+        >
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M21 21l-4-4" />
+          </svg>
+          Search
+        </button>
         <Link className="mnav-link" href={p("tools")} aria-current={active(pathname.includes("/tools"))} onClick={() => setMobileOpen(false)}>Tools</Link>
         <ServicesMobileGroup base={`/${cc}`} isActive={pathname.includes("/services")} onNavigate={() => setMobileOpen(false)} />
         <Link className="mnav-link" href={p("products")} aria-current={active(pathname.endsWith("/products"))} onClick={() => setMobileOpen(false)}>Products</Link>
@@ -321,6 +350,8 @@ export default function SiteNav() {
         )}
       </div>
     </div>
+
+    <SearchPalette />
     </>
   );
 }
