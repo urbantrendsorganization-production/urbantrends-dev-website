@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Our Work",
   description:
     "Recent projects from UrbanTrends — products, web apps, integrations, and developer tooling we've shipped for teams across East Africa.",
+  alternates: { canonical: "/work" },
 };
 
 export default async function WorkPage() {

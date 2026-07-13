@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Security",
   description: "Security policy and responsible disclosure for Genmars Tech / UrbanTrends.dev.",
+  alternates: { canonical: "/security" },
 };
 
 const EFFECTIVE = "21 May 2026";

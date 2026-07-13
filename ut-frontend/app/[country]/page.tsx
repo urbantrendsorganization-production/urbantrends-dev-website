@@ -22,6 +22,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `UrbanTrends — Infrastructure for the East African internet`,
     description: `Viewing UrbanTrends from ${name}. M-Pesa-native SaaS and developer tooling for East African operators.`,
+    // These country variants render the same home page — point Google at the
+    // single canonical home URL so they don't compete with `/` in the index.
+    alternates: { canonical: "/" },
   };
 }
 

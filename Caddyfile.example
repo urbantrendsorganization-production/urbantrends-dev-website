@@ -7,17 +7,27 @@
 #   backend  → 127.0.0.1:8000
 #   frontend → 127.0.0.1:3000
 
+# Canonical host: redirect www → apex in a single 301 hop so Google only ever
+# indexes one host variant. (Caddy already auto-redirects http → https, so this
+# collapses all four host/scheme combinations onto https://urbantrends.dev.)
+www.urbantrends.dev {
+    redir https://urbantrends.dev{uri} permanent
+}
+
 # Public website — all traffic goes to Next.js.
 # next.config.ts rewrites proxy /_allauth/*, /api/*, and /accounts/* to the
 # backend container over the internal Docker network, so no path splits needed.
-urbantrends.dev, www.urbantrends.dev {
+urbantrends.dev {
     reverse_proxy localhost:3000
 }
 
 # Django backend — admin dashboard and direct API access.
 # Django reads X-Forwarded-Proto to determine request.is_secure(), which is
 # required for WebAuthn origin checks and secure-cookie delivery.
+# The API/admin surface has no SEO value: tag every response noindex so search
+# engines drop api.urbantrends.dev URLs from the index.
 api.urbantrends.dev {
+    header X-Robots-Tag "noindex, nofollow"
     reverse_proxy localhost:8000 {
         header_up X-Forwarded-Proto {scheme}
     }

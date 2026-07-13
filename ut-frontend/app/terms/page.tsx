@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Terms of Service",
   description: "Terms of Service for Genmars Tech / UrbanTrends.dev products and services.",
+  alternates: { canonical: "/terms" },
 };
 
 const EFFECTIVE = "21 May 2026";

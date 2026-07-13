@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "TrendyyLeads — Pipeline that respects itself",
   description: "B2B lead generation for East Africa — sourced, scored and synced to your CRM.",
+  alternates: { canonical: "/trendyyleads" },
 };
 
 

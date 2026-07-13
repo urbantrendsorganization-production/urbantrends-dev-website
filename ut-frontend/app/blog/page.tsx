@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Blog",
   description:
     "Engineering write-ups, product decisions, and company thinking from the UrbanTrends team.",
+  alternates: { canonical: "/blog" },
 };
 
 function PostThumb({ post }: { post: Post }) {

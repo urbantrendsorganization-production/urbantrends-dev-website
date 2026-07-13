@@ -16,6 +16,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: service.name,
     description: service.tagline,
+    // Self-referencing canonical so encoded/unencoded slug variants (e.g. an
+    // `&` in the slug arriving as `%26`) don't register as duplicate URLs.
+    alternates: { canonical: `/services/${service.slug}` },
   };
 }
 

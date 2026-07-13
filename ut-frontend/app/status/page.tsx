@@ -5,6 +5,7 @@ import { getSiteStatus, type ServiceStatusResult } from "@/lib/cms";
 export const metadata: Metadata = {
   title: "System Status",
   description: "Real-time status of all UrbanTrends services and APIs.",
+  alternates: { canonical: "/status" },
 };
 
 const STATUS_CONFIG = {

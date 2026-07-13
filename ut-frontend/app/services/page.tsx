@@ -7,6 +7,7 @@ import QuoteButton from "./QuoteButton";
 export const metadata: Metadata = {
   title: "Services",
   description: "Genmars Tech builds custom software, APIs, integrations, and developer tools for businesses, agencies, startups, and developers.",
+  alternates: { canonical: "/services" },
 };
 
 const SERVICES = [

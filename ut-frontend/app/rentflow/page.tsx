@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "RentFlow — Property management, reconciled",
   description: "Property management with M-Pesa Paybill reconciliation that works on weekends.",
+  alternates: { canonical: "/rentflow" },
 };
 
 

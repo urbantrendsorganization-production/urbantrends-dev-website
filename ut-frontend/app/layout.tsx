@@ -33,7 +33,11 @@ export const metadata: Metadata = {
     images: [{ url: "/images/og-image.png", width: 1200, height: 630 }],
   },
   twitter: { card: "summary_large_image" },
-  alternates: { canonical: "/" },
+  // NOTE: no `alternates.canonical` here. Next.js merges metadata shallowly and
+  // *inherits* any field a child route doesn't set — a canonical on the root
+  // layout would make every page without its own `alternates` declare the home
+  // page as its canonical, collapsing the whole site to one URL in Google's
+  // index. Canonicals are set per-route instead (see each page's metadata).
   icons: {
     icon: [
       { url: "/images/favicon.svg", type: "image/svg+xml" },

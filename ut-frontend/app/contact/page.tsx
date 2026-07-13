@@ -4,6 +4,7 @@ import ContactForm from "./ContactForm";
 export const metadata: Metadata = {
   title: "Contact",
   description: "Talk to the Genmars Tech team about products, custom software, partnerships, or anything else.",
+  alternates: { canonical: "/contact" },
 };
 
 const CHANNELS = [
