@@ -58,6 +58,23 @@ const nextConfig: NextConfig = {
       { source: "/signup", headers: [noindex] },
     ];
   },
+  async redirects() {
+    // Permanent (301) redirects for URLs Google still has indexed but that no
+    // longer exist as routes. Points their link equity at the closest live
+    // page and clears the "Not found (404)" / "Page with redirect" reports.
+    // Internal links already use the live targets — these only catch external
+    // and historical inbound links.
+    return [
+      { source: "/pricing", destination: "/contact", permanent: true },
+      { source: "/privacy-policy", destination: "/privacy", permanent: true },
+      { source: "/projects", destination: "/work", permanent: true },
+      { source: "/projects/:id", destination: "/work", permanent: true },
+      { source: "/case-studies", destination: "/work", permanent: true },
+      { source: "/clients", destination: "/work", permanent: true },
+      { source: "/support", destination: "/contact", permanent: true },
+      { source: "/community", destination: "/contact", permanent: true },
+    ];
+  },
   async rewrites() {
     // SiteChat zone is in beforeFiles so it owns /tools/sitechat even if a
     // filesystem route ever appears there. Its API/WebSocket calls go straight

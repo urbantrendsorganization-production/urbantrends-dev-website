@@ -7,6 +7,7 @@ import { getAboutData, type TeamMember, type AboutMetric } from "@/lib/cms";
 export const metadata: Metadata = {
   title: "About",
   description: "UrbanTrends — a software studio from Nairobi that designs and ships production-grade products, tools, and applications.",
+  alternates: { canonical: "/about" },
 };
 
 const FALLBACK_METRICS: AboutMetric[] = [

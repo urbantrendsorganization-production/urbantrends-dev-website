@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Developers",
   description:
     "Build integrations on Africa's payment and product infrastructure. Join the UrbanTrends developer community.",
+  alternates: { canonical: "/docs" },
 };
 
 // CMS-managed via getDeveloperIntegrations; used when the API returns nothing.

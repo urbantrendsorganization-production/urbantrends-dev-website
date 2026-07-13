@@ -5,6 +5,7 @@ import Image from "next/image";
 export const metadata: Metadata = {
   title: "Careers",
   description: "Build the boring parts that matter. Open roles at UrbanTrends in Nairobi.",
+  alternates: { canonical: "/careers" },
 };
 
 const PERKS = [

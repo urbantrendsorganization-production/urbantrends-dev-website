@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "Privacy Policy for Genmars Tech / UrbanTrends.dev — how we collect, use, and protect your data.",
+  alternates: { canonical: "/privacy" },
 };
 
 const EFFECTIVE = "21 May 2026";

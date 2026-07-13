@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "AcademyOS — Run the whole school",
   description: "School management in one system: admissions, M-Pesa fees, timetables and reports.",
+  alternates: { canonical: "/academyos" },
 };
 
 

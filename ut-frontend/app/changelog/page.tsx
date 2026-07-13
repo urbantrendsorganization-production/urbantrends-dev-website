@@ -5,6 +5,7 @@ import { getChangelog, type ChangelogEntry, type ChangelogTag } from "@/lib/cms"
 export const metadata: Metadata = {
   title: "Changelog",
   description: "Every meaningful change across the UrbanTrends platform and products.",
+  alternates: { canonical: "/changelog" },
 };
 
 const TAG_LABELS: Record<string, string> = { new: "New", imp: "Improved", fix: "Fixed" };

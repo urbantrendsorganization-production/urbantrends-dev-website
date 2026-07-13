@@ -6,6 +6,7 @@ import ToolsGrid from "./ToolsGrid";
 export const metadata: Metadata = {
   title: "Tools",
   description: "Free utilities and developer tools from UrbanTrends — M-Pesa helpers, Daraja playground, and more.",
+  alternates: { canonical: "/tools" },
 };
 
 export default async function ToolsPage() {

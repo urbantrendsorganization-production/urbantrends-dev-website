@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "PortfolioU — Hire from proof",
   description: "A two-sided talent marketplace where East African students are hired from verified work.",
+  alternates: { canonical: "/portfoliou" },
 };
 
 
