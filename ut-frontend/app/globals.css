@@ -828,6 +828,92 @@ a.pcard { text-decoration: none; color: inherit; }
 .process-step h3 { margin: 8px 0 0; font-size: 16px; font-weight: 600; color: var(--fg); letter-spacing: -.01em; }
 .process-step p { margin: 0; font-size: 13.5px; color: var(--fg-muted); line-height: 1.5; }
 
+/* ---------- Service detail — lead + selected work ---------- */
+/* The description sits directly under the hero CTAs, left-aligned, no indent. */
+.svc-lead {
+  margin: clamp(20px, 2.6vw, 26px) 0 0;
+  max-width: 640px;
+  font-size: clamp(15px, 2vw, 17.5px);
+  line-height: 1.75;
+  color: var(--fg-muted);
+}
+
+.svc-portfolio { margin-top: clamp(30px, 5vw, 52px); --pa: var(--accent); }
+.svc-portfolio-head {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: clamp(16px, 2vw, 22px);
+}
+.svc-portfolio-rule {
+  flex: 1; height: 1px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--pa) 45%, transparent), transparent);
+}
+.svc-portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 288px), 1fr));
+  gap: 16px;
+}
+.svc-work-card {
+  position: relative; display: flex; flex-direction: column;
+  border: 1px solid var(--border); border-radius: 12px;
+  background: var(--surface-1); overflow: hidden;
+  text-decoration: none; color: inherit;
+  /* Scroll-reveal: hidden until the grid enters view (.is-shown on parent). */
+  opacity: 0; transform: translateY(14px);
+  transition: opacity .5s ease, transform .5s cubic-bezier(.3,.7,.4,1),
+              border-color .2s ease, box-shadow .25s ease;
+}
+.svc-portfolio.is-shown .svc-work-card { opacity: 1; transform: none; }
+.svc-work-card.is-link { cursor: pointer; }
+.svc-work-card.is-link:hover,
+.svc-work-card.is-link:focus-visible {
+  border-color: color-mix(in srgb, var(--pa) 55%, var(--border));
+  box-shadow: 0 10px 30px -18px color-mix(in srgb, var(--pa) 70%, transparent);
+  outline: none;
+}
+.svc-work-media {
+  position: relative; aspect-ratio: 16 / 10; overflow: hidden;
+  background:
+    radial-gradient(120% 100% at 0% 0%, color-mix(in srgb, var(--pa) 16%, transparent), transparent 60%),
+    var(--surface-2);
+}
+.svc-work-media img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform .5s cubic-bezier(.3,.7,.4,1);
+}
+.svc-work-card.is-link:hover .svc-work-media img { transform: scale(1.045); }
+.svc-work-noimg {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-family: var(--font-mono); font-size: 40px; font-weight: 600;
+  color: color-mix(in srgb, var(--pa) 60%, var(--fg-subtle));
+  opacity: .5;
+}
+.svc-work-body { display: flex; flex-direction: column; gap: 7px; padding: 15px 16px 16px; }
+.svc-work-client {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--fg-subtle);
+}
+.svc-work-title {
+  margin: 0; font-size: 15.5px; font-weight: 600; letter-spacing: -.01em; color: var(--fg);
+}
+.svc-work-desc {
+  margin: 0; font-size: 13px; line-height: 1.55; color: var(--fg-muted);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.svc-work-link {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 3px;
+  font-size: 13px; font-weight: 500; color: var(--pa);
+}
+.svc-work-link svg { transition: transform .2s ease; }
+.svc-work-card.is-link:hover .svc-work-link svg,
+.svc-work-card.is-link:focus-visible .svc-work-link svg { transform: translateX(4px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .svc-work-card { opacity: 1; transform: none; transition: border-color .2s ease; }
+  .svc-work-media img,
+  .svc-work-card.is-link:hover .svc-work-media img { transition: none; transform: none; }
+  .svc-work-link svg { transition: none; }
+}
+
 /* ============================================================
    Bento capabilities grid
    ============================================================ */

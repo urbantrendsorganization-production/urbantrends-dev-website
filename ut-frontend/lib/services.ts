@@ -18,6 +18,16 @@ export type PricingPlan = {
   order: number;
 };
 
+export type PortfolioItem = {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+  client: string;
+  link_url: string;
+  link_label: string;
+};
+
 export type Service = {
   id: number;
   name: string;
@@ -32,6 +42,7 @@ export type Service = {
   category_name: string;
   category_slug: string;
   plans: PricingPlan[];
+  portfolio?: PortfolioItem[];
 };
 
 export type Order = {

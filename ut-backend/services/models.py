@@ -317,3 +317,48 @@ class Review(models.Model):
         if not self.is_approved:
             self.approved_at = None
         super().save(*args, **kwargs)
+
+
+class ServicePortfolioItem(models.Model):
+    """A piece of past work shown on a service's detail page.
+
+    Each service can carry its own small portfolio — a cover image, a short
+    write-up, and a link to the live project or case study. Editable per
+    service from the admin (inline on the Service page).
+    """
+    service = models.ForeignKey(
+        Service, on_delete=models.CASCADE, related_name='portfolio_items'
+    )
+    title = models.CharField(max_length=200)
+    description = models.CharField(
+        max_length=400,
+        help_text="One or two sentences on what was built and the result.",
+    )
+    image = models.ImageField(
+        upload_to='service_portfolio/', blank=True, null=True,
+        help_text="Upload a cover image (PNG, JPG, SVG, or WebP).",
+    )
+    image_url = models.URLField(
+        blank=True,
+        help_text="Alternative to uploading: paste a direct image URL.",
+    )
+    client = models.CharField(
+        max_length=150, blank=True, help_text="Client / company name (optional).",
+    )
+    link_url = models.CharField(
+        max_length=500, blank=True,
+        help_text="Link to the live project or case study (optional).",
+    )
+    link_label = models.CharField(
+        max_length=60, blank=True, default='View project',
+        help_text="Text for the portfolio link.",
+    )
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+
+    def __str__(self):
+        return f'{self.title} ({self.service.name})'

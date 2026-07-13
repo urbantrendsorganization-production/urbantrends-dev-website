@@ -6,6 +6,7 @@ import { getService, type PricingPlan } from "@/lib/services";
 import { currencyForCountry, formatPrice, kesRate, type DisplayCurrency } from "@/lib/currency";
 import QuoteButton from "../QuoteButton";
 import GetStartedButton from "../GetStartedButton";
+import ServicePortfolio from "../ServicePortfolio";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -200,18 +201,16 @@ export default async function ServiceDetailPage({ params }: Props) {
             />
             <Link className="btn btn-ghost" href="/services">All services</Link>
           </div>
+
+          {service.description && (
+            <p className="svc-lead">{service.description}</p>
+          )}
+
+          {service.portfolio && service.portfolio.length > 0 && (
+            <ServicePortfolio items={service.portfolio} accent={service.accent_color} />
+          )}
         </div>
       </section>
-
-      {service.description && (
-        <section className="section" style={{ paddingTop: "clamp(16px,2vw,28px)" }}>
-          <div className="wrap" style={{ maxWidth: 760 }}>
-            <p style={{ fontSize: "clamp(15px,2vw,17.5px)", lineHeight: 1.8, color: "var(--fg-muted)" }}>
-              {service.description}
-            </p>
-          </div>
-        </section>
-      )}
 
       {hasPlans && (
         <section className="section divider-top">
