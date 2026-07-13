@@ -1,6 +1,9 @@
 from rest_framework import serializers
 
-from .models import Invoice, Order, OrderMessage, PricingPlan, QuoteRequest, Review, Service, ServiceCategory
+from .models import (
+    Invoice, Order, OrderMessage, PricingPlan, QuoteRequest, Review,
+    Service, ServiceCategory, ServicePortfolioItem,
+)
 
 
 class QuoteRequestSerializer(serializers.ModelSerializer):
@@ -42,9 +45,28 @@ class ServiceListSerializer(serializers.ModelSerializer):
         return PricingPlanSerializer(plans, many=True).data
 
 
+class ServicePortfolioItemSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ServicePortfolioItem
+        fields = ['id', 'title', 'description', 'image', 'client', 'link_url', 'link_label']
+
+    def get_image(self, obj):
+        if obj.image:
+            return obj.image.url
+        return obj.image_url or ''
+
+
 class ServiceDetailSerializer(ServiceListSerializer):
+    portfolio = serializers.SerializerMethodField()
+
     class Meta(ServiceListSerializer.Meta):
-        fields = ServiceListSerializer.Meta.fields + ['description', 'created_at']
+        fields = ServiceListSerializer.Meta.fields + ['description', 'created_at', 'portfolio']
+
+    def get_portfolio(self, obj):
+        items = obj.portfolio_items.filter(is_active=True)
+        return ServicePortfolioItemSerializer(items, many=True, context=self.context).data
 
 
 class OrderSerializer(serializers.ModelSerializer):

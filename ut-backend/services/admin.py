@@ -2,7 +2,10 @@ from django import forms
 from django.contrib import admin, messages
 from django.forms.models import BaseInlineFormSet
 
-from .models import Invoice, Order, OrderMessage, PricingPlan, QuoteRequest, Review, Service, ServiceCategory
+from .models import (
+    Invoice, Order, OrderMessage, PricingPlan, QuoteRequest, Review,
+    Service, ServiceCategory, ServicePortfolioItem,
+)
 from .signals import send_invoice_email
 
 
@@ -86,6 +89,13 @@ class PricingPlanInline(admin.TabularInline):
         return super().get_max_num(request, obj, **kwargs)
 
 
+class ServicePortfolioInline(admin.TabularInline):
+    model = ServicePortfolioItem
+    fields = ('title', 'description', 'image', 'image_url', 'client',
+              'link_url', 'link_label', 'is_active', 'order')
+    extra = 1
+
+
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'is_active', 'is_featured', 'is_tiered', 'order')
@@ -106,7 +116,7 @@ class ServiceAdmin(admin.ModelAdmin):
             'fields': ('icon_path', 'accent_color', 'order', 'is_active', 'is_featured', 'is_tiered'),
         }),
     )
-    inlines = [PricingPlanInline]
+    inlines = [PricingPlanInline, ServicePortfolioInline]
 
     @admin.action(description='Mark as tiered (Basic / Standard / Premium)')
     def mark_tiered(self, request, queryset):
