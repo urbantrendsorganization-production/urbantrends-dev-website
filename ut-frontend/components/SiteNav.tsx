@@ -7,6 +7,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import CountryFlag from "@/components/CountryFlag";
 import { ServicesDropdown, ServicesMobileGroup } from "@/components/ServicesNav";
 import SearchPalette from "@/components/SearchPalette";
+import NotificationBell from "@/components/NotificationBell";
 import { getSession, logout, type AuthUser } from "@/lib/auth";
 
 function openSearch() {
@@ -205,6 +206,7 @@ export default function SiteNav() {
               <path d="M21 21l-4-4" />
             </svg>
           </button>
+          {user && <NotificationBell />}
           {user ? (
             <div className="nav-user-wrap" ref={userMenuRef} style={{ position: "relative" }}>
               <button
