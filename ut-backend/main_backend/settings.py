@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     'github_repos',
     'deployments',
     'gmail',
+    'notifications',
 ]
 
 JAZZMIN_SETTINGS = {

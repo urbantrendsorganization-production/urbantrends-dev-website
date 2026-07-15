@@ -307,6 +307,16 @@ class OrderReviewView(generics.GenericAPIView):
         from django.conf import settings as django_settings
         from django.core.mail import send_mail
 
+        from notifications.services import push_staff
+
+        push_staff(
+            kind='review',
+            title=f"New {review.rating}★ review",
+            body=f"{review.author_name} reviewed order #{review.order_id}.",
+            url=f"/portal/orders/{review.order_id}",
+            order=review.order,
+        )
+
         base = getattr(django_settings, 'FRONTEND_BASE_URL', 'http://localhost:3000')
         send_mail(
             f'[UrbanTrends] New {review.rating}★ review — Order #{review.order_id}',

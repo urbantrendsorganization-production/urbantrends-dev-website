@@ -5,6 +5,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 
+from notifications.services import push, push_staff
+
 from .models import Invoice, Order, OrderMessage
 
 STAFF_EMAIL = getattr(settings, 'STAFF_NOTIFICATION_EMAIL', settings.DEFAULT_FROM_EMAIL)
@@ -291,6 +293,15 @@ def send_invoice_email(invoice):
         fail_silently=True,
     )
 
+    push(
+        order.customer,
+        kind='invoice',
+        title=f"Invoice {invoice.invoice_number} is ready",
+        body=f"{invoice.currency} {invoice.total:,.2f} for {order.service.name}.",
+        url=f"/portal/orders/{order.pk}",
+        order=order,
+    )
+
 
 # ─── Signals ─────────────────────────────────────────────────────────────────
 
@@ -397,6 +408,14 @@ def _notify_staff_new_order(order):
         fail_silently=True,
     )
 
+    push_staff(
+        kind='new_order',
+        title=f"New order #{order.pk}",
+        body=f"{order.customer.email} requested {order.service.name}.",
+        url=f"/portal/orders/{order.pk}",
+        order=order,
+    )
+
 
 def _notify_customer_status_change(order):
     headline, body_copy = STATUS_COPY.get(
@@ -456,6 +475,15 @@ def _notify_customer_status_change(order):
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[order.customer.email],
         fail_silently=True,
+    )
+
+    push(
+        order.customer,
+        kind='order_status',
+        title=headline,
+        body=f"Order #{order.pk} — {status_label}.",
+        url=order_url,
+        order=order,
     )
 
 
@@ -523,6 +551,15 @@ def _notify_customer_new_message(order, message):
         fail_silently=True,
     )
 
+    push(
+        order.customer,
+        kind='order_message',
+        title=f"New reply on order #{order.pk}",
+        body=message.content[:140],
+        url=order_url,
+        order=order,
+    )
+
 
 def _notify_staff_new_message(order, message):
     admin_url = _admin_link(order.pk)
@@ -576,4 +613,12 @@ def _notify_staff_new_message(order, message):
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[STAFF_EMAIL],
         fail_silently=True,
+    )
+
+    push_staff(
+        kind='order_message',
+        title=f"Customer message on order #{order.pk}",
+        body=message.content[:140],
+        url=f"/portal/orders/{order.pk}",
+        order=order,
     )
