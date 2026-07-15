@@ -8,6 +8,7 @@ import {
   passkeyLoginCeremony,
   requestLoginCode,
   confirmLoginCode,
+  browserSupportsWebAuthn,
   type AllauthResponse,
 } from "@/lib/auth";
 import { MercuryBackdrop } from "@/components/ui/mercury-auth";
@@ -105,9 +106,16 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
+  const [passkeySupported, setPasskeySupported] = useState(true);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
+    // Devices without a WebAuthn authenticator can't use passkeys — lead with
+    // the email-code flow instead of a button that can only fail.
+    if (!browserSupportsWebAuthn()) {
+      setPasskeySupported(false);
+      setMode("code");
+    }
     getSession()
       .then((r) => { if (r.meta?.is_authenticated) router.replace("/"); })
       .catch(() => {});
@@ -205,6 +213,13 @@ export default function LoginForm() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          padding: "36px 32px",
+          borderRadius: 20,
+          background: "rgba(14, 15, 18, 0.55)",
+          border: "1px solid rgba(255,255,255,0.12)",
+          boxShadow: "0 24px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)",
+          backdropFilter: "blur(22px) saturate(1.3)",
+          WebkitBackdropFilter: "blur(22px) saturate(1.3)",
         }}
       >
         {LOGO}
@@ -278,9 +293,11 @@ export default function LoginForm() {
             <AuthBtn primary type="submit" disabled={pending}>
               {pending ? "Sending…" : "Send me a code"}
             </AuthBtn>
-            <AuthBtn onClick={() => { setMode("passkey"); setStatus({ kind: "idle" }); }}>
-              Use a passkey instead
-            </AuthBtn>
+            {passkeySupported && (
+              <AuthBtn onClick={() => { setMode("passkey"); setStatus({ kind: "idle" }); }}>
+                Use a passkey instead
+              </AuthBtn>
+            )}
           </form>
 
           <StatusMsg s={status} />

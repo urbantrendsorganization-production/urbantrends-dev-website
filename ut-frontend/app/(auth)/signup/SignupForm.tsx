@@ -8,6 +8,7 @@ import {
   signup,
   verifyEmail,
   passkeySignupCeremony,
+  browserSupportsWebAuthn,
   type AllauthResponse,
 } from "@/lib/auth";
 import { MercuryBackdrop } from "@/components/ui/mercury-auth";
@@ -108,9 +109,11 @@ export default function SignupForm() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
+  const [passkeySupported, setPasskeySupported] = useState(true);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
+    setPasskeySupported(browserSupportsWebAuthn());
     getSession()
       .then((r) => { if (r.meta?.is_authenticated) router.replace("/"); })
       .catch(() => {});
@@ -155,10 +158,21 @@ export default function SignupForm() {
     startTransition(async () => {
       try {
         const r = await verifyEmail(code.trim());
-        if (r.status >= 400 && !flowIsPending(r, "verify_email")) {
-          if (r.errors?.length) { reportError(r, "That code didn't match."); return; }
+        // Wrong / expired code: allauth returns 4xx with the verify_email flow
+        // still pending. Stay on this step and surface the error.
+        if (r.status >= 400 && flowIsPending(r, "verify_email")) {
+          reportError(r, "That code didn't match.");
+          return;
         }
-        if (r.meta?.is_authenticated) { router.push("/"); router.refresh(); return; }
+        if (r.status >= 400 && r.errors?.length) {
+          reportError(r, "That code didn't match.");
+          return;
+        }
+        // Email verified — the account now exists and is signed in. Before
+        // sending the user on, prompt them to register a passkey so they have a
+        // real credential for next time (MFA_PASSKEY_SIGNUP_ENABLED is on). We
+        // used to redirect home here whenever `is_authenticated`, which meant
+        // the passkey step never rendered.
         setStep("passkey");
         setStatus({ kind: "idle" });
       } catch (err) {
@@ -235,6 +249,13 @@ export default function SignupForm() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          padding: "36px 32px",
+          borderRadius: 20,
+          background: "rgba(14, 15, 18, 0.55)",
+          border: "1px solid rgba(255,255,255,0.12)",
+          boxShadow: "0 24px 70px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)",
+          backdropFilter: "blur(22px) saturate(1.3)",
+          WebkitBackdropFilter: "blur(22px) saturate(1.3)",
         }}
       >
         {LOGO}
@@ -353,20 +374,27 @@ export default function SignupForm() {
 
         {step === "passkey" && (
           <>
-            <h1 style={titleStyle}>Add a passkey</h1>
+            <h1 style={titleStyle}>
+              {passkeySupported ? "How do you want to sign in?" : "You're all set"}
+            </h1>
             <p style={subtitleStyle}>
-              Use your device — fingerprint, Face ID, or Windows Hello — instead of a password.
+              {passkeySupported
+                ? "Add a passkey for one-tap sign-in with your fingerprint, Face ID, or Windows Hello — or keep it simple with email codes."
+                : "This device doesn't support passkeys, so you'll sign in with a one-time email code each time."}
             </p>
 
             <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10 }}>
-              <AuthBtn primary onClick={registerPasskey} disabled={pending}>
-                {pending ? "Waiting for authenticator…" : "Register passkey"}
-              </AuthBtn>
+              {passkeySupported && (
+                <AuthBtn primary onClick={registerPasskey} disabled={pending}>
+                  {pending ? "Waiting for authenticator…" : "Set up a passkey"}
+                </AuthBtn>
+              )}
               <AuthBtn
+                primary={!passkeySupported}
                 onClick={() => { router.push("/"); router.refresh(); }}
                 disabled={pending}
               >
-                Skip — I&apos;ll use email codes
+                {passkeySupported ? "Use email codes instead" : "Continue"}
               </AuthBtn>
             </div>
 
