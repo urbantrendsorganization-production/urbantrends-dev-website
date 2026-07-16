@@ -79,6 +79,10 @@ class AgentQuote(models.Model):
         Order, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='agent_quotes',
     )
+    session_ref = models.CharField(
+        max_length=64, blank=True, db_index=True,
+        help_text="Mica conversation this quote belongs to (links it in the dashboard).",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
 
@@ -178,6 +182,114 @@ class SupportTicket(models.Model):
     @property
     def ticket_id(self) -> str:
         return f"tkt_{self.pk}"
+
+
+class AgentConversation(models.Model):
+    """A Mica chat session with a visitor — the container for the transcript and
+    the actions Mica took. Staff read the whole story from here in the admin.
+
+    Keyed by ``session_ref`` (Mica's session uuid) so every message, event, quote,
+    order, and ticket from the same chat threads back to one row.
+    """
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('ended', 'Ended'),
+        ('escalated', 'Escalated'),
+    ]
+
+    session_ref = models.CharField(max_length=64, unique=True)
+    customer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='agent_conversations',
+    )
+    customer_ref = models.CharField(
+        max_length=254, blank=True,
+        help_text="Email/handle for an anonymous visitor (no account yet).",
+    )
+    channel = models.CharField(max_length=40, default='web_widget')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    message_count = models.PositiveIntegerField(default=0)
+    started_at = models.DateTimeField(auto_now_add=True)
+    last_activity_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-last_activity_at']
+
+    def __str__(self):
+        who = self.customer.email if self.customer else (self.customer_ref or 'anonymous')
+        return f"{self.ref} — {who}"
+
+    @property
+    def ref(self) -> str:
+        return f"CONV-{self.pk}"
+
+
+class AgentMessage(models.Model):
+    """One turn in a conversation. ``role`` distinguishes who spoke; ``meta``
+    carries structured extras (e.g. the tool a turn invoked)."""
+    ROLE_CHOICES = [
+        ('user', 'Customer'),
+        ('agent', 'Mica'),
+        ('system', 'System'),
+        ('tool', 'Tool'),
+    ]
+
+    conversation = models.ForeignKey(
+        AgentConversation, on_delete=models.CASCADE, related_name='messages',
+    )
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    text = models.TextField(blank=True)
+    meta = models.JSONField(default=dict, blank=True)
+    client_id = models.CharField(
+        max_length=64, blank=True,
+        help_text="Optional Mica-side id used to de-duplicate re-sent messages.",
+    )
+    at = models.DateTimeField(
+        null=True, blank=True, help_text="When the turn happened on Mica's side.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['at', 'created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['conversation', 'client_id'],
+                condition=models.Q(client_id__gt=''),
+                name='uniq_message_client_id_per_conversation',
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.get_role_display()} @ {self.conversation.ref}"
+
+
+class AgentEvent(models.Model):
+    """Append-only audit of what Mica *did* — one row per loop step / tool call.
+    Gives staff the reconstructable "why" behind every action."""
+    conversation = models.ForeignKey(
+        AgentConversation, on_delete=models.CASCADE, null=True, blank=True,
+        related_name='events',
+    )
+    session_ref = models.CharField(max_length=64, blank=True, db_index=True)
+    kind = models.CharField(
+        max_length=40,
+        help_text="e.g. tool_call, tool_result, navigate, quote, order, ticket, "
+                  "verify, escalation, error.",
+    )
+    name = models.CharField(max_length=120, blank=True, help_text="Tool/action name.")
+    data = models.JSONField(default=dict, blank=True)
+    ok = models.BooleanField(
+        null=True, blank=True,
+        help_text="Outcome for verify/action steps: passed (true) or failed (false).",
+    )
+    at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.kind}:{self.name}" if self.name else self.kind
 
 
 class IdempotentRequest(models.Model):

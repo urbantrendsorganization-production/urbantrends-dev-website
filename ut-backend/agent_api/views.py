@@ -28,6 +28,9 @@ from .common import (
 )
 from .forms import ParamError, form_for, validate_params
 from .models import (
+    AgentConversation,
+    AgentEvent,
+    AgentMessage,
     AgentQuote,
     IdempotentRequest,
     KBArticle,
@@ -142,6 +145,30 @@ def _idempotent(request, endpoint, producer):
     return Response(body, status=code)
 
 
+def _upsert_conversation(session_ref, request, *, customer_ref=None, channel=None):
+    """Get or create the conversation for ``session_ref`` and keep its customer /
+    last-activity fresh. Returns ``None`` when no session_ref is given."""
+    session_ref = (session_ref or '').strip()[:64]
+    if not session_ref:
+        return None
+    convo, _ = AgentConversation.objects.get_or_create(session_ref=session_ref)
+    dirty = []
+    user = resolve_session_user(request)
+    if user and convo.customer_id != user.pk:
+        convo.customer = user
+        dirty.append('customer')
+    if customer_ref and not convo.customer_ref:
+        convo.customer_ref = customer_ref[:254]
+        dirty.append('customer_ref')
+    if channel and convo.channel != channel:
+        convo.channel = channel
+        dirty.append('channel')
+    convo.last_activity_at = timezone.now()
+    dirty.append('last_activity_at')
+    convo.save(update_fields=dirty)
+    return convo
+
+
 # ── §2 Catalog ──────────────────────────────────────────────────────────────
 
 class ServicesView(AgentView, APIView):
@@ -191,6 +218,7 @@ class QuoteView(AgentView, APIView):
             amount=amount,
             breakdown=[{'label': l['label'], 'amount': str(l['amount'])} for l in breakdown],
             customer=resolve_session_user(request),
+            session_ref=(request.data.get('session_ref') or '')[:64],
             expires_at=timezone.now() + QUOTE_TTL,
         )
         return Response(_quote_dict(quote), status=200)
