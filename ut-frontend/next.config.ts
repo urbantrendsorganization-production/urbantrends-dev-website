@@ -21,6 +21,13 @@ const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8000";
 // shared Docker network.
 const SITECHAT_DASHBOARD_URL = process.env.SITECHAT_DASHBOARD_URL;
 
+// The Mica agent service serves both the chat widget (mika-widget.js + assets
+// under /agent/static/*) and its own API (/agent/api/*). The <Script> in the
+// root layout loads from /agent/static, so proxy the whole /agent subtree to
+// that service. Leave unset to disable (the widget then 404s and won't mount).
+// Examples: a deployment URL, or http://mica-agent:8080 on a shared Docker net.
+const MICA_AGENT_URL = process.env.MICA_AGENT_URL;
+
 const nextConfig: NextConfig = {
   // Emit a self-contained server bundle for Docker (copies only the files
   // needed to run, so the runtime image doesn't need node_modules).
@@ -96,9 +103,18 @@ const nextConfig: NextConfig = {
           },
         ]
       : [];
+    if (process.env.NODE_ENV === "production" && !MICA_AGENT_URL) {
+      console.warn(
+        "[Mica] MICA_AGENT_URL is unset — /agent/* will 404 and the chat widget won't load",
+      );
+    }
+    const mica = MICA_AGENT_URL
+      ? [{ source: "/agent/:path*", destination: `${MICA_AGENT_URL}/agent/:path*` }]
+      : [];
     return {
       beforeFiles: sitechat,
       afterFiles: [
+        ...mica,
         { source: "/api/:path*", destination: `${BACKEND_URL}/api/:path*` },
         { source: "/_allauth/:path*", destination: `${BACKEND_URL}/_allauth/:path*` },
         { source: "/accounts/:path*", destination: `${BACKEND_URL}/accounts/:path*` },
