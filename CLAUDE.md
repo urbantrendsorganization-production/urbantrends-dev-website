@@ -51,6 +51,8 @@ Backend reads from `ut-backend/.env`:
 | `SECRET_KEY` | `change-me-in-production` | _(long random string)_ |
 | `DEBUG` | `True` | `False` |
 | `STAFF_NOTIFICATION_EMAIL` | falls back to `DEFAULT_FROM_EMAIL` | ops inbox |
+| `URBANTRENDS_API_KEY` | _(empty — agent API auth fails open)_ | long random string; Mica sends it as `Authorization: Bearer …` |
+| `AGENT_QUOTE_TTL_HOURS` | `24` | `24` |
 
 Frontend reads from standard Next.js env files (or Vercel project settings):
 
