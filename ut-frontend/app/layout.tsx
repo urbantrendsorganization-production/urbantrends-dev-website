@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import SiteNav from "@/components/SiteNav";
 import SiteFooter from "@/components/SiteFooter";
@@ -103,6 +104,12 @@ export default function RootLayout({
         <SiteNav />
         {children}
         <SiteFooter />
+        <Script
+          src="/agent/static/mika-widget.js"
+          data-api-base="/agent/api"
+          data-avatar="/agent/static/assets/agent1.jpg"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );
