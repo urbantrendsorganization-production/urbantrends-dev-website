@@ -175,6 +175,27 @@ export const completePasskeySignup = (
     body: JSON.stringify({ name: name ?? "", credential }),
   });
 
+// Adding a passkey to an *already-authenticated* account (e.g. right after an
+// email-code signup) goes through the MFA authenticator endpoints, NOT
+// /auth/webauthn/signup — that signup endpoint 409s unless the session is
+// sitting in the passkey-signup stage, which a verified/logged-in user has
+// already passed. `?passwordless` asks for a discoverable credential usable to
+// sign in on its own.
+export const beginAddPasskey = () =>
+  request<{ creation_options: PublicKeyCredentialCreationOptionsJSON }>(
+    "/account/authenticators/webauthn?passwordless",
+    { method: "GET" },
+  );
+
+export const completeAddPasskey = (
+  credential: RegistrationResponseJSON,
+  name?: string,
+) =>
+  request("/account/authenticators/webauthn", {
+    method: "POST",
+    body: JSON.stringify({ name: name ?? "", credential, passwordless: true }),
+  });
+
 export const beginPasskeyLogin = () =>
   request<{ request_options: PublicKeyCredentialRequestOptionsJSON }>(
     "/auth/webauthn/login",
@@ -247,6 +268,30 @@ export async function passkeySignupCeremony(
   };
   const credential = await startRegistration({ optionsJSON });
   return completePasskeySignup(credential, name);
+}
+
+// Register a passkey on the *current, authenticated* account. Use this (not
+// passkeySignupCeremony) once the user is signed in — e.g. the passkey step
+// after an email-code signup, or a "add a passkey" action in account settings.
+export async function addPasskeyCeremony(
+  name?: string,
+): Promise<AllauthResponse> {
+  const begin = await beginAddPasskey();
+  const creationOptions = begin.data?.creation_options;
+  if (!creationOptions) return begin;
+  const raw =
+    unwrapPublicKey<PublicKeyCredentialCreationOptionsJSON>(creationOptions);
+  const optionsJSON: PublicKeyCredentialCreationOptionsJSON = {
+    ...raw,
+    authenticatorSelection: {
+      ...raw.authenticatorSelection,
+      authenticatorAttachment: "platform",
+      residentKey: "required",
+      userVerification: "required",
+    },
+  };
+  const credential = await startRegistration({ optionsJSON });
+  return completeAddPasskey(credential, name);
 }
 
 // --- Capability probes ------------------------------------------------------
