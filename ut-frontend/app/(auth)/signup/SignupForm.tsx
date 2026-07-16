@@ -7,7 +7,7 @@ import {
   getSession,
   signup,
   verifyEmail,
-  passkeySignupCeremony,
+  addPasskeyCeremony,
   browserSupportsWebAuthn,
   type AllauthResponse,
 } from "@/lib/auth";
@@ -188,15 +188,18 @@ export default function SignupForm() {
     setStatus({ kind: "idle" });
     startTransition(async () => {
       try {
-        const r = await passkeySignupCeremony();
-        if (r.meta?.is_authenticated) {
+        // The user is already signed in at this step (email verify authenticated
+        // them), so we add a passkey to the live account. Success = the
+        // authenticator was created without errors; the session stays signed in.
+        const r = await addPasskeyCeremony();
+        if (r.status < 300 && !r.errors?.length) {
           setStep("done");
           window.dispatchEvent(new Event("auth:changed"));
           router.push("/");
           router.refresh();
           return;
         }
-        reportError(r, "Passkey registered but sign-in didn't complete.");
+        reportError(r, "Couldn't save the passkey. Try again or use email codes.");
       } catch (err) {
         setStatus({
           kind: "error",

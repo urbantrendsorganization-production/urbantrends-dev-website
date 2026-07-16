@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/', include('deployments.urls')),
     path('api/', include('gmail.urls')),
     path('api/', include('notifications.urls')),
+    path('api/v1/agent/', include('agent_api.urls')),
 
     # Serve user-uploaded media in every environment. WhiteNoise only handles
     # STATIC_ROOT (and indexes at boot, so it can't serve runtime uploads), and

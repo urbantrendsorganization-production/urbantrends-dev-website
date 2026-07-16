@@ -100,6 +100,7 @@ INSTALLED_APPS = [
     'deployments',
     'gmail',
     'notifications',
+    'agent_api',
 ]
 
 JAZZMIN_SETTINGS = {
@@ -321,6 +322,15 @@ ANYMAIL = {
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@urbantrends.dev")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 STAFF_NOTIFICATION_EMAIL = os.environ.get("STAFF_NOTIFICATION_EMAIL", DEFAULT_FROM_EMAIL)
+
+# ── Mica agent API (/api/v1/agent/) ─────────────────────────────────────────
+# Shared bearer key that authenticates the Mica agent service to this backend.
+# Leave empty in dev/tests to run keyless (auth fails open); set a long random
+# value in production so every agent call must carry
+# `Authorization: Bearer <URBANTRENDS_API_KEY>`.
+URBANTRENDS_API_KEY = os.environ.get("URBANTRENDS_API_KEY", "")
+# How long a computed quote stays valid before the order endpoint rejects it.
+AGENT_QUOTE_TTL_HOURS = int(os.environ.get("AGENT_QUOTE_TTL_HOURS", "24"))
 
 
 # Internationalization
