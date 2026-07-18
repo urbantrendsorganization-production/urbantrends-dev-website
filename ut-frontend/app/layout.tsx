@@ -4,6 +4,7 @@ import "./globals.css";
 import SiteNav from "@/components/SiteNav";
 import SiteFooter from "@/components/SiteFooter";
 import PageProgress from "@/components/PageProgress";
+import NotificationToaster from "@/components/NotificationToaster";
 
 const geistSans = Geist({
   variable: "--font-sans",
@@ -103,6 +104,7 @@ export default function RootLayout({
         <SiteNav />
         {children}
         <SiteFooter />
+        <NotificationToaster />
       </body>
     </html>
   );

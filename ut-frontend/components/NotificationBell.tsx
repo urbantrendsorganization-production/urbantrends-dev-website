@@ -51,10 +51,12 @@ export default function NotificationBell() {
     const onFocus = () => refreshCount();
     window.addEventListener("focus", onFocus);
     window.addEventListener("auth:changed", refreshCount);
+    window.addEventListener("notifications:changed", refreshCount);
     return () => {
       window.clearInterval(id);
       window.removeEventListener("focus", onFocus);
       window.removeEventListener("auth:changed", refreshCount);
+      window.removeEventListener("notifications:changed", refreshCount);
     };
   }, [refreshCount]);
 
@@ -108,7 +110,7 @@ export default function NotificationBell() {
     <div ref={wrapRef} style={{ position: "relative" }}>
       <button
         type="button"
-        className="cmdk-icon"
+        className="notif-bell"
         aria-label={count > 0 ? `Notifications (${count} unread)` : "Notifications"}
         aria-expanded={open}
         onClick={toggle}

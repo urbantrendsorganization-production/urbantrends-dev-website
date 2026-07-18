@@ -345,6 +345,16 @@ a { color: inherit; text-decoration: none; }
   transition: border-color .15s, color .15s;
 }
 .cmdk-icon:hover { border-color: var(--border-strong); color: var(--fg); }
+/* Notification bell — same chrome as the icon-only search, but visible at
+   every width (unlike .cmdk-icon, which only appears once the nav collapses). */
+.notif-bell {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 34px; flex-shrink: 0;
+  border: 1px solid var(--border); border-radius: 7px;
+  background: var(--surface-1); color: var(--fg-subtle); cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.notif-bell:hover { border-color: var(--border-strong); color: var(--fg); }
 .cmdk .keys {
   font-family: var(--font-mono); font-size: 11px;
   color: var(--fg-muted);
@@ -2829,4 +2839,87 @@ button.sc-link {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ── Global notification toasts ─────────────────────────────────────── */
+.toast-stack {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9500;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  pointer-events: none;
+}
+@media (max-width: 560px) {
+  .toast-stack {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    width: auto;
+  }
+}
+.toast {
+  pointer-events: auto;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--surface-1) 92%, var(--bg));
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .28);
+  color: var(--fg);
+  cursor: pointer;
+  animation: toast-in .28s cubic-bezier(.2, .8, .2, 1);
+}
+.toast:hover { border-color: var(--accent-line); }
+.toast.leaving { animation: toast-out .2s ease forwards; }
+.toast-dot {
+  margin-top: 5px;
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.toast-body { min-width: 0; flex: 1; }
+.toast-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.toast-sub {
+  display: block;
+  font-size: 12px;
+  color: var(--fg-muted);
+  margin-top: 2px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.toast-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--fg-subtle);
+  padding: 0;
+  margin: -2px -2px 0 0;
+  line-height: 0;
+}
+.toast-close:hover { color: var(--fg); }
+@keyframes toast-in {
+  from { transform: translateX(12px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes toast-out {
+  to { transform: translateX(12px); opacity: 0; }
 }
