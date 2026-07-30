@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import SiteNav from "@/components/SiteNav";
 import SiteFooter from "@/components/SiteFooter";
@@ -104,7 +105,6 @@ export default function RootLayout({
         <SiteNav />
         {children}
         <SiteFooter />
-        <NotificationToaster />
       </body>
     </html>
   );
