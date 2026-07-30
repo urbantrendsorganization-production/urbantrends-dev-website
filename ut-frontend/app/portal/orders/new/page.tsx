@@ -71,7 +71,8 @@ function NewOrderForm() {
             Plan: <strong style={{ color: "var(--fg)" }}>{plan.name}</strong>
             {!plan.is_quote && plan.price && (
               <>
-                {" "}— ${plan.price}
+                {/* Plan prices are authored in KES — this used to render a "$". */}
+                {" "}— KES {Number(plan.price).toLocaleString("en-KE")}
                 {plan.billing_cycle === "monthly" ? "/mo" : plan.billing_cycle === "yearly" ? "/yr" : ""}
               </>
             )}

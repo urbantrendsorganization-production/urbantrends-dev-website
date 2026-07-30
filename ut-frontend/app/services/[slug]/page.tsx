@@ -3,7 +3,13 @@ import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getService, type PricingPlan } from "@/lib/services";
-import { currencyForCountry, formatPrice, kesRate, type DisplayCurrency } from "@/lib/currency";
+import { currencyForCountry, kesRate, type DisplayCurrency } from "@/lib/currency";
+import {
+  CurrencyNote,
+  CurrencyToggle,
+  Price,
+  PricingCurrencyProvider,
+} from "../PricingCurrency";
 import QuoteButton from "../QuoteButton";
 import GetStartedButton from "../GetStartedButton";
 import ServicePortfolio from "../ServicePortfolio";
@@ -40,15 +46,11 @@ function PlanCard({
   accent,
   serviceId,
   serviceName,
-  currency,
-  rate,
 }: {
   plan: PricingPlan;
   accent: string;
   serviceId: number;
   serviceName: string;
-  currency: DisplayCurrency;
-  rate: number;
 }) {
   return (
     <div
@@ -72,7 +74,7 @@ function PlanCard({
         <>
           <div className="plan-price">
             {plan.price
-              ? <>{formatPrice(Number(plan.price), currency, rate)}<span> {BILLING_LABELS[plan.billing_cycle] ?? ""}</span></>
+              ? <><Price kes={Number(plan.price)} /><span> {BILLING_LABELS[plan.billing_cycle] ?? ""}</span></>
               : "—"}
           </div>
           {plan.billing_cycle && (
@@ -139,19 +141,21 @@ export default async function ServiceDetailPage({ params }: Props) {
 
   const hasPlans = service.plans && service.plans.length > 0;
 
-  // Localise pricing to the visitor: KES for Kenya, approximate USD elsewhere.
+  // Prices are authored in KES. Kenyan visitors default to KES, everyone else
+  // to USD — but the rate is resolved either way so the on-page toggle works
+  // for both. If the rate lookup fails we pin to KES and hide the toggle
+  // rather than convert at a guessed rate.
   const hdrs = await headers();
   const country =
     hdrs.get("x-vercel-ip-country") ||
     (await cookies()).get("ut-country")?.value ||
     "";
-  let currency = currencyForCountry(country);
-  let rate = 1;
-  if (currency !== "KES") {
-    const r = await kesRate(currency);
-    if (r) rate = r;
-    else currency = "KES"; // rate unavailable — fall back to the base currency
-  }
+  const usdRate = await kesRate("USD");
+  const canConvert = usdRate !== null;
+  const rate = usdRate ?? 1;
+  const currency: DisplayCurrency = canConvert
+    ? currencyForCountry(country)
+    : "KES";
 
   return (
     <>
@@ -215,24 +219,32 @@ export default async function ServiceDetailPage({ params }: Props) {
       {hasPlans && (
         <section className="section divider-top">
           <div className="wrap">
-            <div className="section-head">
-              <span className="eyebrow muted">Pricing</span>
-              <h2>{service.is_tiered ? "Choose your tier." : "Choose a plan."}</h2>
-              <p>All plans include a scoping call. No lock-in — scope adjustments are always a conversation, not a contract fight.</p>
-            </div>
-            <div className="plans-grid">
-              {service.plans.map((plan) => (
-                <PlanCard
-                  key={plan.id}
-                  plan={plan}
-                  accent={service.accent_color}
-                  serviceId={service.id}
-                  serviceName={service.name}
-                  currency={currency}
-                  rate={rate}
-                />
-              ))}
-            </div>
+            <PricingCurrencyProvider
+              initialCurrency={currency}
+              rate={rate}
+              canConvert={canConvert}
+            >
+              <div className="pricing-head">
+                <div className="section-head">
+                  <span className="eyebrow muted">Pricing</span>
+                  <h2>{service.is_tiered ? "Choose your tier." : "Choose a plan."}</h2>
+                  <p>All plans include a scoping call. No lock-in — scope adjustments are always a conversation, not a contract fight.</p>
+                </div>
+                <CurrencyToggle />
+              </div>
+              <div className="plans-grid">
+                {service.plans.map((plan) => (
+                  <PlanCard
+                    key={plan.id}
+                    plan={plan}
+                    accent={service.accent_color}
+                    serviceId={service.id}
+                    serviceName={service.name}
+                  />
+                ))}
+              </div>
+              <CurrencyNote />
+            </PricingCurrencyProvider>
           </div>
         </section>
       )}
