@@ -45,9 +45,15 @@ export default function NotificationBell() {
   }, []);
 
   // Poll the unread count; also refresh when the tab regains focus.
+  // Background tabs are skipped — the focus listener below catches up the
+  // moment the user comes back, so polling while hidden only ever added
+  // backend requests nobody was waiting on.
   useEffect(() => {
     refreshCount();
-    const id = window.setInterval(refreshCount, POLL_MS);
+    const tick = () => {
+      if (document.visibilityState === "visible") refreshCount();
+    };
+    const id = window.setInterval(tick, POLL_MS);
     const onFocus = () => refreshCount();
     window.addEventListener("focus", onFocus);
     window.addEventListener("auth:changed", refreshCount);

@@ -4,6 +4,12 @@ import Image from "next/image";
 import { listServices, type Service } from "@/lib/services";
 import QuoteButton from "./QuoteButton";
 
+// ISR window, declared explicitly rather than inferred from the fetches
+// below: when the API is unreachable at build time those fetches fall back
+// instead of registering a cache entry, and the page would otherwise be
+// frozen as fully static with no revalidation. See lib/cache.ts.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "Services",
   description: "Genmars Tech builds custom software, APIs, integrations, and developer tools for businesses, agencies, startups, and developers.",

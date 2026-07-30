@@ -59,4 +59,12 @@ USER django
 EXPOSE 8000
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["gunicorn", "main_backend.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120", "--forwarded-allow-ips", "*", "--max-requests", "1000", "--max-requests-jitter", "100", "--access-logfile", "-"]
+# Threaded workers: Django here is I/O-bound (Postgres, Resend, the GitHub and
+# Vercel APIs), so with the default sync worker each process blocks on one
+# request at a time and 3 slow calls stall the whole site. 3 workers x 4
+# threads gives 12 concurrent requests for roughly the same memory.
+#
+# Tune without rebuilding by setting GUNICORN_CMD_ARGS in the environment,
+# e.g. GUNICORN_CMD_ARGS="--workers 5 --threads 8" — gunicorn reads it and it
+# overrides everything below.
+CMD ["gunicorn", "main_backend.wsgi:application", "--bind", "0.0.0.0:8000", "--worker-class", "gthread", "--workers", "3", "--threads", "4", "--timeout", "120", "--graceful-timeout", "30", "--keep-alive", "5", "--forwarded-allow-ips", "*", "--max-requests", "1000", "--max-requests-jitter", "100", "--access-logfile", "-"]

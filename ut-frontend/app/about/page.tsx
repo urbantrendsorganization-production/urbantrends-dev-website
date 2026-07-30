@@ -4,6 +4,12 @@ import Image from "next/image";
 import LogoStrip from "@/components/LogoStrip";
 import { getAboutData, type TeamMember, type AboutMetric } from "@/lib/cms";
 
+// ISR window, declared explicitly rather than inferred from the fetches
+// below: when the API is unreachable at build time those fetches fall back
+// instead of registering a cache entry, and the page would otherwise be
+// frozen as fully static with no revalidation. See lib/cache.ts.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "About",
   description: "UrbanTrends — a software studio from Nairobi that designs and ships production-grade products, tools, and applications.",

@@ -1,3 +1,4 @@
+import { PUBLIC_CONTENT } from "./cache";
 // Browser: relative URL goes through Next.js rewrites → Django.
 // Server component: no base URL, so call Django directly.
 const API =
@@ -125,16 +126,27 @@ export const STATUS_LABELS: Record<string, string> = {
   cancelled: "Cancelled",
 };
 
+// As in lib/blog.ts: a thrown fetch (backend down or saturated) must degrade
+// to empty rather than 500 the route. Callers already handle the empty case —
+// the homepage falls back to its built-in service list.
 export async function listServices(): Promise<Service[]> {
-  const res = await fetch(`${API}/services`, { cache: "no-store" });
-  if (!res.ok) return [];
-  return res.json();
+  try {
+    const res = await fetch(`${API}/services`, PUBLIC_CONTENT);
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
 }
 
 export async function getService(slug: string): Promise<Service | null> {
-  const res = await fetch(`${API}/services/${slug}`, { cache: "no-store" });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch(`${API}/services/${slug}`, PUBLIC_CONTENT);
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
 function csrfToken(): string {

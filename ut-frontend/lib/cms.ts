@@ -1,3 +1,4 @@
+import { PUBLIC_CONTENT, PUBLIC_STATUS } from './cache';
 import type { Product } from '@/components/ProductShowcase';
 
 const API =
@@ -162,7 +163,7 @@ const DEFAULT_HOME_DATA: HomeData = {
 
 export async function getHomeData(): Promise<HomeData> {
   try {
-    const res = await fetch(`${API}/cms/home`, { cache: 'no-store' });
+    const res = await fetch(`${API}/cms/home`, PUBLIC_CONTENT);
     if (!res.ok) return DEFAULT_HOME_DATA;
     const data = await res.json();
     return {
@@ -179,7 +180,7 @@ export async function getHomeData(): Promise<HomeData> {
 
 export async function getChangelog(page = 1): Promise<PaginatedChangelog> {
   try {
-    const res = await fetch(`${API}/cms/changelog?page=${page}`, { cache: 'no-store' });
+    const res = await fetch(`${API}/cms/changelog?page=${page}`, PUBLIC_CONTENT);
     if (!res.ok) return { count: 0, next: null, previous: null, results: [] };
     return res.json();
   } catch {
@@ -189,7 +190,7 @@ export async function getChangelog(page = 1): Promise<PaginatedChangelog> {
 
 export async function getAboutData(): Promise<{ team: TeamMember[]; metrics: AboutMetric[] }> {
   try {
-    const res = await fetch(`${API}/cms/about`, { cache: 'no-store' });
+    const res = await fetch(`${API}/cms/about`, PUBLIC_CONTENT);
     if (!res.ok) return { team: [], metrics: [] };
     return res.json();
   } catch {
@@ -199,7 +200,7 @@ export async function getAboutData(): Promise<{ team: TeamMember[]; metrics: Abo
 
 export async function getSiteStatus(): Promise<ServiceStatusResult[]> {
   try {
-    const res = await fetch(`${API}/cms/status`, { cache: 'no-store' });
+    const res = await fetch(`${API}/cms/status`, PUBLIC_STATUS);
     if (!res.ok) return [];
     return res.json();
   } catch {
@@ -209,7 +210,7 @@ export async function getSiteStatus(): Promise<ServiceStatusResult[]> {
 
 export async function getTools(): Promise<Tool[]> {
   try {
-    const res = await fetch(`${API}/cms/tools`, { cache: 'no-store' });
+    const res = await fetch(`${API}/cms/tools`, PUBLIC_CONTENT);
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data : (data.results ?? []);
@@ -220,7 +221,7 @@ export async function getTools(): Promise<Tool[]> {
 
 export async function getProducts(): Promise<Product[]> {
   try {
-    const res = await fetch(`${API}/cms/products`, { cache: 'no-store' });
+    const res = await fetch(`${API}/cms/products`, PUBLIC_CONTENT);
     if (!res.ok) return [];
     const data = await res.json();
     const list: Product[] = Array.isArray(data) ? data : (data.results ?? []);
@@ -240,7 +241,7 @@ export type DeveloperIntegration = {
 
 export async function getDeveloperIntegrations(): Promise<DeveloperIntegration[]> {
   try {
-    const res = await fetch(`${API}/cms/developer-integrations`, { cache: 'no-store' });
+    const res = await fetch(`${API}/cms/developer-integrations`, PUBLIC_CONTENT);
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data : (data.results ?? []);
@@ -252,7 +253,7 @@ export async function getDeveloperIntegrations(): Promise<DeveloperIntegration[]
 export async function getProjects(opts: { featured?: boolean } = {}): Promise<Project[]> {
   try {
     const qs = opts.featured ? '?featured=true' : '';
-    const res = await fetch(`${API}/cms/projects${qs}`, { cache: 'no-store' });
+    const res = await fetch(`${API}/cms/projects${qs}`, PUBLIC_CONTENT);
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data : (data.results ?? []);

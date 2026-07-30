@@ -1,3 +1,4 @@
+import { PUBLIC_CONTENT } from './cache';
 const API =
   typeof window === 'undefined'
     ? `${process.env.BACKEND_URL ?? 'http://localhost:8000'}/api`
@@ -62,16 +63,30 @@ export type PaginatedPosts = {
 
 // ─── API functions ────────────────────────────────────────────────────────────
 
+// These two swallow transport errors as well as bad statuses. A refused
+// connection or a timed-out Django — the exact failure mode of a traffic
+// spike — used to propagate and turn the whole route into a 500. An empty
+// list renders the page's own "nothing here" state instead, and the next
+// revalidation picks the content back up.
 export async function listPosts(page = 1): Promise<PaginatedPosts> {
-  const res = await fetch(`${API}/blog/posts?page=${page}`, { cache: 'no-store' });
-  if (!res.ok) return { count: 0, next: null, previous: null, results: [] };
-  return res.json();
+  const empty: PaginatedPosts = { count: 0, next: null, previous: null, results: [] };
+  try {
+    const res = await fetch(`${API}/blog/posts?page=${page}`, PUBLIC_CONTENT);
+    if (!res.ok) return empty;
+    return res.json();
+  } catch {
+    return empty;
+  }
 }
 
 export async function getPost(slug: string): Promise<PostDetail | null> {
-  const res = await fetch(`${API}/blog/posts/${slug}`, { cache: 'no-store' });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch(`${API}/blog/posts/${slug}`, PUBLIC_CONTENT);
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
 export async function getLikeStatus(slug: string): Promise<LikeStatus> {
