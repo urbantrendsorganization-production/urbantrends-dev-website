@@ -21,8 +21,20 @@ export default function CyberneticGridShader() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Phones are the constraint here. This is a full-bleed fragment shader
+    // living inside a masked, composited layer; animating it while the user
+    // scrolls forces the whole layer to re-rasterise every frame, which is
+    // what produced the torn pixels down the right edge of the hero on
+    // smaller devices. On those we draw one frame and stop — the layer is
+    // already dialled back to 0.32 opacity there, so the motion was barely
+    // legible anyway.
+    const isSmallScreen = window.matchMedia("(max-width: 760px)").matches;
+    const animate = !reduceMotion && !isSmallScreen;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: !isSmallScreen, alpha: true });
+    // Past ~1.5x the extra fragments buy nothing visible on a soft glow, and
+    // cost quadratically.
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmallScreen ? 1 : 1.5));
     container.appendChild(renderer.domElement);
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
@@ -114,32 +126,71 @@ export default function CyberneticGridShader() {
     const resizeObserver = new ResizeObserver(setSize);
     resizeObserver.observe(container);
 
-    // Listen on the window (not the container) so the warp tracks the cursor
-    // even though the canvas sits behind the hero content with pointer-events
-    // disabled — it never intercepts clicks on the hero CTAs.
-    const onMouseMove = (e: MouseEvent) => {
-      const rect = container.getBoundingClientRect();
-      uniforms.iMouse.value.set(
-        e.clientX - rect.left,
-        rect.height - (e.clientY - rect.top),
-      );
-    };
-    window.addEventListener("mousemove", onMouseMove);
-
     const renderFrame = () => {
       uniforms.iTime.value = (performance.now() - startTime) / 1000;
       renderer.render(scene, camera);
     };
 
-    if (reduceMotion) {
+    // Listen on the window (not the container) so the warp tracks the cursor
+    // even though the canvas sits behind the hero content with pointer-events
+    // disabled — it never intercepts clicks on the hero CTAs.
+    // Only wired up when we're actually animating: on a static frame the warp
+    // never updates, and the getBoundingClientRect per mousemove is pure
+    // layout thrash.
+    const onMouseMove = animate
+      ? (e: MouseEvent) => {
+          const rect = container.getBoundingClientRect();
+          uniforms.iMouse.value.set(
+            e.clientX - rect.left,
+            rect.height - (e.clientY - rect.top),
+          );
+        }
+      : null;
+    if (onMouseMove) window.addEventListener("mousemove", onMouseMove);
+
+    if (!animate) {
       renderFrame();
-    } else {
-      renderer.setAnimationLoop(renderFrame);
+
+      return () => {
+        resizeObserver.disconnect();
+        const canvas = renderer.domElement;
+        canvas.parentNode?.removeChild(canvas);
+        material.dispose();
+        geometry.dispose();
+        renderer.dispose();
+      };
     }
+
+    // Only burn GPU while the hero is actually on screen and the tab is
+    // focused. Without this the loop kept running behind the rest of the page
+    // for the entire visit.
+    let onScreen = true;
+    let running = false;
+
+    const sync = () => {
+      const shouldRun = onScreen && document.visibilityState === "visible";
+      if (shouldRun === running) return;
+      running = shouldRun;
+      renderer.setAnimationLoop(shouldRun ? renderFrame : null);
+    };
+
+    const intersectionObserver = new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+        sync();
+      },
+      { rootMargin: "64px" },
+    );
+    intersectionObserver.observe(container);
+
+    document.addEventListener("visibilitychange", sync);
+    sync();
 
     return () => {
       resizeObserver.disconnect();
-      window.removeEventListener("mousemove", onMouseMove);
+      intersectionObserver.disconnect();
+      document.removeEventListener("visibilitychange", sync);
+      if (onMouseMove) window.removeEventListener("mousemove", onMouseMove);
       renderer.setAnimationLoop(null);
       const canvas = renderer.domElement;
       canvas.parentNode?.removeChild(canvas);

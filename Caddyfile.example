@@ -18,6 +18,13 @@ www.urbantrends.dev {
 # next.config.ts rewrites proxy /_allauth/*, /api/*, and /accounts/* to the
 # backend container over the internal Docker network, so no path splits needed.
 urbantrends.dev {
+    # Compress text responses. HTML, the RSC payloads Next sends on client-side
+    # navigation, JS and CSS all shrink by roughly 70-80%; without this every
+    # byte goes out raw, which is the single cheapest thing to fix before a
+    # traffic spike. Caddy negotiates per Accept-Encoding and skips anything
+    # already compressed (images, fonts, video).
+    encode zstd gzip
+
     reverse_proxy localhost:3000
 }
 
@@ -28,6 +35,7 @@ urbantrends.dev {
 # engines drop api.urbantrends.dev URLs from the index.
 api.urbantrends.dev {
     header X-Robots-Tag "noindex, nofollow"
+    encode zstd gzip
     reverse_proxy localhost:8000 {
         header_up X-Forwarded-Proto {scheme}
     }

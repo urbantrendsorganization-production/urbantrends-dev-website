@@ -232,11 +232,28 @@ else:
         }
     }
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+# Cache backend.
+#
+# gunicorn runs several worker processes, so LocMemCache is NOT shared — each
+# worker holds its own private copy. Anything that needs to be consistent
+# across workers (sessions, allauth's rate limit counters) therefore must not
+# rely on the cache unless REDIS_URL points at a genuinely shared store.
+# See the SESSION_ENGINE block below for why this matters.
+REDIS_URL = os.environ.get("REDIS_URL", "")
+
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
+    }
 
 
 # Password validation
@@ -257,8 +274,26 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# session engine
-SESSION_ENGINE = "qsessions.backends.cached_db"
+# Session engine.
+#
+# `cached_db` is a read-through cache: load() returns the cached copy and only
+# falls back to the database on a miss. That is only safe when every worker
+# shares one cache. With per-process LocMemCache it silently breaks:
+#
+#   1. Worker A serves GET /_allauth/browser/v1/config and caches the (empty)
+#      session.
+#   2. Worker B serves POST /auth/code/request. allauth stashes the pending
+#      login stage into the session; B writes it to the DB and to B's cache.
+#   3. Worker C serves POST /auth/code/confirm. It never sees the stage —
+#      either from its own stale cache or a copy predating step 2 — so
+#      ConfirmLoginCodeView finds no pending stage and returns 409.
+#
+# That was the production "email codes get rejected" bug. Only use the cached
+# variant when the cache is actually shared; otherwise read sessions straight
+# from the database, which is always coherent.
+SESSION_ENGINE = (
+    "qsessions.backends.cached_db" if REDIS_URL else "qsessions.backends.db"
+)
 
 # 1. Force cookies over HTTPS only. Relaxed in DEBUG so http://localhost dev works.
 SESSION_COOKIE_SECURE = not DEBUG

@@ -5,8 +5,17 @@
    ============================================================ */
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; max-width: 100vw; overflow-x: clip; }
-body { margin: 0; overflow-x: clip; }
+
+/* `overflow-x: clip` (not `hidden`) so the root never becomes a scroll
+   container — that is what keeps `position: sticky` working inside.
+   Deliberately NOT `max-width: 100vw`: 100vw counts the scrollbar gutter, so
+   on any platform with a classic scrollbar it makes the root box wider than
+   the space actually available and manufactures the very overflow it looks
+   like it is preventing. And clipping only needs to happen once — repeating
+   it on <body> just adds a second paint-containment boundary for the
+   compositor to manage on every scroll frame. */
+html { -webkit-text-size-adjust: 100%; overflow-x: clip; }
+body { margin: 0; }
 
 /* ---------- Tokens : DARK (default) ---------- */
 :root, [data-theme="dark"] {
@@ -345,6 +354,16 @@ a { color: inherit; text-decoration: none; }
   transition: border-color .15s, color .15s;
 }
 .cmdk-icon:hover { border-color: var(--border-strong); color: var(--fg); }
+/* Notification bell — same chrome as the icon-only search, but visible at
+   every width (unlike .cmdk-icon, which only appears once the nav collapses). */
+.notif-bell {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 34px; flex-shrink: 0;
+  border: 1px solid var(--border); border-radius: 7px;
+  background: var(--surface-1); color: var(--fg-subtle); cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.notif-bell:hover { border-color: var(--border-strong); color: var(--fg); }
 .cmdk .keys {
   font-family: var(--font-mono); font-size: 11px;
   color: var(--fg-muted);
@@ -370,45 +389,232 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- Hero ---------- */
 .hero { position: relative; overflow: hidden; }
+/* auto-fit + minmax(min(100%, …)) collapses to one column on its own, so the
+   hero needs no breakpoint of its own. `min(100%, 430px)` is the important
+   half: a bare `minmax(430px, 1fr)` would refuse to go below 430px and push
+   the page sideways on a 390px phone. */
 .hero-grid {
   position: relative;
-  display: grid; grid-template-columns: 1.02fr 1.1fr;
-  gap: clamp(32px, 5vw, 72px); align-items: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 430px), 1fr));
+  gap: clamp(32px, 4vw, 56px); align-items: start;
   padding-block: clamp(56px, 8vw, 104px);
+  min-width: 0;
 }
-.hero-copy { max-width: 560px; }
+/* Grid and flex children default to min-width:auto, which means "never shrink
+   below my content". One long word is then enough to widen the whole page.
+   Everything inside the hero opts out. */
+.hero-grid > *, .hero-panel > * { min-width: 0; }
+.hero-copy {
+  max-width: 560px;
+  display: flex; flex-direction: column;
+  gap: clamp(18px, 2.2vw, 26px);
+}
+/* the flex gap owns the vertical rhythm now */
+.hero-copy > * { margin: 0; }
 .hero h1 {
-  font-size: clamp(38px, 5.6vw, 66px);
-  line-height: 1.0;
+  font-size: clamp(38px, 6.4vw, 72px);
+  line-height: 1.02;
   letter-spacing: -0.035em;
   font-weight: 600;
-  margin: 22px 0 0;
   text-wrap: balance;
+  /* long unbroken product names shouldn't be able to widen the column */
+  overflow-wrap: break-word;
 }
 .hero h1 .em { color: var(--accent-text); }
 .hero .sub {
-  margin: 22px 0 0;
   font-size: clamp(16px, 1.5vw, 18.5px);
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--fg-muted);
   max-width: 48ch;
   text-wrap: pretty;
 }
-.hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
-.hero-meta {
-  margin-top: 38px; padding-top: 22px;
-  border-top: 1px solid var(--border);
-  display: flex; flex-wrap: wrap; gap: 22px 34px; align-items: center;
+.hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.hero-rule {
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-strong), transparent);
 }
+.hero-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 120px), 1fr));
+  gap: 20px 24px;
+}
+.hero-meta .stat { min-width: 0; }
 .hero-meta .stat .n {
-  font-family: var(--font-mono); font-size: 22px; font-weight: 500;
+  font-family: var(--font-mono);
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 500;
   letter-spacing: -0.02em; color: var(--fg);
 }
-.hero-meta .stat .l { font-size: 12.5px; color: var(--fg-subtle); margin-top: 2px; }
+.hero-meta .stat .l {
+  font-size: 12.5px; color: var(--fg-subtle);
+  margin-top: 4px; line-height: 1.35;
+}
 
-/* hero treatment switching — the active template is chosen in React (HeroArt),
-   so we just show whatever it renders. */
-.hero-art > * { display: block; }
+/* ---------- Hero: right-hand panel ---------- */
+
+/* Entrance. Opacity only — no transform — so it can't fight the tilt
+   transform that JS writes onto the same elements. */
+@keyframes hero-rise { from { opacity: 0; } to { opacity: 1; } }
+
+/* Slow ambient drift on the accent wash. */
+@keyframes hero-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(0, -14px, 0) scale(1.04); }
+}
+
+/* The drifting accent glow behind the hero. Kept off small screens on
+   purpose: this is a permanently-animating composited layer, and the hero
+   already stacks a photo, a masked WebGL canvas and this on top of each
+   other. That pile-up is what tore during scroll on phones. Desktop has the
+   headroom; phones get the static wash. */
+.hero-glow {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 78% 8%, var(--accent-soft), transparent 60%),
+    radial-gradient(80% 70% at 0% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 55%);
+}
+@media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
+  .hero-glow { animation: hero-drift 16s ease-in-out infinite; will-change: transform; }
+}
+
+.hero-panel {
+  display: flex; flex-direction: column; gap: 14px; min-width: 0;
+  /* tilt children rotate within this */
+  perspective: 1400px;
+  perspective-origin: 50% 40%;
+}
+
+.hero-media {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 16 / 9;
+  min-height: 180px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--surface-1);
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, .9);
+  transform-style: preserve-3d;
+  transition: transform 320ms cubic-bezier(.22, .61, .36, 1), box-shadow 320ms ease;
+  animation: hero-rise 700ms cubic-bezier(.22, .61, .36, 1) both;
+}
+[data-theme="light"] .hero-media { box-shadow: var(--shadow-float); }
+.hero-media-scrim {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 62%;
+  background: linear-gradient(to top,
+    color-mix(in srgb, var(--bg) 94%, transparent),
+    color-mix(in srgb, var(--bg) 35%, transparent) 55%,
+    transparent);
+  pointer-events: none;
+}
+.hero-media-badge {
+  position: absolute; left: 16px; top: 16px;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 11px; border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 62%, transparent);
+  border: 1px solid var(--border-strong);
+  backdrop-filter: blur(6px);
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em;
+  color: var(--fg);
+  pointer-events: none;
+}
+.dot-live {
+  width: 6px; height: 6px; border-radius: 50%; flex: none;
+  background: #4ADE80;
+}
+.hero-media-foot {
+  position: absolute; left: 16px; right: 16px; bottom: 14px;
+  display: flex; flex-wrap: wrap; align-items: flex-end;
+  justify-content: space-between; gap: 10px;
+  pointer-events: none;
+}
+.hmf-copy { display: grid; min-width: 0; }
+.hmf-title { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: var(--fg); }
+.hmf-sub {
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--fg-muted); margin-top: 3px;
+}
+.hmf-tag {
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--accent-text); white-space: nowrap;
+}
+
+.hero-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-1);
+  padding: clamp(16px, 2vw, 22px);
+  min-width: 0;
+  transform-style: preserve-3d;
+  transition: transform 320ms cubic-bezier(.22, .61, .36, 1);
+  animation: hero-rise 700ms 120ms cubic-bezier(.22, .61, .36, 1) both;
+}
+.hero-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 14px;
+}
+.hero-card-head .mono-label { color: var(--fg-subtle); letter-spacing: .16em; }
+.mono-count { font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle); }
+
+.hero-caps {
+  list-style: none; margin: 0; padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 152px), 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+.hero-cap {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 12px; border-radius: 11px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-2);
+  min-width: 0;
+  transition: background .18s ease, border-color .18s ease;
+}
+.hero-cap:hover { background: var(--accent-soft); border-color: var(--accent-line); }
+.cap-mark {
+  width: 7px; height: 7px; border-radius: 2px; flex: none;
+  background: var(--accent); opacity: .85;
+}
+.cap-name {
+  font-size: 14px; color: var(--fg); line-height: 1.25;
+  min-width: 0; overflow-wrap: break-word;
+}
+
+.hero-card-rule { height: 1px; background: var(--border); margin: 18px 0 14px; }
+.hero-stack {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0;
+}
+.hero-stack .mono-label { color: var(--fg-subtle); letter-spacing: .16em; margin-right: 4px; }
+.hero-chip {
+  font-family: var(--font-mono); font-size: 12px;
+  padding: 5px 10px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.hero-thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 120px), 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+.hero-thumb {
+  position: relative; aspect-ratio: 4 / 3;
+  border-radius: 13px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-cap { transition: none; }
+  /* HeroTilt already bails out for these visitors, so nothing writes a
+     transform here — this just drops the entrance fade and the drift. */
+  .hero-media, .hero-card { animation: none; transition: none; }
+  .hero-glow { animation: none; }
+}
 
 /* ---------- Hero: diagram ---------- */
 .art-diagram { position: relative; }
@@ -1068,8 +1274,7 @@ a.pcard { text-decoration: none; color: inherit; }
   .footer .fbrand { grid-column: 1 / -1; }
 }
 @media (max-width: 920px) {
-  .hero-grid { grid-template-columns: 1fr; }
-  .hero-art { order: 2; }
+  /* .hero-grid needs no rule here — its auto-fit track collapses on its own. */
   .kenya-grid { grid-template-columns: 1fr; }
   .pcard.feature { grid-column: span 6; grid-row: auto; }
   .pcard.tall { grid-row: auto; }
@@ -1634,6 +1839,45 @@ button.sc-link {
   font-size: 12.5px; color: var(--fg-muted); line-height: 1.4;
 }
 .hsvc-bullets li svg { color: var(--pa); flex-shrink: 0; margin-top: 1px; }
+
+/* pricing header — section copy on the left, currency switch on the right */
+.pricing-head {
+  display: flex; flex-wrap: wrap; align-items: flex-end;
+  justify-content: space-between; gap: 16px 24px;
+}
+.pricing-head .section-head { flex: 1 1 320px; min-width: 0; }
+
+.currency-toggle {
+  display: inline-flex; flex: none;
+  padding: 3px; gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+.currency-opt {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em;
+  padding: 7px 14px; border-radius: 999px;
+  border: 1px solid transparent; background: transparent;
+  color: var(--fg-muted); cursor: pointer;
+  transition: color .16s ease, background .16s ease, border-color .16s ease;
+}
+.currency-opt:hover { color: var(--fg); }
+.currency-opt[aria-pressed="true"] {
+  background: var(--surface-1);
+  border-color: var(--border-strong);
+  color: var(--fg);
+}
+.currency-opt:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.currency-note {
+  margin: 16px 0 0;
+  font-size: 13px; color: var(--fg-subtle);
+}
+@media (prefers-reduced-motion: reduce) {
+  .currency-opt { transition: none; }
+}
 
 /* pricing plans on detail page */
 .plans-grid {
@@ -2472,31 +2716,6 @@ button.sc-link {
 /* ensure hero content stays above the bg photo + shader layers */
 .hero-grid { z-index: 1; }
 
-/* Hero photo mosaic strip */
-.hero-photo-card {
-  display: grid;
-  grid-template-columns: 1.35fr 1fr 1fr;
-  grid-template-rows: 1fr;
-  gap: 8px;
-  height: 146px;
-  margin-top: 28px;
-  border-radius: 10px;
-  overflow: hidden;
-}
-.hpc-a, .hpc-b, .hpc-c {
-  position: relative;
-  overflow: hidden;
-  border-radius: 7px;
-  border: 1px solid var(--border);
-  min-height: 0;
-}
-.hpc-a::after, .hpc-b::after, .hpc-c::after {
-  content: "";
-  position: absolute; inset: 0;
-  background: linear-gradient(160deg, transparent 40%, rgba(0,0,0,.35) 100%);
-  pointer-events: none;
-}
-
 /* Kenya section — photo above code window */
 .kenya-img-wrap {
   position: relative;
@@ -2514,7 +2733,6 @@ button.sc-link {
 }
 
 @media (max-width: 640px) {
-  .hero-photo-card { height: 110px; gap: 6px; }
   .kenya-img-wrap { height: 160px; }
 }
 
@@ -2829,4 +3047,87 @@ button.sc-link {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ── Global notification toasts ─────────────────────────────────────── */
+.toast-stack {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9500;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  pointer-events: none;
+}
+@media (max-width: 560px) {
+  .toast-stack {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    width: auto;
+  }
+}
+.toast {
+  pointer-events: auto;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--surface-1) 92%, var(--bg));
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .28);
+  color: var(--fg);
+  cursor: pointer;
+  animation: toast-in .28s cubic-bezier(.2, .8, .2, 1);
+}
+.toast:hover { border-color: var(--accent-line); }
+.toast.leaving { animation: toast-out .2s ease forwards; }
+.toast-dot {
+  margin-top: 5px;
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.toast-body { min-width: 0; flex: 1; }
+.toast-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.toast-sub {
+  display: block;
+  font-size: 12px;
+  color: var(--fg-muted);
+  margin-top: 2px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.toast-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--fg-subtle);
+  padding: 0;
+  margin: -2px -2px 0 0;
+  line-height: 0;
+}
+.toast-close:hover { color: var(--fg); }
+@keyframes toast-in {
+  from { transform: translateX(12px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes toast-out {
+  to { transform: translateX(12px); opacity: 0; }
 }

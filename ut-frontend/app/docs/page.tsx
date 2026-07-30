@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getDeveloperIntegrations } from "@/lib/cms";
 
+// ISR window, declared explicitly rather than inferred from the fetches
+// below: when the API is unreachable at build time those fetches fall back
+// instead of registering a cache entry, and the page would otherwise be
+// frozen as fully static with no revalidation. See lib/cache.ts.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "Developers",
   description:

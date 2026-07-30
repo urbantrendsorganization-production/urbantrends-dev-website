@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getSiteStatus, type ServiceStatusResult } from "@/lib/cms";
 
+// ISR window, declared explicitly rather than inferred from the fetches
+// below: when the API is unreachable at build time those fetches fall back
+// instead of registering a cache entry, and the page would otherwise be
+// frozen as fully static with no revalidation. See lib/cache.ts.
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "System Status",
   description: "Real-time status of all UrbanTrends services and APIs.",

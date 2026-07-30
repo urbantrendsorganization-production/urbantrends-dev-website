@@ -45,16 +45,24 @@ export default function NotificationBell() {
   }, []);
 
   // Poll the unread count; also refresh when the tab regains focus.
+  // Background tabs are skipped — the focus listener below catches up the
+  // moment the user comes back, so polling while hidden only ever added
+  // backend requests nobody was waiting on.
   useEffect(() => {
     refreshCount();
-    const id = window.setInterval(refreshCount, POLL_MS);
+    const tick = () => {
+      if (document.visibilityState === "visible") refreshCount();
+    };
+    const id = window.setInterval(tick, POLL_MS);
     const onFocus = () => refreshCount();
     window.addEventListener("focus", onFocus);
     window.addEventListener("auth:changed", refreshCount);
+    window.addEventListener("notifications:changed", refreshCount);
     return () => {
       window.clearInterval(id);
       window.removeEventListener("focus", onFocus);
       window.removeEventListener("auth:changed", refreshCount);
+      window.removeEventListener("notifications:changed", refreshCount);
     };
   }, [refreshCount]);
 
@@ -108,7 +116,7 @@ export default function NotificationBell() {
     <div ref={wrapRef} style={{ position: "relative" }}>
       <button
         type="button"
-        className="cmdk-icon"
+        className="notif-bell"
         aria-label={count > 0 ? `Notifications (${count} unread)` : "Notifications"}
         aria-expanded={open}
         onClick={toggle}

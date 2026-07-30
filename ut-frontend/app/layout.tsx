@@ -5,6 +5,7 @@ import "./globals.css";
 import SiteNav from "@/components/SiteNav";
 import SiteFooter from "@/components/SiteFooter";
 import PageProgress from "@/components/PageProgress";
+import NotificationToaster from "@/components/NotificationToaster";
 
 const geistSans = Geist({
   variable: "--font-sans",
@@ -104,12 +105,6 @@ export default function RootLayout({
         <SiteNav />
         {children}
         <SiteFooter />
-        <Script
-          src="/agent/static/mika-widget.js"
-          data-api-base="/agent/api"
-          data-avatar="/agent/static/assets/agent1.jpg"
-          strategy="lazyOnload"
-        />
       </body>
     </html>
   );
