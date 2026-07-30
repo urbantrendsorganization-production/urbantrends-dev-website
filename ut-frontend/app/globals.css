@@ -200,6 +200,26 @@ a { color: inherit; text-decoration: none; }
   .lamp-floor-blur { filter: blur(18px); }
   /* Stop the perpetual composited animation on the bento orb on mobile. */
   .bento-orb::after { animation: none; filter: blur(16px); }
+
+  /* Same tearing, different property. `mask-image` promotes the element to
+     its own composited layer and forces a re-raster on every scroll frame,
+     which on the same budget GPUs produces the identical torn bands — this
+     is what showed up on /services and every other sub-page header.
+
+     The mask only exists to fade the decorative grid out toward the edges,
+     and that can be done without compositing at all: drop the mask and
+     paint an opaque --bg radial gradient over the grid instead. Background
+     layers stack first-on-top, so the fade goes first. Visually equivalent,
+     no layer promotion. */
+  .page-head::before {
+    -webkit-mask-image: none;
+            mask-image: none;
+    background-image:
+      radial-gradient(120% 90% at 50% 0%, transparent 30%, var(--bg) 75%),
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: auto, 56px 56px, 56px 56px;
+  }
 }
 
 /* A continuously animating blurred layer keeps the GPU busy every frame;
