@@ -30,6 +30,21 @@ services:
       timeout: 5s
       retries: 5
 
+  # Shared cache across gunicorn workers. Django only uses it when REDIS_URL is
+  # set (see settings.py) — without it, sessions read straight from Postgres,
+  # which is slower but always coherent. What must never happen is a
+  # read-through session cache backed by per-process memory: workers then serve
+  # each other stale sessions. That broke login-by-code in production.
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     image: ${BACKEND_IMAGE:-urbantrends-backend:local}
     build:
@@ -41,11 +56,14 @@ services:
       - ./ut-backend/.env
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-urbantrends}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-urbantrends}
+      REDIS_URL: redis://redis:6379/0
     volumes:
       - static:/app/staticfiles
       - media:/app/media
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     ports:
       - "127.0.0.1:8000:8000"
