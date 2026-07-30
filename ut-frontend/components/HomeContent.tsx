@@ -1,13 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import LogoStrip from "@/components/LogoStrip";
-import OrbitalTemplate from "@/components/hero/OrbitalTemplate";
-import CodeTemplate from "@/components/hero/CodeTemplate";
-import GridTemplate from "@/components/hero/GridTemplate";
-import MinimalTemplate from "@/components/hero/MinimalTemplate";
-import AuroraTemplate from "@/components/hero/AuroraTemplate";
-import BentoTemplate from "@/components/hero/BentoTemplate";
-import { getHomeData, getProjects, getProducts, type SiteSettings, type HeroStat, type Partner, type Testimonial } from "@/lib/cms";
+import StudioHero from "@/components/hero/StudioHero";
+import { getHomeData, getProjects, getProducts, type Partner, type Testimonial } from "@/lib/cms";
 import { listServices, type Service } from "@/lib/services";
 import ProjectCard from "@/components/ProjectCard";
 import ProductShowcase from "@/components/ProductShowcase";
@@ -37,17 +32,6 @@ const FALLBACK_TESTIMONIALS: Testimonial[] = [
     product_label: "API Work", product_accent_color: "#A78BFA",
   },
 ];
-
-function HeroArt({ template }: { template: SiteSettings["active_hero_template"] }) {
-  switch (template) {
-    case "code":    return <CodeTemplate />;
-    case "grid":    return <GridTemplate />;
-    case "minimal": return <MinimalTemplate />;
-    case "aurora":  return <AuroraTemplate />;
-    case "bento":   return <BentoTemplate />;
-    default:        return <OrbitalTemplate />;
-  }
-}
 
 const FALLBACK_SERVICES: Service[] = [
   {
@@ -137,13 +121,17 @@ export default async function HomeContent() {
       {/* ===== HERO ===== */}
       <section className="hero">
         <div className="hero-bg">
+          {/* Deliberately not `priority`. This is a decorative wash sitting at
+              22% opacity behind the content; the hero media card is the real
+              above-the-fold image and the LCP candidate, so it gets the
+              preload slot instead. Two priority images just make them
+              compete for the same early bandwidth. */}
           <Image
             src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1800&q=55"
             alt=""
             fill
             sizes="100vw"
             style={{ objectFit: "cover", opacity: .22 }}
-            priority
             aria-hidden="true"
           />
         </div>
@@ -152,51 +140,15 @@ export default async function HomeContent() {
           <CyberneticGridShader />
         </div>
 
-        <div className="wrap hero-grid">
-          <div className="hero-copy">
-            <span className="eyebrow">
-              <span className="dot-led" />
-              {settings.hero_eyebrow}
-            </span>
-            <h1>{settings.hero_headline}</h1>
-            <p className="sub">{settings.hero_subheading}</p>
-            <div className="hero-cta">
-              <a className="btn btn-primary" href={settings.hero_primary_cta_url}>
-                {settings.hero_primary_cta_text}
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-              </a>
-              <a className="btn btn-ghost" href={settings.hero_secondary_cta_url}>
-                {settings.hero_secondary_cta_text} <span className="kbd">⌘</span>
-              </a>
-            </div>
-            <div className="hero-meta">
-              {stats.map((s: HeroStat) => (
-                <div key={s.label} className="stat">
-                  <div className="n">{s.value}</div>
-                  <div className="l">{s.label}</div>
-                </div>
-              ))}
-            </div>
+        <div className="hero-glow" aria-hidden="true" />
 
-            <div className="hero-photo-card">
-              <div className="hpc-a">
-                <Image fill sizes="(max-width: 920px) 50vw, 260px" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=560&q=80" alt="Team collaborating on software" style={{ objectFit: "cover" }} />
-              </div>
-              <div className="hpc-b">
-                <Image fill sizes="(max-width: 920px) 33vw, 180px" src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=300&q=80" alt="Developer writing code" style={{ objectFit: "cover" }} />
-              </div>
-              <div className="hpc-c">
-                <Image fill sizes="(max-width: 920px) 33vw, 180px" src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=300&q=80" alt="Software team at work" style={{ objectFit: "cover" }} />
-              </div>
-            </div>
-          </div>
-
-          <div className="hero-art">
-            <HeroArt template={settings.active_hero_template} />
-          </div>
-        </div>
+        <StudioHero
+          settings={settings}
+          stats={stats}
+          capabilities={services.slice(0, 6).map((s: Service) => s.name)}
+          stack={railsItems.slice(0, 6)}
+          products={products}
+        />
       </section>
 
       {/* ===== TRUST STRIP ===== */}
@@ -450,7 +402,7 @@ export default async function HomeContent() {
           </div>
           <div className="bento-grid">
             <div className="bento-tile bento-lg" data-reveal>
-              <span className="bento-tag">// always-on</span>
+              <span className="bento-tag">{"// always-on"}</span>
               <h3>Observable, resilient, awake at 3AM so you aren&apos;t.</h3>
               <p>Health checks, structured logs, alerting, and graceful failure baked into every service we ship.</p>
               <div className="bento-orb">
@@ -475,7 +427,7 @@ export default async function HomeContent() {
             </div>
 
             <div className="bento-tile bento-wide" data-reveal style={{ "--reveal-delay": "0.06s" } as React.CSSProperties}>
-              <span className="bento-tag">// p95 latency, trailing 24h</span>
+              <span className="bento-tag">{"// p95 latency, trailing 24h"}</span>
               <h3>Fast by measurement, not by vibes.</h3>
               <div className="bento-bars">
                 {[0.5, 0.7, 0.45, 0.8, 0.6, 0.9, 0.55, 0.75, 0.5, 0.85, 0.65, 0.7].map((_, i) => (
@@ -485,7 +437,7 @@ export default async function HomeContent() {
             </div>
 
             <div className="bento-tile" data-reveal style={{ "--reveal-delay": "0.12s" } as React.CSSProperties}>
-              <span className="bento-tag">// uptime</span>
+              <span className="bento-tag">{"// uptime"}</span>
               <div className="bento-spacer" />
               <div className="bento-stat">99.96%</div>
               <p>Trailing 90 days, across every service in production.</p>
