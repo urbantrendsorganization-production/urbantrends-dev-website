@@ -88,8 +88,8 @@ export default function StudioHero({
       <HeroTilt className="hero-panel">
         <figure className="hero-media" data-tilt="media">
           <Image
-            src="/images/showcase/multi-device.jpg"
-            alt="A product build shown across laptop, tablet, and phone"
+            src="/images/showcase/hero-desk.jpg"
+            alt="A shared studio desk shot from above — four laptops, notebooks, headphones and phones mid-session"
             fill
             sizes="(max-width: 920px) 100vw, 46vw"
             style={{ objectFit: "cover" }}
